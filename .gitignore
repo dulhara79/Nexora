@@ -4,6 +4,7 @@ client/.gitignore
 client/package-lock.json
 client/node_modules
 client/ readme.md
+client/FrontEndStructure.bash
 
 server/.gitignore
 server/package-lock.json
