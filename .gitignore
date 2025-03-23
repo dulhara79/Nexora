@@ -9,6 +9,10 @@ server/.gitignore
 server/package-lock.json
 server/node_modules
 server/ readme.md
+server/.gitattributes
+server/mvnw
+server/mvnw.cmd
+server/.mvn
 
 */.env
 
