@@ -78,7 +78,7 @@ Ensure you have the following installed:
 - [Dulhara Kaushalya](https://github.com/dulhara79)  
 - [Senuvi Layathma](https://github.com/SENUVI20)
 - [Dewdu Sendanayake](https://github.com/DewduSendanayake)
-- [Senuvi Layathma](https://github.com/UVINDUSEN)
+- [Uvindu Seneviratne](https://github.com/UVINDUSEN)
 
 ## 📝 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
