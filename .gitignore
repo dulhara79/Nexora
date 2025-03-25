@@ -14,6 +14,7 @@ server/.gitattributes
 server/mvnw
 server/mvnw.cmd
 server/.mvn
+server/src/main/resources/application.properties
 
 */.env
 
@@ -26,3 +27,4 @@ server/.mvn
 *.webp
 *.mp4
 *.webm
+server/src/main/resources/serviceAccountKey.json
