@@ -15,6 +15,7 @@ server/mvnw
 server/mvnw.cmd
 server/.mvn
 server/src/main/resources/application.properties
+server/src/main/resources/serviceAccountKey.json
 
 */.env
 
@@ -27,4 +28,3 @@ server/src/main/resources/application.properties
 *.webp
 *.mp4
 *.webm
-server/src/main/resources/serviceAccountKey.json
