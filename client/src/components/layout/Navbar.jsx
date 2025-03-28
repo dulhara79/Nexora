@@ -19,7 +19,7 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { name: "Home", href: "#hero" },
+    { name: "Home", href: "/" },
     { name: "Features", href: "#features" },
     { name: "How It Works", href: "#how-it-works" },
     { name: "Testimonials", href: "#testimonials" },
@@ -46,6 +46,7 @@ const Navbar = () => {
             </a>
           </motion.div>
 
+          {/* Desktop Navigation */}
           <div className="hidden md:block">
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -60,7 +61,7 @@ const Navbar = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3, delay: index * 0.1 + 0.2 }}
-                  className={`text-sm font-medium transition-colors duration-200 ${
+                  className={`text-sm font-medium border-b-0 hover:border-b-2 hover:border-indigo-600 transition duration-200 ${
                     isScrolled
                       ? "text-gray-700 hover:text-indigo-600"
                       : "text-gray-800 hover:text-indigo-500"
@@ -69,18 +70,38 @@ const Navbar = () => {
                   {link.name}
                 </motion.a>
               ))}
-              <motion.button
+              <motion.a
+                href="/login"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3, delay: 0.6 }}
-                style={{ backgroundColor: "#4f46e5" }} // HEX code for indigo-600
+                style={{
+                  backgroundColor: "transparent",
+                  color: "#1e293b",
+                  border: "none",
+                  padding: "8px 16px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "color 0.3s ease, transform 0.2s ease",
+                }}
+                className="hover:scale-105 hover:text-indigo-600"
+              >
+                LogIn
+              </motion.a>
+              <motion.a
+                href="/signup"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.6 }}
+                style={{ backgroundColor: "#4f46e5" }}
                 className="px-4 py-2 font-medium text-white transition-colors duration-200 transform bg-indigo-600 rounded-md hover:bg-indigo-700 hover:scale-105"
               >
-                Sign Up
-              </motion.button>
+                <span className="text-white">Sign Up</span>
+              </motion.a>
             </motion.div>
           </div>
 
+          {/* Mobile Menu Toggle */}
           <div className="md:hidden">
             <button
               type="button"
@@ -122,7 +143,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
@@ -142,9 +163,20 @@ const Navbar = () => {
                 {link.name}
               </a>
             ))}
-            <button className="w-full px-3 py-2 mt-3 text-base font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+            <a
+              href="/login"
+              className="block px-3 py-2 text-base font-medium text-gray-700 rounded-md hover:text-indigo-600 hover:bg-gray-50"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              LogIn
+            </a>
+            <a
+              href="/signup"
+              className="block w-full px-3 py-2 mt-3 text-base font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
+              onClick={() => setMobileMenuOpen(false)}
+            >
               Sign Up
-            </button>
+            </a>
           </div>
         </motion.div>
       )}
