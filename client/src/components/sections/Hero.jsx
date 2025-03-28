@@ -59,13 +59,14 @@ const Hero = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.6 }}
             >
-              <motion.button
-                className="px-6 py-3 font-medium text-white transition-all duration-300 transform rounded-lg shadow-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:shadow-xl hover:scale-105"
+              <motion.a
+                className="px-6 py-3 font-medium transition-all duration-300 transform rounded-lg shadow-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:shadow-xl hover:scale-105"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                href="/signup"
               >
-                Get Started
-              </motion.button>
+                <spam className="text-white">Get Started</spam>
+              </motion.a>
 
               <motion.button
                 className="relative px-8 py-3.5 font-medium text-white transition-all duration-300 rounded-lg overflow-hidden group"
@@ -201,7 +202,7 @@ const Hero = () => {
                   <span className="font-medium">Cooking</span>
                 </div>
               </motion.div>
-              
+
               <motion.div
                 className="absolute z-10 p-4 bg-white rounded-lg shadow-lg bottom-10 right-4"
                 initial={{ x: 100, y: 50, opacity: 0 }}
@@ -251,7 +252,7 @@ const Hero = () => {
           className="w-full h-auto"
         >
           <path
-            fill="#F3F4F6"
+            fill="#b3d3fd"
             fillOpacity="1"
             d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,138.7C960,139,1056,117,1152,106.7C1248,96,1344,96,1392,96L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
           ></path>
