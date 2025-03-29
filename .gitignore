@@ -12,6 +12,7 @@ server/.gitattributes
 server/mvnw
 server/mvnw.cmd
 server/.mvn
+server/target
 
 */.env
 
