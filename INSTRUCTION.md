@@ -36,8 +36,8 @@ This command will:
 
 Once the containers are up and running, you can access the application in your browser:
 
-- **Frontend**: Open your browser and go to `http://localhost:80` to access the frontend.
-- **Backend**: The backend will be available on `http://localhost:8080` (if your backend exposes an API on that port).
+- **Frontend**: Open your browser and go to `http://localhost:5173` to access the frontend.
+- **Backend**: The backend will be available on `http://localhost:5000` (if your backend exposes an API on that port).
 
 ### 4. Stopping the Containers
 
