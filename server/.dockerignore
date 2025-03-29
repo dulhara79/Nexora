@@ -1,0 +1,47 @@
+# Help files
+HELP.md
+
+# Maven build output
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# STS (Spring Tool Suite) related files
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# IntelliJ IDEA related files
+.idea
+*.iws
+*.iml
+*.ipr
+
+# NetBeans related files
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# VS Code related files
+.vscode/
+
+# Sensitive data like .env (if applicable)
+.env
+
+# Docker-related files that should not be in the build context
+docker-compose.override.yml
+
+# Ignore other build-related files
+*.log
+*.tar
+*.tgz
