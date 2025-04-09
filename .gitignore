@@ -27,3 +27,4 @@ server/target
 
 server/src/main/resources/client_secret_googleusercontent.com.json
 server/src/main/resources/serviceAccountKey.json
+server/src/main/resources/.env
