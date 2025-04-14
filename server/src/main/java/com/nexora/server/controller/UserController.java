@@ -122,7 +122,8 @@ public class UserController {
             }
             if (socialMedia != null) {
                 List<SocialMediaLink> socialMediaLinks = objectMapper.readValue(socialMedia,
-                        new TypeReference<List<SocialMediaLink>>() {});
+                        new TypeReference<List<SocialMediaLink>>() {
+                        });
                 user.setSocialMedia(socialMediaLinks);
             }
 
