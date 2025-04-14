@@ -286,7 +286,7 @@ function EditProfile() {
   };
 
   return (
-    <div className="min-h-screen py-12 bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">
+    <div className="min-h-screen py-12 bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">         
       <motion.div 
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}

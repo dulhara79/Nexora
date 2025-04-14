@@ -28,6 +28,6 @@ server/target
 server/src/main/resources/client_secret_googleusercontent.com.json
 server/src/main/resources/serviceAccountKey.json
 server/src/main/resources/.env
-client/public/favicon_io/site.webmanifest
 client/public/favicon_io/about.txt
 client/public/demo.txt
+client/public/favicon_io/site.webmanifest
