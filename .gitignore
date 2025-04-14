@@ -1,0 +1,30 @@
+.qodo
+
+client/package-lock.json
+client/node_modules
+client/ readme.md
+client/FrontEndStructure.bash
+
+server/package-lock.json
+server/node_modules
+server/ readme.md
+server/.gitattributes
+server/target
+
+*/.env
+
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.svg
+*.ico
+*.webp
+*.mp4
+*.webm
+
+*.pdf
+
+server/src/main/resources/client_secret_googleusercontent.com.json
+server/src/main/resources/serviceAccountKey.json
+server/src/main/resources/.env
