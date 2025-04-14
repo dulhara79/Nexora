@@ -40,7 +40,7 @@ const VerifyEmailPage = () => {
 
       console.log("Verification response:", response.data);
       setSuccess("Email verified successfully!");
-      setTimeout(() => navigate("/login"), 2000);
+      setTimeout(() => navigate("/feed"), 2000);
     } catch (err) {
       console.error("OTP verification error:", err.response);
       setError(
