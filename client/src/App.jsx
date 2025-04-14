@@ -14,6 +14,11 @@ import "./index.css";
 import Profile from "./pages/User/UserProfilePage";
 import EditProfile from "./pages/User/EditProfilePage";
 
+import HomePage from './pages/LearningPlanPage/HomePage';
+import ProgressPage from './pages/LearningPlanPage/ProgressPage';
+import PlanPage from "./pages/LearningPlanPage/PlanPage";
+
+
 function App() {
   return (
     <AuthProvider>
@@ -29,6 +34,15 @@ function App() {
         <Route path="/profile/:userId" element={<Profile />} />
         <Route path="/edit/:userId" element={<EditProfile />} />
         {/* <Route path="/register" element={<Register />} /> */}
+
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/progress" element={<ProgressPage />} />
+        <Route path="/plan/:level" element={<PlanPage />} />
+        <Route path="/progress/:cuisineName" element={<ProgressPage />} />
+
+
+
+        {/* 404 Page */}
 
         <Route path="/*" element={<PageNotFound />} />
       </Routes>
