@@ -8,6 +8,7 @@ import java.util.List;
 
 @Repository
 public interface QuestionRepository extends MongoRepository<Question, String> {
+    List<Question> findByTags(String tagId);
     List<Question> findByTagsContaining(String tag);
     List<Question> findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String title, String description);
     List<Question> findByIsFlaggedTrue();
