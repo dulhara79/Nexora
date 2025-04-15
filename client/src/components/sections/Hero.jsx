@@ -22,7 +22,7 @@ const Hero = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              A platform to{" "}
+              A platform to <br />{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">
                 <TypeAnimation
                   sequence={[
@@ -100,7 +100,7 @@ const Hero = () => {
             </motion.div>
           </motion.div>
 
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -240,6 +240,285 @@ const Hero = () => {
                 alt="Skills sharing platform illustration" 
                 className="z-0 w-full h-auto rounded-lg shadow-2xl"
               /> */}
+          {/* </div>
+          </motion.div> */}
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="relative"
+          >
+            <div className="relative w-full h-full min-h-96">
+              <motion.div
+                className="absolute left-0 z-10 p-4 bg-white rounded-lg shadow-lg top-10"
+                initial={{ x: -50, y: 20, opacity: 0 }}
+                animate={{ x: -20, y: 30, opacity: 1 }}
+                transition={{
+                  duration: 0.8,
+                  delay: 0.8,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  repeatDelay: 3,
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-red-100 rounded-full">
+                    <svg
+                      className="w-6 h-6 text-red-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
+                    </svg>
+                  </div>
+                  <span className="font-medium">Baking</span>
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="absolute right-0 z-10 p-4 bg-white rounded-lg shadow-lg top-20"
+                initial={{ x: 50, y: 40, opacity: 0 }}
+                animate={{ x: 30, y: 70, opacity: 1 }}
+                transition={{
+                  duration: 0.8,
+                  delay: 1.0,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  repeatDelay: 4,
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-yellow-100 rounded-full">
+                    <svg
+                      className="w-6 h-6 text-yellow-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                      />
+                    </svg>
+                  </div>
+                  <span className="font-medium">Grilling</span>
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="absolute z-10 p-4 bg-white rounded-lg shadow-lg bottom-10 left-1/4"
+                initial={{ x: 0, y: 50, opacity: 0 }}
+                animate={{ x: 0, y: 20, opacity: 1 }}
+                transition={{
+                  duration: 0.8,
+                  delay: 1.2,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  repeatDelay: 3.5,
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 rounded-full">
+                    <svg
+                      className="w-6 h-6 text-green-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                      />
+                    </svg>
+                  </div>
+                  <span className="font-medium">Knife Skills</span>
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="absolute z-10 p-4 bg-white rounded-lg shadow-lg bottom-10 right-4"
+                initial={{ x: 100, y: 50, opacity: 0 }}
+                animate={{ x: 30, y: 20, opacity: 1 }}
+                transition={{
+                  duration: 0.8,
+                  delay: 1.4,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  repeatDelay: 3.5,
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-full">
+                    <svg
+                      className="w-6 h-6 text-blue-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </div>
+                  <span className="font-medium">Plating</span>
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="absolute z-10 p-4 bg-white rounded-lg shadow-lg left-1/3 top-36"
+                initial={{ x: -20, y: 60, opacity: 0 }}
+                animate={{ x: 0, y: 80, opacity: 1 }}
+                transition={{
+                  duration: 0.8,
+                  delay: 1.6,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  repeatDelay: 4,
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 rounded-full">
+                    <svg
+                      className="w-6 h-6 text-purple-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                      />
+                    </svg>
+                  </div>
+                  <span className="font-medium">Sauté</span>
+                </div>
+              </motion.div>
+            {/* </div>
+          </motion.div> */}
+
+              {/* Culinary Arts */}
+              <motion.div
+                className="absolute z-10 p-4 bg-white rounded-lg shadow-lg"
+                style={{ left: "20%", top: "20%" }}
+                initial={{ x: -50, y: 20, opacity: 0 }}
+                animate={{ x: -20, y: 10, opacity: 1 }}
+                transition={{
+                  duration: 0.8,
+                  delay: 0.6,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  repeatDelay: 3,
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 rounded-full">
+                    <svg
+                      className="w-6 h-6 text-green-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                      />
+                    </svg>
+                  </div>
+                  <span className="font-medium">Culinary Arts</span>
+                </div>
+              </motion.div>
+
+              {/* Recipe Creation */}
+              <motion.div
+                className="absolute z-10 p-4 bg-white rounded-lg shadow-lg"
+                style={{ right: "20%", top: "30%" }}
+                initial={{ x: 50, y: 20, opacity: 0 }}
+                animate={{ x: 20, y: 10, opacity: 1 }}
+                transition={{
+                  duration: 0.8,
+                  delay: 0.8,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  repeatDelay: 3.5,
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-orange-100 rounded-full">
+                    <svg
+                      className="w-6 h-6 text-orange-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                  </div>
+                  <span className="font-medium">Recipe Creation</span>
+                </div>
+              </motion.div>
+
+              {/* Meal Planning */}
+              {/* <motion.div
+                className="absolute z-10 p-4 bg-white rounded-lg shadow-lg"
+                style={{ right: "25%", bottom: "15%" }}
+                initial={{ x: 30, y: 50, opacity: 0 }}
+                animate={{ x: 10, y: 20, opacity: 1 }}
+                transition={{
+                  duration: 0.8,
+                  delay: 1.2,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  repeatDelay: 3.5,
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-full">
+                    <svg
+                      className="w-6 h-6 text-blue-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                  </div>
+                  <span className="font-medium">Meal Planning</span>
+                </div>
+              </motion.div> */}
+
+              {/* <img 
+      src="/api/placeholder/600/500" 
+      alt="Cooking platform illustration" 
+      className="z-0 w-full h-auto rounded-lg shadow-2xl"
+    /> */}
             </div>
           </motion.div>
         </div>
