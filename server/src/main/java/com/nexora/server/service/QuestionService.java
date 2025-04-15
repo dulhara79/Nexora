@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -86,15 +88,32 @@ public class QuestionService {
     }
 
     public List<Question> getQuestions(String tag, String search, String sortBy) {
-        if (tag != null) {
-            return questionRepository.findByTagsContaining(tag);
-        } else if (search != null) {
-            return questionRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(search, search);
-        } else if ("mostCommented".equals(sortBy)) {
-            // Note: MongoDB aggregation would be needed for exact comment count sorting
-            return questionRepository.findAll(); // Placeholder
+        List<Question> questions;
+
+        // Handle tag search
+        if (tag != null && !tag.isEmpty()) {
+            Tag tagObj = tagRepository.findByName(tag);
+            if (tagObj != null) {
+                questions = questionRepository.findByTags(tagObj.getId());
+            } else {
+                return Collections.emptyList(); // No questions if tag not found
+            }
+        } else if (search != null && !search.isEmpty()) {
+            // Handle search by title or description
+            questions = questionRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(search, search);
+        } else {
+            // Get all questions
+            questions = questionRepository.findAll();
         }
-        return questionRepository.findAll();
+
+        // Handle sorting
+        if ("newest".equalsIgnoreCase(sortBy)) {
+            questions.sort(Comparator.comparing(Question::getCreatedAt).reversed());
+        } else if ("mostCommented".equalsIgnoreCase(sortBy)) {
+            questions.sort(Comparator.comparingInt((Question q) -> q.getCommentIds() != null ? q.getCommentIds().size() : 0).reversed());
+        }
+
+        return questions;
     }
 
     public Question upvoteQuestion(String questionId, String userId) throws Exception {
