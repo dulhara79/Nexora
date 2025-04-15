@@ -34,7 +34,8 @@ public class QuestionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateQuestion(@PathVariable String id, @RequestBody Question question, HttpSession session) {
+    public ResponseEntity<?> updateQuestion(@PathVariable String id, @RequestBody Question question,
+            HttpSession session) {
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
             return ResponseEntity.status(401).body("Unauthorized");
@@ -66,6 +67,9 @@ public class QuestionController {
             @RequestParam(required = false) String tag,
             @RequestParam(required = false) String search,
             @RequestParam(required = false, defaultValue = "newest") String sortBy) {
+        System.out.println("Tag: " + tag);
+        System.out.println("Search: " + search);
+        System.out.println("Sort By: " + sortBy);
         return ResponseEntity.ok(questionService.getQuestions(tag, search, sortBy));
     }
 
