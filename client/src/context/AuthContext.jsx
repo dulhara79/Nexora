@@ -21,6 +21,7 @@ export const AuthProvider = ({ children }) => {
             email: (response.data.email)? response.data.email : "",
             name: (response.data.name)? response.data.name : "",
             profileImage: (response.data.profileImage)? response.data.profileImage : "",
+            role: response.data.role || "USER",
           });
           setIsAuthenticated(true);
         } else {
