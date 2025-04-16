@@ -12,7 +12,7 @@ public class Question {
     private String title;
     private String description;
     private String authorId;
-    private List<String> tags; // Stores Tag IDs
+    private List<String> tags; // Now stores tag names directly
     private List<String> upvoteUserIds;
     private List<String> downvoteUserIds;
     private List<String> commentIds;
@@ -20,7 +20,7 @@ public class Question {
     private LocalDateTime updatedAt;
     private boolean isFlagged;
 
-    // Getters and setters
+    // Getters and setters (unchanged)
     public String getId() {
         return id;
     }
