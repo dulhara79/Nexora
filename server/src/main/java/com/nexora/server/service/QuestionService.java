@@ -2,16 +2,16 @@ package com.nexora.server.service;
 
 import com.nexora.server.model.Question;
 import com.nexora.server.model.Role;
-import com.nexora.server.model.Tag;
 import com.nexora.server.model.User;
 import com.nexora.server.repository.QuestionRepository;
-import com.nexora.server.repository.TagRepository;
 import com.nexora.server.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -24,9 +24,6 @@ public class QuestionService {
     private QuestionRepository questionRepository;
 
     @Autowired
-    private TagRepository tagRepository;
-
-    @Autowired
     private UserRepository userRepository;
 
     public Question createQuestion(Question question, String userId) throws Exception {
@@ -36,7 +33,9 @@ public class QuestionService {
         }
 
         question.setAuthorId(userId);
-        question.setTags(processTags(question.getTags()));
+        question.setCreatedAt(LocalDateTime.now());
+        question.setTags(question.getTags() != null ? question.getTags() : new ArrayList<>()); // Ensure tags is not
+                                                                                               // null
         Question savedQuestion = questionRepository.save(question);
         LOGGER.info("Question created with ID: " + savedQuestion.getId());
         return savedQuestion;
@@ -53,14 +52,13 @@ public class QuestionService {
             throw new Exception("Unauthorized to edit this question");
         }
 
-        // Check time limit (24 hours)
         if (question.getCreatedAt().plusHours(24).isBefore(LocalDateTime.now()) && !isAdminOrModerator(userId)) {
             throw new Exception("Edit time limit exceeded");
         }
 
         question.setTitle(updatedQuestion.getTitle());
         question.setDescription(updatedQuestion.getDescription());
-        question.setTags(processTags(updatedQuestion.getTags()));
+        question.setTags(updatedQuestion.getTags() != null ? updatedQuestion.getTags() : new ArrayList<>());
         question.setUpdatedAt(LocalDateTime.now());
         return questionRepository.save(question);
     }
@@ -76,7 +74,6 @@ public class QuestionService {
             throw new Exception("Unauthorized to delete this question");
         }
 
-        // Check time limit (24 hours)
         if (question.getCreatedAt().plusHours(24).isBefore(LocalDateTime.now()) && !isAdminOrModerator(userId)) {
             throw new Exception("Delete time limit exceeded");
         }
@@ -86,15 +83,34 @@ public class QuestionService {
     }
 
     public List<Question> getQuestions(String tag, String search, String sortBy) {
-        if (tag != null) {
-            return questionRepository.findByTagsContaining(tag);
-        } else if (search != null) {
-            return questionRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(search, search);
-        } else if ("mostCommented".equals(sortBy)) {
-            // Note: MongoDB aggregation would be needed for exact comment count sorting
-            return questionRepository.findAll(); // Placeholder
+        List<Question> questions;
+
+        if (tag != null && !tag.trim().isEmpty()) {
+            // Search for questions with the exact tag name (case-insensitive)
+            questions = questionRepository.findByTagsIn(Collections.singletonList(tag.trim().toLowerCase()));
+            System.out.println("Questions with tag: " + questions);
+        } else if (search != null && !search.trim().isEmpty()) {
+            // Search by title or description
+            questions = questionRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(search,
+                    search);
+            System.out.println("Questions with search term: " + questions);
+        } else {
+            // Get all questions
+            questions = questionRepository.findAll();
+            System.out.println("All questions: " + questions);
         }
-        return questionRepository.findAll();
+
+        // Sorting logic
+        if ("newest".equalsIgnoreCase(sortBy)) {
+            questions.sort(Comparator.comparing(
+                    Question::getCreatedAt,
+                    Comparator.nullsLast(Comparator.naturalOrder())).reversed());
+        } else if ("mostCommented".equalsIgnoreCase(sortBy)) {
+            questions.sort(Comparator.comparingInt(
+                    (Question q) -> q.getCommentIds() != null ? q.getCommentIds().size() : 0).reversed());
+        }
+
+        return questions;
     }
 
     public Question upvoteQuestion(String questionId, String userId) throws Exception {
@@ -104,11 +120,18 @@ public class QuestionService {
         }
 
         Question question = questionOptional.get();
+        if (question.getUpvoteUserIds() == null) {
+            question.setUpvoteUserIds(new ArrayList<>());
+        }
+        if (question.getDownvoteUserIds() == null) {
+            question.setDownvoteUserIds(new ArrayList<>());
+        }
+
         if (question.getUpvoteUserIds().contains(userId)) {
             question.getUpvoteUserIds().remove(userId);
         } else {
             question.getUpvoteUserIds().add(userId);
-            question.getDownvoteUserIds().remove(userId); // Remove downvote if exists
+            question.getDownvoteUserIds().remove(userId);
         }
 
         return questionRepository.save(question);
@@ -121,11 +144,18 @@ public class QuestionService {
         }
 
         Question question = questionOptional.get();
+        if (question.getUpvoteUserIds() == null) {
+            question.setUpvoteUserIds(new ArrayList<>());
+        }
+        if (question.getDownvoteUserIds() == null) {
+            question.setDownvoteUserIds(new ArrayList<>());
+        }
+
         if (question.getDownvoteUserIds().contains(userId)) {
             question.getDownvoteUserIds().remove(userId);
         } else {
             question.getDownvoteUserIds().add(userId);
-            question.getUpvoteUserIds().remove(userId); // Remove upvote if exists
+            question.getUpvoteUserIds().remove(userId);
         }
 
         return questionRepository.save(question);
@@ -141,20 +171,6 @@ public class QuestionService {
         question.setFlagged(true);
         questionRepository.save(question);
         LOGGER.info("Question flagged with ID: " + questionId);
-    }
-
-    private List<String> processTags(List<String> tags) {
-        List<String> tagIds = new ArrayList<>();
-        for (String tagName : tags) {
-            Tag tag = tagRepository.findByName(tagName);
-            if (tag == null) {
-                tag = new Tag();
-                tag.setName(tagName);
-                tag = tagRepository.save(tag);
-            }
-            tagIds.add(tag.getId());
-        }
-        return tagIds;
     }
 
     private boolean isAdminOrModerator(String userId) {

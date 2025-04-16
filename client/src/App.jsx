@@ -1,5 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+// Authentication
 import { AuthProvider } from "./context/AuthContext";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
@@ -12,13 +14,20 @@ import UserFeedPage from "./pages/User/UserFeedPage";
 import PageNotFound from "./pages/PageNotFound";
 import "./index.css";
 
+// User Pages
 import Profile from "./pages/User/UserProfilePage";
 import EditProfile from "./pages/User/EditProfilePage";
 
-import HomePage from './pages/LearningPlanPage/HomePage';
-import ProgressPage from './pages/LearningPlanPage/ProgressPage';
+// Learning Plan Pages
+import HomePage from "./pages/LearningPlanPage/HomePage";
+import ProgressPage from "./pages/LearningPlanPage/ProgressPage";
 import PlanPage from "./pages/LearningPlanPage/PlanPage";
 
+// Forum Pages
+import ForumHomePage from "./pages/Forum/ForumHomePage";
+import QuestionDetailPage from "./pages/Forum/QuestionDetailPage";
+import AskQuestionPage from "./pages/Forum/AskQuestionPage";
+import SavedQuestions from "./pages/Forum/SavedQuestions";
 
 function App() {
   return (
@@ -36,18 +45,23 @@ function App() {
           <Route path="/edit/:userId" element={<EditProfile />} />
           <Route path="/feed" element={<UserFeedPage />} />
           {/* <Route path="/register" element={<Register />} /> */}
+          {/* Learning Plan Routes */}
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/progress" element={<ProgressPage />} />
+          <Route path="/plan/:level" element={<PlanPage />} />
+          <Route path="/progress/:cuisineName" element={<ProgressPage />} />
 
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/progress" element={<ProgressPage />} />
-        <Route path="/plan/:level" element={<PlanPage />} />
-        <Route path="/progress/:cuisineName" element={<ProgressPage />} />
+          {/* Forum Routes */}
+          <Route path="/forum" element={<ForumHomePage />} />
+          <Route path="/forum/question/:id" element={<QuestionDetailPage />} />
+          <Route path="/forum/ask" element={<AskQuestionPage />} />
+          <Route path="/forum/edit/:id" element={<AskQuestionPage />} />
+          <Route path="/forum/saved" element={<SavedQuestions />} />
 
-
-
-        {/* 404 Page */}
-        <Route path="/*" element={<PageNotFound />} />
-      </Routes>
-    </Router>
+          {/* 404 Page */}
+          <Route path="/*" element={<PageNotFound />} />
+        </Routes>
+      </Router>
     </AuthProvider>
   );
 }
