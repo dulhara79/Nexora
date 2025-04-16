@@ -1,7 +1,7 @@
 package com.nexora.server.controller;
 
 import com.nexora.server.model.Question;
-import com.nexora.server.service.CommentService;
+import com.nexora.server.repository.QuestionRepository;
 import com.nexora.server.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/questions")
@@ -17,6 +18,9 @@ public class QuestionController {
 
     @Autowired
     private QuestionService questionService;
+
+    @Autowired
+    private QuestionRepository questionRepository;
 
     @PostMapping("/add")
     public ResponseEntity<?> createQuestion(@RequestBody Question question, HttpSession session) {
@@ -71,6 +75,19 @@ public class QuestionController {
         System.out.println("Search: " + search);
         System.out.println("Sort By: " + sortBy);
         return ResponseEntity.ok(questionService.getQuestions(tag, search, sortBy));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getQuestion(@PathVariable String id) {
+        try {
+            Optional<Question> question = questionRepository.findById(id);
+            if (question.isPresent()) {
+                return ResponseEntity.ok(question.get());
+            }
+            return ResponseEntity.status(404).body("Question not found");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/{id}/upvote")
