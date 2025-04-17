@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AuthContext } from "../../context/AuthContext";
+import Header from "../../components/Forum/Header"
 
 const ForumHomePage = () => {
   const [questions, setQuestions] = useState([]);
@@ -16,7 +17,7 @@ const ForumHomePage = () => {
   }, [selectedTag, searchQuery, sortBy]);
 
   const fetchQuestions = async () => {
-    setIsLoading(true);
+    // setIsLoading(true);
     try {
       let url = `http://localhost:5000/api/questions?sortBy=${sortBy}`;
       if (selectedTag) url += `&tag=${selectedTag}`;
@@ -72,6 +73,8 @@ const ForumHomePage = () => {
   const allTags = [...new Set(questions.flatMap((q) => q.tags || []))];
 
   return (
+    <>
+    <Header/>
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -337,6 +340,7 @@ const ForumHomePage = () => {
         </div>
       </div>
     </motion.div>
+    </>
   );
 };
 
