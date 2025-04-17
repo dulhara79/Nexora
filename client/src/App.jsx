@@ -24,6 +24,7 @@ import ProgressPage from "./pages/LearningPlanPage/ProgressPage";
 import PlanPage from "./pages/LearningPlanPage/PlanPage";
 
 // Forum Pages
+import ForumDashBoard from "./pages/Forum/ForumDashBoard";
 import ForumHomePage from "./pages/Forum/ForumHomePage";
 import QuestionDetailPage from "./pages/Forum/QuestionDetailPage";
 import AskQuestionPage from "./pages/Forum/AskQuestionPage";
@@ -52,6 +53,7 @@ function App() {
           <Route path="/progress/:cuisineName" element={<ProgressPage />} />
 
           {/* Forum Routes */}
+          <Route path="/forum/home" element={<ForumDashBoard />} />
           <Route path="/forum" element={<ForumHomePage />} />
           <Route path="/forum/question/:id" element={<QuestionDetailPage />} />
           <Route path="/forum/ask" element={<AskQuestionPage />} />

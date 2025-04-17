@@ -16,69 +16,34 @@ const QuestionDetailPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  /*
-  useEffect(() => {
-    const fetchQuestionDetails = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch(`http://localhost:5000/api/questions/${id}`, {
-          credentials: "include",
-        });
-
-        const resComments = axios.get(`http://localhost:5000/api/comments/question/${id}`);
-
-        if (!response.ok) {
-          throw new Error("Question not found");
-        }
-
-        const data = await response.json();
-        setQuestion(data);
-        // Assuming comments are included in the question data
-        setComments(data.comments || []);
-        console.log("res comments: " , resComments);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchQuestionDetails();
-  }, [id]);
-  */
-
   useEffect(() => {
     const fetchQuestionDetails = async () => {
       setIsLoading(true);
       try {
         // Fetch question
-        const response = await fetch(`http://localhost:5000/api/questions/${id}`, {
-          credentials: "include",
-        });
-  
-        // Await comments fetch
-        const resComments = await axios.get(`http://localhost:5000/api/comments/question/${id}`);
-  
-        if (!response.ok) {
-          throw new Error("Question not found");
-        }
-  
-        // Parse question data
-        const data = await response.json();
-        setQuestion(data);
-  
-        // Set comments from axios response
-        setComments(resComments.data); // resComments.data is the array of commentsactual comment array
+        const questionResponse = await axios.get(
+          `http://localhost:5000/api/questions/${id}`,
+          {
+            withCredentials: true,
+          }
+        );
+
+        // Fetch comments
+        const commentsResponse = await axios.get(
+          `http://localhost:5000/api/comments/question/${id}`
+        );
+
+        setQuestion(questionResponse.data);
+        setComments(commentsResponse.data); // Set comments from response
       } catch (err) {
-        setError(err.message);
+        setError(err.message || "Failed to load question");
       } finally {
         setIsLoading(false);
       }
     };
-  
+
     fetchQuestionDetails();
   }, [id]);
-  
 
   const handleVote = async (voteType) => {
     if (!user) {
@@ -87,44 +52,44 @@ const QuestionDetailPage = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/questions/${id}/${voteType}`, {
-        method: "POST",
-        credentials: "include",
-      });
-      console.log("Response: ", response); // Log the response object
-      console.log("Vote Type: ", voteType); // Log the vote type
-      if (response.ok) {
-        const updatedQuestion = await response.json();
-        setQuestion(updatedQuestion);
-      }
+      const response = await axios.post(
+        `http://localhost:5000/api/questions/${id}/${voteType}`,
+        {},
+        { withCredentials: true }
+      );
+      setQuestion(response.data);
     } catch (error) {
       console.error(`Error ${voteType}ing question:`, error);
     }
   };
 
-  const handleFlag = async () => {
+  const handleSaveToggle = async () => {
     if (!user) {
-      alert("Please log in to flag content");
+      alert("Please log in to save questions");
       return;
     }
 
-    if (
-      window.confirm(
-        "Are you sure you want to flag this question as inappropriate?"
-      )
-    ) {
-      try {
-        const response = await fetch(`http://localhost:5000/api/comments/${id}/flag`, {
-          method: "POST",
-          credentials: "include",
-        });
+    try {
+      const isSaved = question.savedQuestionIds?.includes(user.id);
+      const endpoint = isSaved
+        ? `/api/questions/${id}/unsave`
+        : `/api/questions/${id}/save`;
+      const response = await axios.post(
+        `http://localhost:5000${endpoint}`,
+        {},
+        { withCredentials: true }
+      );
 
-        if (response.ok) {
-          alert("Question has been flagged for review");
-        }
-      } catch (error) {
-        console.error("Error flagging question:", error);
-      }
+      // Update question state with new savedQuestionIds
+      setQuestion((prev) => ({
+        ...prev,
+        savedQuestionIds: isSaved
+          ? prev.savedQuestionIds.filter((userId) => userId !== user.id)
+          : [...(prev.savedQuestionIds || []), user.id],
+      }));
+    } catch (error) {
+      console.error("Error toggling save:", error);
+      alert("Failed to save/unsave question");
     }
   };
 
@@ -137,19 +102,13 @@ const QuestionDetailPage = () => {
       )
     ) {
       try {
-        const response = await fetch(`http://localhost:5000/api/questions/${id}`, {
-          method: "DELETE",
-          credentials: "include",
+        await axios.delete(`http://localhost:5000/api/questions/${id}`, {
+          withCredentials: true,
         });
-
-        if (response.ok) {
-          navigate("/forum");
-        } else {
-          const error = await response.text();
-          alert(`Failed to delete: ${error}`);
-        }
+        navigate("/forum");
       } catch (error) {
         console.error("Error deleting question:", error);
+        alert("Failed to delete question");
       }
     }
   };
@@ -164,23 +123,17 @@ const QuestionDetailPage = () => {
     if (!newComment.trim()) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/comments`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
+      const response = await axios.post(
+        `http://localhost:5000/api/comments`,
+        {
           questionId: id,
           content: newComment,
-        }),
-      });
+        },
+        { withCredentials: true }
+      );
 
-      if (response.ok) {
-        const newCommentData = await response.json();
-        setComments([...comments, newCommentData]);
-        setNewComment("");
-      }
+      setComments([...comments, response.data]);
+      setNewComment("");
     } catch (error) {
       console.error("Error adding comment:", error);
     }
@@ -196,43 +149,35 @@ const QuestionDetailPage = () => {
     if (!replyContent.trim() || !replyTo) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/comments`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
+      const response = await axios.post(
+        `http://localhost:5000/api/comments`,
+        {
           questionId: id,
           parentId: replyTo,
           content: replyContent,
-        }),
+        },
+        { withCredentials: true }
+      );
+
+      const newReply = response.data;
+      const updatedComments = comments.map((comment) => {
+        if (comment.id === replyTo) {
+          return {
+            ...comment,
+            replies: [...(comment.replies || []), newReply],
+          };
+        }
+        return comment;
       });
 
-      if (response.ok) {
-        const newReply = await response.json();
-
-        // Find and update the parent comment with the new reply
-        const updatedComments = comments.map((comment) => {
-          if (comment.id === replyTo) {
-            return {
-              ...comment,
-              replies: [...(comment.replies || []), newReply],
-            };
-          }
-          return comment;
-        });
-
-        setComments(updatedComments);
-        setReplyTo(null);
-        setReplyContent("");
-      }
+      setComments(updatedComments);
+      setReplyTo(null);
+      setReplyContent("");
     } catch (error) {
       console.error("Error adding reply:", error);
     }
   };
 
-  // Recursive function to render comments and their replies
   const renderComments = (commentsToRender, level = 0) => {
     return commentsToRender.map((comment) => (
       <motion.div
@@ -274,7 +219,6 @@ const QuestionDetailPage = () => {
               </button>
             )}
 
-            {/* Reply form */}
             <AnimatePresence>
               {replyTo === comment.id && (
                 <motion.form
@@ -311,7 +255,6 @@ const QuestionDetailPage = () => {
               )}
             </AnimatePresence>
 
-            {/* Nested replies */}
             {comment.replies && comment.replies.length > 0 && (
               <div className="mt-3">
                 {renderComments(comment.replies, level + 1)}
@@ -347,6 +290,8 @@ const QuestionDetailPage = () => {
   }
 
   if (!question) return null;
+
+  const isSaved = user && question.savedQuestionIds?.includes(user.id);
 
   return (
     <motion.div
@@ -413,7 +358,8 @@ const QuestionDetailPage = () => {
                 </svg>
               </button>
               <span className="my-1 text-xl font-bold">
-                {question.upvoteUserIds?.length - question.downvoteUserIds?.length || 0}
+                {question.upvoteUserIds?.length -
+                  question.downvoteUserIds?.length || 0}
               </span>
               <button
                 onClick={() => handleVote("downvote")}
@@ -498,11 +444,15 @@ const QuestionDetailPage = () => {
                     </>
                   )}
                   <button
-                    onClick={handleFlag}
-                    className="text-gray-600 transition-colors hover:text-gray-700"
-                    title="Flag as inappropriate"
+                    onClick={handleSaveToggle}
+                    className={`transition-colors ${
+                      isSaved
+                        ? "text-yellow-600 hover:text-yellow-700"
+                        : "text-gray-600 hover:text-gray-700"
+                    }`}
+                    title={isSaved ? "Unsave question" : "Save question"}
                   >
-                    Flag
+                    {isSaved ? "Unsave" : "Save"}
                   </button>
                 </div>
               </div>
@@ -562,7 +512,6 @@ const QuestionDetailPage = () => {
               </p>
             </div>
           ) : (
-            // Only render top-level comments (those without parentId)
             renderComments(comments.filter((comment) => !comment.parentId))
           )}
         </div>

@@ -26,16 +26,34 @@ public class QuestionService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserService userService;
+
     public Question createQuestion(Question question, String userId) throws Exception {
+        LOGGER.info("Creating question with title: " + question.getTitle());
+        LOGGER.info("Description: " + question.getDescription());
+        LOGGER.info("Tags: " + question.getTags());
+        LOGGER.info("User ID: " + userId);
+
         Optional<User> userOptional = userRepository.findById(userId);
+        User user = userService.getUserById(userId);
+        String username = user.getName(); // Get username from User object
         if (!userOptional.isPresent()) {
             throw new Exception("User not found");
         }
 
+        if (question.getTitle() == null || question.getTitle().trim().isEmpty()) {
+            throw new Exception("Title is required");
+        }
+        if (question.getDescription() == null || question.getDescription().trim().isEmpty()) {
+            throw new Exception("Description is required");
+        }
+
         question.setAuthorId(userId);
         question.setCreatedAt(LocalDateTime.now());
-        question.setTags(question.getTags() != null ? question.getTags() : new ArrayList<>()); // Ensure tags is not
-                                                                                               // null
+        question.setTags(question.getTags() != null ? question.getTags() : new ArrayList<>());
+        LOGGER.warning(".......................question: " + user.getName() + ".......................");
+        question.setAuthorUsername(username); // Set the username in the question object
         Question savedQuestion = questionRepository.save(question);
         LOGGER.info("Question created with ID: " + savedQuestion.getId());
         return savedQuestion;
@@ -203,7 +221,8 @@ public class QuestionService {
         }
 
         User user = userOptional.get();
-        List<String> savedQuestionIds = user.getSavedQuestionIds() != null ? user.getSavedQuestionIds() : new ArrayList<>();
+        List<String> savedQuestionIds = user.getSavedQuestionIds() != null ? user.getSavedQuestionIds()
+                : new ArrayList<>();
         if (savedQuestionIds.isEmpty()) {
             return new ArrayList<>();
         }
@@ -232,6 +251,29 @@ public class QuestionService {
             userRepository.save(user);
             LOGGER.info("Question unsaved with ID: " + questionId + " for user: " + userId);
         }
+    }
+
+    public Question incrementViews(String questionId) throws Exception {
+        Optional<Question> questionOptional = questionRepository.findById(questionId);
+        if (!questionOptional.isPresent()) {
+            throw new Exception("Question not found");
+        }
+        Question question = questionOptional.get();
+        question.setViews(question.getViews() + 1);
+        return questionRepository.save(question);
+    }
+
+    public Question togglePinQuestion(String questionId, String userId) throws Exception {
+        if (!isAdminOrModerator(userId)) {
+            throw new Exception("Unauthorized to pin/unpin question");
+        }
+        Optional<Question> questionOptional = questionRepository.findById(questionId);
+        if (!questionOptional.isPresent()) {
+            throw new Exception("Question not found");
+        }
+        Question question = questionOptional.get();
+        question.setPinned(!question.isPinned());
+        return questionRepository.save(question);
     }
 
     private boolean isAdminOrModerator(String userId) {

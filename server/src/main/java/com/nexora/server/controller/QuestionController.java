@@ -1,8 +1,11 @@
 package com.nexora.server.controller;
 
 import com.nexora.server.model.Question;
+import com.nexora.server.model.User;
 import com.nexora.server.repository.QuestionRepository;
 import com.nexora.server.service.QuestionService;
+import com.nexora.server.service.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,10 +25,16 @@ public class QuestionController {
     @Autowired
     private QuestionRepository questionRepository;
 
+    @Autowired
+    private UserService userService;
+
     @PostMapping("/add")
     public ResponseEntity<?> createQuestion(@RequestBody Question question, HttpSession session) {
         String userId = (String) session.getAttribute("userId");
+        System.out.println("..............session will print below...............");
+        System.out.println("session: " + session);
         System.out.println("User ID from session: " + userId);
+        System.out.println("Request body: " + question); // Log request body
         if (userId == null) {
             return ResponseEntity.status(401).body("Unauthorized");
         }
@@ -33,6 +42,7 @@ public class QuestionController {
             Question createdQuestion = questionService.createQuestion(question, userId);
             return ResponseEntity.ok(createdQuestion);
         } catch (Exception e) {
+            System.err.println("Error creating question: " + e.getMessage()); // Log error
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -169,6 +179,30 @@ public class QuestionController {
         try {
             questionService.unsaveQuestion(id, userId);
             return ResponseEntity.ok("Question unsaved");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/view")
+    public ResponseEntity<?> incrementQuestionViews(@PathVariable String id) {
+        try {
+            Question question = questionService.incrementViews(id);
+            return ResponseEntity.ok(question);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/pin")
+    public ResponseEntity<?> togglePinQuestion(@PathVariable String id, HttpSession session) {
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+        try {
+            Question question = questionService.togglePinQuestion(id, userId);
+            return ResponseEntity.ok(question);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
