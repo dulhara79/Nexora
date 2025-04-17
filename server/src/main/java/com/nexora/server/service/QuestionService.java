@@ -173,6 +173,67 @@ public class QuestionService {
         LOGGER.info("Question flagged with ID: " + questionId);
     }
 
+    public void saveQuestion(String questionId, String userId) throws Exception {
+        Optional<Question> questionOptional = questionRepository.findById(questionId);
+        if (!questionOptional.isPresent()) {
+            throw new Exception("Question not found");
+        }
+
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (!userOptional.isPresent()) {
+            throw new Exception("User not found");
+        }
+
+        User user = userOptional.get();
+        if (user.getSavedQuestionIds() == null) {
+            user.setSavedQuestionIds(new ArrayList<>());
+        }
+
+        if (!user.getSavedQuestionIds().contains(questionId)) {
+            user.getSavedQuestionIds().add(questionId);
+            userRepository.save(user);
+            LOGGER.info("Question saved with ID: " + questionId + " for user: " + userId);
+        }
+    }
+
+    public List<Question> getSavedQuestions(String userId) throws Exception {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (!userOptional.isPresent()) {
+            throw new Exception("User not found");
+        }
+
+        User user = userOptional.get();
+        List<String> savedQuestionIds = user.getSavedQuestionIds() != null ? user.getSavedQuestionIds() : new ArrayList<>();
+        if (savedQuestionIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Question> savedQuestions = questionRepository.findAllById(savedQuestionIds);
+        savedQuestions.sort(Comparator.comparing(
+                Question::getCreatedAt,
+                Comparator.nullsLast(Comparator.naturalOrder())).reversed());
+        return savedQuestions;
+    }
+
+    public void unsaveQuestion(String questionId, String userId) throws Exception {
+        Optional<Question> questionOptional = questionRepository.findById(questionId);
+        if (!questionOptional.isPresent()) {
+            throw new Exception("Question not found");
+        }
+
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (!userOptional.isPresent()) {
+            throw new Exception("User not found");
+        }
+
+        User user = userOptional.get();
+        if (user.getSavedQuestionIds() != null && user.getSavedQuestionIds().contains(questionId)) {
+            user.getSavedQuestionIds().remove(questionId);
+            userRepository.save(user);
+            LOGGER.info("Question unsaved with ID: " + questionId + " for user: " + userId);
+        }
+    }
+
     private boolean isAdminOrModerator(String userId) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
