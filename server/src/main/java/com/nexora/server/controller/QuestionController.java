@@ -131,4 +131,46 @@ public class QuestionController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PostMapping("/{id}/save")
+    public ResponseEntity<?> saveQuestion(@PathVariable String id, HttpSession session) {
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+        try {
+            questionService.saveQuestion(id, userId);
+            return ResponseEntity.ok("Question saved");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/saved")
+    public ResponseEntity<?> getSavedQuestions(HttpSession session) {
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+        try {
+            List<Question> savedQuestions = questionService.getSavedQuestions(userId);
+            return ResponseEntity.ok(savedQuestions);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}/unsave")
+    public ResponseEntity<?> unsaveQuestion(@PathVariable String id, HttpSession session) {
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+        try {
+            questionService.unsaveQuestion(id, userId);
+            return ResponseEntity.ok("Question unsaved");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
