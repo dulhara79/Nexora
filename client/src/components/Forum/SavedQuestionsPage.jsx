@@ -1,5 +1,5 @@
 // src/components/SavedQuestionsPage.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import Header from './Header';
 import QuestionCard from './QuestionCard';
@@ -71,37 +71,29 @@ const SAVED_QUESTIONS = [
 ];
 
 const SavedQuestionsPage = () => {
-  const [questions, setQuestions] = useState([]);
-  const [filteredQuestions, setFilteredQuestions] = useState([]);
+  const [questions, setQuestions] = useState(SAVED_QUESTIONS); // Initialize with SAVED_QUESTIONS
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('newest');
 
-  useEffect(() => {
-    // Simulate loading data
-    setTimeout(() => {
-      setQuestions(SAVED_QUESTIONS);
-      setFilteredQuestions(SAVED_QUESTIONS);
-    }, 500);
-  }, []);
-
-  useEffect(() => {
+  // Derive filteredQuestions using useMemo
+  const filteredQuestions = useMemo(() => {
     let result = [...questions];
-    
+
     // Apply filter
     if (filter === 'pinned') {
       result = result.filter(q => q.isPinned);
     }
-    
+
     // Apply search
     if (searchTerm) {
-      result = result.filter(q => 
+      result = result.filter(q =>
         q.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         q.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         q.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
-    
+
     // Apply sorting
     if (sortBy === 'newest') {
       result.sort((a, b) => new Date(b.datePosted) - new Date(a.datePosted));
@@ -110,8 +102,8 @@ const SavedQuestionsPage = () => {
     } else if (sortBy === 'mostAnswers') {
       result.sort((a, b) => b.answers - a.answers);
     }
-    
-    setFilteredQuestions(result);
+
+    return result;
   }, [questions, filter, searchTerm, sortBy]);
 
   const handleFilter = (newFilter) => {
@@ -131,7 +123,7 @@ const SavedQuestionsPage = () => {
   };
 
   const handleTogglePin = (id) => {
-    setQuestions(questions.map(q => 
+    setQuestions(questions.map(q =>
       q.id === id ? { ...q, isPinned: !q.isPinned } : q
     ));
   };
@@ -152,7 +144,7 @@ const SavedQuestionsPage = () => {
       
       <main className="max-w-6xl px-4 py-8 mx-auto">
         <div className="flex items-center justify-between mb-8">
-          <motion.h1 
+          <motion.h1
             className="text-3xl font-bold text-blue-600 dark:text-blue-400"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -161,7 +153,7 @@ const SavedQuestionsPage = () => {
             Saved Questions
           </motion.h1>
           
-          <motion.div 
+          <motion.div
             className="flex items-center space-x-2"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -173,7 +165,7 @@ const SavedQuestionsPage = () => {
           </motion.div>
         </div>
         
-        <FilterBar 
+        <FilterBar
           filter={filter}
           onFilterChange={handleFilter}
           searchTerm={searchTerm}
@@ -184,7 +176,7 @@ const SavedQuestionsPage = () => {
         
         <div className="mt-6 space-y-6">
           {filteredQuestions.length === 0 ? (
-            <motion.div 
+            <motion.div
               className="flex flex-col items-center justify-center py-16 text-center"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -193,20 +185,20 @@ const SavedQuestionsPage = () => {
               <HiBookmark className="w-16 h-16 mb-4 text-slate-300 dark:text-slate-600" />
               <h3 className="text-xl font-medium text-slate-600 dark:text-slate-300">No saved questions found</h3>
               <p className="max-w-md mt-2 text-slate-500 dark:text-slate-400">
-                {searchTerm ? 
-                  "No questions match your search criteria." : 
+                {searchTerm ?
+                  "No questions match your search criteria." :
                   "Start saving questions to build your collection."}
               </p>
             </motion.div>
           ) : (
-            <motion.div 
+            <motion.div
               className="space-y-4"
               variants={container}
               initial="hidden"
               animate="show"
             >
               {filteredQuestions.map((question) => (
-                <QuestionCard 
+                <QuestionCard
                   key={question.id}
                   question={question}
                   onRemove={() => handleRemoveQuestion(question.id)}
