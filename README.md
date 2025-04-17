@@ -48,21 +48,21 @@ Ensure you have the following installed:
 ### ⚡ Clone the Repository
 ```sh
  git clone https://github.com/dulhara79/Nexora.git
- cd skill-sharing-platform
+ cd Nexora
 ```
 
 ### 🖥️ Setting Up the Backend
 ```sh
  cd backend
- mvn clean install
- mvn spring-boot:run
+ mvnw clean install
+ mvnw spring-boot:run
 ```
 
 ### 🌐 Setting Up the Frontend
 ```sh
  cd frontend
  npm install
- npm start
+ npm run dev
 ```
 
 ## 🔗 API Endpoints
