@@ -47,7 +47,7 @@ Ensure you have the following installed:
 
 ### ⚡ Clone the Repository
 ```sh
- git clone https://github.com/yourusername/skill-sharing-platform.git
+ git clone https://github.com/dulhara79/Nexora.git
  cd skill-sharing-platform
 ```
 
