@@ -26,15 +26,27 @@ public class PostController {
             HttpSession session) {
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
+            System.out.println("User not authenticated: No userId in session");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+
+        System.out.println("Creating post for userId: " + userId);
+        System.out.println("Description: " + description);
+        System.out.println("Files received: " + (files != null ? files.size() : 0));
+        if (files != null) {
+            files.forEach(file -> System.out.println("File: " + file.getOriginalFilename() + ", Type: " + file.getContentType()));
         }
 
         try {
             Post post = postService.createPost(userId, description, files);
+            System.out.println("Post created successfully: " + post);
             return ResponseEntity.ok(post);
         } catch (IllegalArgumentException e) {
+            System.out.println("Validation error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
+            System.err.println("Error creating post: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating post: " + e.getMessage());
         }
     }
