@@ -36,6 +36,11 @@ import Home from "./pages/post/Home";
 import CreatePost from "./pages/post/CreatePost";
 import Notifications from "./pages/post/Notifications";
 
+import Navbar from "./components/post/Navbar";
+import Home from "./pages/post/Home";
+import CreatePost from "./pages/post/CreatePost";
+import Notifications from "./pages/post/Notifications";
+
 function App() {
   
   return (
@@ -68,6 +73,10 @@ function App() {
           <Route path="/forum/edit/:id" element={<AskQuestionPage />} />
           <Route path="/forum/saved" element={<SavedQuestions />} />
           <Route path="/forum/tags/:tag" element={<TagPage />} />
+
+          <Route path="/post" element={<Home />} />
+          <Route path="/create-post" element={<CreatePost />} />
+          <Route path="/post-notifications" element={<Notifications  />} />
 
           <Route path="/post" element={<Home />} />
           <Route path="/create-post" element={<CreatePost />} />
