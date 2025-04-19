@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, Navigate } from "react-router-dom"; // Import Navigate
+import { Link, Navigate } from "react-router-dom";
 import {
   HiOutlineFire,
   HiOutlineStar,
@@ -14,9 +14,9 @@ import {
 } from "react-icons/hi";
 import axios from "axios";
 import Header from "../../components/Forum/Header";
-import { AuthContext } from "../../context/AuthContext"; // Import AuthContext
+import { AuthContext } from "../../context/AuthContext";
 
-// Error Boundary Component (unchanged)
+// Error Boundary Component
 class ErrorBoundary extends React.Component {
   state = { hasError: false };
 
@@ -41,15 +41,17 @@ class ErrorBoundary extends React.Component {
 }
 
 const HomePage = () => {
-  const { isAuthenticated, loading } = useContext(AuthContext); // Use AuthContext
+  const { isAuthenticated, loading } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState("trending");
   const [isLoaded, setIsLoaded] = useState(false);
   const [showWelcomeCard, setShowWelcomeCard] = useState(true);
   const [posts, setPosts] = useState([]);
   const [trendingTags, setTrendingTags] = useState([]);
   const [communitySpotlight, setCommunitySpotlight] = useState([]);
-  const [dataLoading, setLoading] = useState(true); // Renamed to avoid conflict
+  const [dataLoading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [savedPosts, setSavedPosts] = useState(new Set());
+  const [likedPosts, setLikedPosts] = useState(new Set());
 
   const API_BASE_URL = "http://localhost:5000/api";
 
@@ -60,6 +62,8 @@ const HomePage = () => {
         setShowWelcomeCard(false);
       }, 5000);
       fetchInitialData();
+      fetchSavedStatus();
+      fetchLikedStatus();
       return () => clearTimeout(timer);
     }
   }, [loading, isAuthenticated]);
@@ -73,20 +77,11 @@ const HomePage = () => {
   const fetchInitialData = async () => {
     try {
       setLoading(true);
-      const tagsResponse = await axios.get(`${API_BASE_URL}/tags`, {
-        withCredentials: true,
-      });
+      const [tagsResponse, communitiesResponse] = await Promise.all([
+        axios.get(`${API_BASE_URL}/tags`, { withCredentials: true }),
+        axios.get(`${API_BASE_URL}/communities`, { withCredentials: true }),
+      ]);
       setTrendingTags(tagsResponse.data.map((tag) => tag.name));
-
-      const communitiesResponse = await axios.get(
-        `${API_BASE_URL}/communities`,
-        {
-          withCredentials: true,
-        }
-      );
-
-      console.log("Communities response:", communitiesResponse.data); // Debugging
-
       setCommunitySpotlight(
         communitiesResponse.data.map((community) => ({
           id: community.id || "unknown",
@@ -99,7 +94,7 @@ const HomePage = () => {
       );
     } catch (err) {
       console.error("Failed to fetch initial data:", err);
-      setError("Failed to load tags or communities. Please try again.");
+      setError("Failed to load tags or communities.");
     } finally {
       setLoading(false);
     }
@@ -122,8 +117,6 @@ const HomePage = () => {
         withCredentials: true,
       });
 
-      console.log("Posts response:", response.data);
-
       const transformedPosts = response.data.map((post) => ({
         id: post.id || "unknown",
         title: post.title || "Untitled",
@@ -143,7 +136,7 @@ const HomePage = () => {
       setPosts(transformedPosts);
     } catch (err) {
       console.error("Fetch posts error:", err);
-      setError("Failed to load posts. Please try again.");
+      setError("Failed to load posts.");
     } finally {
       setLoading(false);
     }
@@ -155,8 +148,6 @@ const HomePage = () => {
       const response = await axios.get(`${API_BASE_URL}/questions/saved`, {
         withCredentials: true,
       });
-
-      console.log("Saved posts response:", response.data);
 
       const transformedPosts = response.data.map((post) => ({
         id: post.id || "unknown",
@@ -177,9 +168,31 @@ const HomePage = () => {
       setPosts(transformedPosts);
     } catch (err) {
       console.error("Fetch saved posts error:", err);
-      setError("Failed to load saved posts. Please try again.");
+      setError("Failed to load saved posts.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSavedStatus = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/questions/saved`, {
+        withCredentials: true,
+      });
+      setSavedPosts(new Set(response.data.map((post) => post.id)));
+    } catch (err) {
+      console.error("Failed to fetch saved status:", err);
+    }
+  };
+
+  const fetchLikedStatus = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/questions/liked`, {
+        withCredentials: true,
+      });
+      setLikedPosts(new Set(response.data.map((post) => post.id)));
+    } catch (err) {
+      console.error("Failed to fetch liked status:", err);
     }
   };
 
@@ -197,9 +210,18 @@ const HomePage = () => {
             : post
         )
       );
+      setLikedPosts((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(postId)) {
+          newSet.delete(postId);
+        } else {
+          newSet.add(postId);
+        }
+        return newSet;
+      });
     } catch (err) {
       console.error("Failed to upvote:", err);
-      setError("Failed to upvote post. Please try again.");
+      setError("Failed to upvote post.");
     }
   };
 
@@ -210,9 +232,18 @@ const HomePage = () => {
         {},
         { withCredentials: true }
       );
+      setSavedPosts((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(postId)) {
+          newSet.delete(postId);
+        } else {
+          newSet.add(postId);
+        }
+        return newSet;
+      });
     } catch (err) {
       console.error("Failed to save:", err);
-      setError("Failed to save post. Please try again.");
+      setError("Failed to save post.");
     }
   };
 
@@ -238,6 +269,25 @@ const HomePage = () => {
   };
 
   const tabContainerVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+        type: "spring",
+        stiffness: 100,
+      },
+    },
+  };
+
+  const tabItemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0, transition: { type: "spring", damping: 15 } },
+  };
+
+  const cardContainerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -248,81 +298,71 @@ const HomePage = () => {
     },
   };
 
-  const tabItemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
-
-  const cardContainerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.3,
-      },
-    },
-  };
-
   const cardItemVariants = {
-    hidden: { opacity: 0, y: 30 },
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: {
-        type: "spring",
-        damping: 12,
-      },
+      transition: { type: "spring", damping: 20, stiffness: 100 },
     },
   };
 
-  // Redirect to login if not authenticated
+  const sidebarItemVariants = {
+    hidden: { opacity: 0, x: 20 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { type: "spring", damping: 20, stiffness: 100 },
+    },
+  };
+
   if (!loading && !isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-gray-100 dark:from-slate-900 dark:to-slate-800">
         <Header />
-        <main className="max-w-6xl px-4 pt-6 pb-16 mx-auto">
+        <main className="px-4 pt-8 pb-16 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <AnimatePresence>
             {showWelcomeCard && (
               <motion.div
-                className="relative mb-6 overflow-hidden shadow-lg rounded-xl bg-gradient-to-r from-blue-600 to-indigo-700"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                transition={{ duration: 0.5 }}
+                className="relative mb-8 overflow-hidden shadow-xl rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600"
+                initial={{ opacity: 0, y: -30, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -30, scale: 0.95 }}
+                transition={{ duration: 0.6, type: "spring", bounce: 0.3 }}
               >
-                <div className="relative z-10 flex flex-col items-start justify-between p-6 md:flex-row md:items-center">
-                  <div className="mb-4 md:mb-0">
-                    <h2 className="text-2xl font-bold text-white">
+                <div className="relative z-10 flex flex-col items-start justify-between p-8 md:flex-row md:items-center">
+                  <div className="mb-6 md:mb-0">
+                    <h2 className="text-3xl font-extrabold tracking-tight text-white">
                       Welcome to Nexora Forum
                     </h2>
-                    <p className="mt-1 text-blue-100">
-                      Join the conversation with developers worldwide
+                    <p className="mt-2 text-lg text-blue-100">
+                      Connect, share, and learn with global developers
                     </p>
                   </div>
-                  <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3">
+                  <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
                     <motion.button
-                      className="px-4 py-2 font-medium text-blue-700 bg-white rounded-lg shadow-md hover:bg-blue-50"
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
+                      className="px-6 py-3 font-semibold text-indigo-700 transition-colors bg-white shadow-lg rounded-xl hover:bg-blue-50"
+                      whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(0,0,0,0.2)" }}
+                      whileTap={{ scale: 0.95 }}
                     >
-                      Join Now
+                      Join the Community
                     </motion.button>
                     <motion.button
-                      className="px-4 py-2 font-medium text-blue-100 border border-blue-400 rounded-lg hover:bg-blue-700"
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
+                      className="px-6 py-3 font-semibold text-white transition-colors bg-transparent border-2 border-white rounded-xl hover:bg-white/10"
+                      whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(0,0,0,0.2)" }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => setShowWelcomeCard(false)}
                     >
                       Dismiss
                     </motion.button>
                   </div>
                 </div>
-                <div className="absolute top-0 right-0 w-64 h-64 opacity-20">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 mix-blend-overlay" />
+                <div className="absolute top-0 right-0 w-96 h-96 opacity-10">
                   <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                     <path
                       fill="white"
@@ -331,23 +371,14 @@ const HomePage = () => {
                     />
                   </svg>
                 </div>
-                <div className="absolute bottom-0 left-0 w-40 h-40 opacity-10">
-                  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      fill="white"
-                      d="M47.2,-57.2C59.9,-45.8,68.5,-29.9,70.8,-13.2C73.1,3.6,69.2,21.2,60.5,36.3C51.8,51.4,38.3,64,22.2,69.7C6.1,75.5,-12.5,74.4,-29.6,68C-46.7,61.6,-62.3,50,-71.5,33.8C-80.7,17.7,-83.5,-3,-77.7,-20.4C-71.9,-37.7,-57.5,-51.7,-42,-61.1C-26.5,-70.5,-9.8,-75.4,4,-80C17.9,-84.6,35.9,-69,47.2,-57.2Z"
-                      transform="translate(100 100)"
-                    />
-                  </svg>
-                </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
+            <div className="lg:col-span-3">
               <motion.div
-                className="flex p-1 mb-6 space-x-1 overflow-x-auto bg-white rounded-lg shadow-sm dark:bg-slate-800"
+                className="sticky z-10 flex p-2 mb-8 space-x-2 shadow-lg bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-xl top-4"
                 variants={tabContainerVariants}
                 initial="hidden"
                 animate={isLoaded ? "visible" : "hidden"}
@@ -356,26 +387,26 @@ const HomePage = () => {
                   <motion.button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`flex items-center px-4 py-2 text-sm font-medium rounded-md capitalize transition-all ${
+                    className={`flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold capitalize transition-all duration-300 ${
                       activeTab === tab
-                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
-                        : "text-slate-600 hover:text-blue-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700/50"
+                        ? "bg-indigo-600 text-white shadow-md"
+                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"
                     }`}
                     variants={tabItemVariants}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
                   >
                     {tab === "trending" && (
-                      <HiOutlineFire className="w-4 h-4 mr-1" />
+                      <HiOutlineFire className="w-5 h-5 mr-2" />
                     )}
                     {tab === "latest" && (
-                      <HiOutlineClock className="w-4 h-4 mr-1" />
+                      <HiOutlineClock className="w-5 h-5 mr-2" />
                     )}
                     {tab === "popular" && (
-                      <HiOutlineStar className="w-4 h-4 mr-1" />
+                      <HiOutlineStar className="w-5 h-5 mr-2" />
                     )}
                     {tab === "following" && (
-                      <HiOutlineBookmark className="w-4 h-4 mr-1" />
+                      <HiOutlineBookmark className="w-5 h-5 mr-2" />
                     )}
                     {tab}
                   </motion.button>
@@ -384,19 +415,23 @@ const HomePage = () => {
 
               {dataLoading ? (
                 <div className="flex items-center justify-center h-64">
-                  <div className="w-12 h-12 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin"></div>
+                  <motion.div
+                    className="w-16 h-16 border-4 border-indigo-600 rounded-full border-t-transparent"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  />
                 </div>
               ) : error ? (
-                <div className="p-4 text-red-700 bg-red-100 border border-red-200 rounded-lg">
+                <div className="p-6 text-red-700 bg-red-100 border border-red-200 rounded-xl">
                   {error}
                 </div>
               ) : posts.length === 0 ? (
-                <div className="p-4 text-gray-600">
+                <div className="p-6 text-gray-600 bg-white shadow-sm dark:text-gray-300 dark:bg-slate-800 rounded-xl">
                   No posts found. Be the first to ask a question!
                 </div>
               ) : (
                 <motion.div
-                  className="space-y-4"
+                  className="space-y-6"
                   variants={cardContainerVariants}
                   initial="hidden"
                   animate={isLoaded ? "visible" : "hidden"}
@@ -404,32 +439,34 @@ const HomePage = () => {
                   {posts.map((post) => (
                     <motion.div
                       key={post.id}
-                      className="overflow-hidden transition-shadow bg-white shadow-sm rounded-xl dark:bg-slate-800 hover:shadow-md"
+                      className="overflow-hidden transition-all duration-300 bg-white border shadow-lg dark:bg-slate-800 rounded-2xl hover:shadow-xl border-slate-100 dark:border-slate-700"
                       variants={cardItemVariants}
-                      whileHover={{ y: -3 }}
+                      whileHover={{ y: -5, boxShadow: "0 12px 40px rgba(0,0,0,0.1)" }}
                     >
-                      <div className="p-5">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center space-x-3">
-                            <div
-                              className={`flex items-center justify-center w-8 h-8 text-sm font-bold text-white rounded-full bg-gradient-to-br ${post.authorColor}`}
+                      <div className="relative p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center space-x-4">
+                            <motion.div
+                              className={`flex items-center justify-center w-10 h-10 text-base font-bold text-white rounded-full bg-gradient-to-br ${post.authorColor}`}
+                              whileHover={{ scale: 1.1, rotate: 10 }}
+                              transition={{ type: "spring", stiffness: 200 }}
                             >
                               {post.authorAvatar}
-                            </div>
+                            </motion.div>
                             <div>
-                              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                              <span className="text-base font-semibold text-slate-800 dark:text-white">
                                 {post.author}
                               </span>
-                              <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">
+                              <span className="ml-2 text-sm text-slate-500 dark:text-slate-400">
                                 {post.timeAgo} ago
                               </span>
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-3">
                             {post.isPinned && (
-                              <span className="flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-400">
+                              <span className="flex items-center px-3 py-1 text-xs font-semibold text-indigo-600 bg-indigo-100 rounded-full dark:bg-indigo-900/30 dark:text-indigo-400">
                                 <svg
-                                  className="w-3 h-3 mr-1"
+                                  className="w-4 h-4 mr-1"
                                   fill="none"
                                   viewBox="0 0 24 24"
                                   stroke="currentColor"
@@ -445,75 +482,89 @@ const HomePage = () => {
                               </span>
                             )}
                             {post.isHot && (
-                              <span className="flex items-center px-2 py-1 text-xs font-medium text-orange-700 bg-orange-100 rounded-full dark:bg-orange-900/30 dark:text-orange-400">
-                                <HiOutlineFire className="w-3 h-3 mr-1" />
+                              <span className="flex items-center px-3 py-1 text-xs font-semibold text-orange-600 bg-orange-100 rounded-full dark:bg-orange-900/30 dark:text-orange-400">
+                                <HiOutlineFire className="w-4 h-4 mr-1" />
                                 Hot
+                              </span>
+                            )}
+                            {savedPosts.has(post.id) && (
+                              <span className="flex items-center px-3 py-1 text-xs font-semibold text-green-600 bg-green-100 rounded-full dark:bg-green-900/30 dark:text-green-400">
+                                <HiOutlineBookmark className="w-4 h-4 mr-1" />
+                                Saved
                               </span>
                             )}
                           </div>
                         </div>
 
                         <Link to={`/forum/question/${post.id}`}>
-                          <h3 className="mb-2 text-lg font-bold text-slate-800 hover:text-blue-600 dark:text-white dark:hover:text-blue-400">
+                          <h3 className="mb-3 text-xl font-bold transition-colors text-slate-800 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400">
                             {post.title}
                           </h3>
                         </Link>
 
-                        <p className="mb-4 text-slate-600 dark:text-slate-300">
+                        <p className="mb-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">
                           {post.content.length > 120
                             ? `${post.content.substring(0, 120)}...`
                             : post.content}
                         </p>
 
-                        <div className="flex flex-wrap gap-2 mb-4">
+                        <div className="flex flex-wrap gap-2 mb-6">
                           {Array.isArray(post.tags) && post.tags.length > 0 ? (
                             post.tags.map((tag, index) => (
                               <Link
                                 key={index}
                                 to={`/forum/tag/${tag}`}
-                                className="flex items-center px-2 py-1 text-xs font-medium transition-colors rounded-md text-slate-600 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+                                className="flex items-center px-3 py-1.5 text-sm font-medium text-slate-600 bg-slate-100 rounded-full hover:bg-indigo-100 hover:text-indigo-700 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-400 transition-colors"
                               >
-                                <HiOutlineTag className="w-3 h-3 mr-1" />
+                                <HiOutlineTag className="w-4 h-4 mr-1" />
                                 {tag}
                               </Link>
                             ))
                           ) : (
-                            <span className="text-xs text-slate-500">
+                            <span className="text-sm text-slate-500">
                               No tags
                             </span>
                           )}
                         </div>
 
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-6">
                             <motion.button
-                              className="flex items-center text-sm text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
+                              className={`flex items-center text-sm font-medium ${
+                                likedPosts.has(post.id)
+                                  ? "text-indigo-600 dark:text-indigo-400"
+                                  : "text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+                              }`}
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
                               onClick={() => handleUpvote(post.id)}
                             >
-                              <HiOutlineThumbUp className="w-4 h-4 mr-1" />
+                              <HiOutlineThumbUp className="w-5 h-5 mr-2" />
                               {post.likes}
                             </motion.button>
                             <Link
                               to={`/forum/question/${post.id}`}
-                              className="flex items-center text-sm text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
+                              className="flex items-center text-sm font-medium text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400"
                             >
-                              <HiOutlineChat className="w-4 h-4 mr-1" />
+                              <HiOutlineChat className="w-5 h-5 mr-2" />
                               {post.comments}
                             </Link>
-                            <span className="flex items-center text-sm text-slate-500 dark:text-slate-400">
-                              <HiOutlineEye className="w-4 h-4 mr-1" />
+                            <span className="flex items-center text-sm font-medium text-slate-500 dark:text-slate-400">
+                              <HiOutlineEye className="w-5 h-5 mr-2" />
                               {post.views}
                             </span>
                           </div>
                           <motion.button
-                            className="text-sm text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
+                            className={`text-sm font-medium ${
+                              savedPosts.has(post.id)
+                                ? "text-green-600 dark:text-green-400"
+                                : "text-slate-500 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400"
+                            }`}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
                             onClick={() => handleSave(post.id)}
                           >
-                            <HiOutlineBookmark className="w-4 h-4" />
+                            <HiOutlineBookmark className="w-5 h-5" />
                           </motion.button>
                         </div>
                       </div>
@@ -522,37 +573,38 @@ const HomePage = () => {
                 </motion.div>
               )}
 
-              <div className="flex justify-center mt-6">
+              <div className="flex justify-center mt-8">
                 <motion.button
-                  className="px-6 py-3 font-medium text-blue-600 transition-colors bg-white border border-blue-200 rounded-lg shadow-sm hover:bg-blue-50 dark:bg-slate-800 dark:text-blue-400 dark:border-slate-700 dark:hover:bg-slate-700"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  className="px-8 py-4 font-semibold text-white transition-all shadow-lg bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl hover:from-indigo-500 hover:to-blue-500"
+                  whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(0,0,0,0.2)" }}
+                  whileTap={{ scale: 0.95 }}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1, transition: { delay: 0.8 } }}
                 >
-                  Load more discussions
+                  Load More Discussions
                 </motion.button>
               </div>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-8">
               <motion.div
-                className="p-5 bg-white shadow-sm rounded-xl dark:bg-slate-800"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
+                className="p-6 bg-white border shadow-lg dark:bg-slate-800 rounded-2xl border-slate-100 dark:border-slate-700"
+                variants={sidebarItemVariants}
+                initial="hidden"
+                animate="visible"
                 transition={{ delay: 0.3 }}
               >
-                <h3 className="mb-4 text-lg font-bold text-slate-800 dark:text-white">
-                  Start a discussion
+                <h3 className="mb-4 text-xl font-bold text-slate-800 dark:text-white">
+                  Start a Discussion
                 </h3>
-                <p className="mb-4 text-sm text-slate-600 dark:text-slate-300">
-                  Have a question or idea to share with the community?
+                <p className="mb-6 text-sm text-slate-600 dark:text-slate-300">
+                  Share your questions or ideas with the community.
                 </p>
                 <Link to="/forum/ask">
                   <motion.button
-                    className="w-full px-4 py-3 font-medium text-white transition-colors rounded-lg shadow-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    className="w-full px-6 py-3 font-semibold text-white transition-all shadow-md bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl hover:from-indigo-500 hover:to-blue-500"
+                    whileHover={{ scale: 1.03, boxShadow: "0 8px 25px rgba(0,0,0,0.2)" }}
+                    whileTap={{ scale: 0.97 }}
                   >
                     Create New Post
                   </motion.button>
@@ -560,23 +612,24 @@ const HomePage = () => {
               </motion.div>
 
               <motion.div
-                className="p-5 bg-white shadow-sm rounded-xl dark:bg-slate-800"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
+                className="p-6 bg-white border shadow-lg dark:bg-slate-800 rounded-2xl border-slate-100 dark:border-slate-700"
+                variants={sidebarItemVariants}
+                initial="hidden"
+                animate="visible"
                 transition={{ delay: 0.4 }}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-white">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-slate-800 dark:text-white">
                     Community Spotlight
                   </h3>
                   <Link
                     to="/community"
-                    className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                    className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
                   >
-                    View all
+                    View All
                   </Link>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {communitySpotlight.length === 0 ? (
                     <p className="text-sm text-slate-600 dark:text-slate-300">
                       No communities available.
@@ -585,32 +638,33 @@ const HomePage = () => {
                     communitySpotlight.map((community) => (
                       <motion.div
                         key={community.id}
-                        className="p-3 transition-colors bg-white border rounded-lg shadow-sm border-slate-100 hover:border-blue-200 dark:bg-slate-800 dark:border-slate-700 dark:hover:border-blue-900"
-                        whileHover={{ y: -2 }}
+                        className="p-4 transition-all bg-white border dark:bg-slate-900 rounded-xl border-slate-100 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-900"
+                        whileHover={{ y: -3, boxShadow: "0 8px 20px rgba(0,0,0,0.1)" }}
                       >
-                        <div className="flex items-center space-x-3">
-                          <div
-                            className={`flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br ${community.color}`}
+                        <div className="flex items-center space-x-4">
+                          <motion.div
+                            className={`flex items-center justify-center w-12 h-12 rounded-lg bg-gradient-to-br ${community.color}`}
+                            whileHover={{ scale: 1.1, rotate: 5 }}
                           >
-                            <span className="text-lg">{community.icon}</span>
-                          </div>
+                            <span className="text-xl">{community.icon}</span>
+                          </motion.div>
                           <div className="flex-1">
-                            <h4 className="font-medium text-slate-800 dark:text-white">
+                            <h4 className="font-semibold text-slate-800 dark:text-white">
                               {community.name}
                             </h4>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
                               {community.members.toLocaleString()} members
                             </p>
                           </div>
                           <motion.button
-                            className="p-1 text-slate-400 hover:text-blue-600 dark:text-slate-500 dark:hover:text-blue-400"
-                            whileHover={{ scale: 1.1 }}
+                            className="p-2 text-slate-400 hover:text-indigo-600 dark:text-slate-500 dark:hover:text-indigo-400"
+                            whileHover={{ scale: 1.2, rotate: 10 }}
                             whileTap={{ scale: 0.9 }}
                           >
-                            <HiChevronRight className="w-5 h-5" />
+                            <HiChevronRight className="w-6 h-6" />
                           </motion.button>
                         </div>
-                        <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">
+                        <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
                           {community.description}
                         </p>
                       </motion.div>
@@ -620,15 +674,16 @@ const HomePage = () => {
               </motion.div>
 
               <motion.div
-                className="p-5 bg-white shadow-sm rounded-xl dark:bg-slate-800"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
+                className="p-6 bg-white border shadow-lg dark:bg-slate-800 rounded-2xl border-slate-100 dark:border-slate-700"
+                variants={sidebarItemVariants}
+                initial="hidden"
+                animate="visible"
                 transition={{ delay: 0.5 }}
               >
-                <h3 className="mb-4 text-lg font-bold text-slate-800 dark:text-white">
+                <h3 className="mb-4 text-xl font-bold text-slate-800 dark:text-white">
                   Trending Topics
                 </h3>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-3">
                   {trendingTags.length === 0 ? (
                     <p className="text-sm text-slate-600 dark:text-slate-300">
                       No trending topics available.
@@ -638,7 +693,7 @@ const HomePage = () => {
                       <Link
                         key={index}
                         to={`/forum/tag/${tag}`}
-                        className="px-3 py-1 text-sm font-medium transition-colors rounded-full text-slate-700 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-blue-900/40 dark:hover:text-blue-400"
+                        className="px-4 py-2 text-sm font-semibold transition-all rounded-full text-slate-700 bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-400"
                       >
                         #{tag}
                       </Link>
@@ -648,80 +703,87 @@ const HomePage = () => {
               </motion.div>
 
               <motion.div
-                className="p-5 bg-white shadow-sm rounded-xl dark:bg-slate-800"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
+                className="p-6 bg-white border shadow-lg dark:bg-slate-800 rounded-2xl border-slate-100 dark:border-slate-700"
+                variants={sidebarItemVariants}
+                initial="hidden"
+                animate="visible"
                 transition={{ delay: 0.6 }}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-white">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-slate-800 dark:text-white">
                     Upcoming Events
                   </h3>
                   <Link
                     to="/events"
-                    className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                    className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
                   >
-                    View all
+                    View All
                   </Link>
                 </div>
                 <div className="space-y-4">
-                  <div className="p-4 rounded-lg bg-gradient-to-r from-indigo-100 to-blue-100 dark:from-indigo-900/30 dark:to-blue-900/30">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="px-2 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-full dark:text-purple-400 dark:bg-purple-900/30">
+                  <motion.div
+                    className="p-5 rounded-xl bg-gradient-to-r from-indigo-100 to-blue-100 dark:from-indigo-900/40 dark:to-blue-900/40"
+                    whileHover={{ y: -3, boxShadow: "0 8px 20px rgba(0,0,0,0.1)" }}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="px-3 py-1 text-xs font-semibold text-purple-700 bg-purple-100 rounded-full dark:text-purple-400 dark:bg-purple-900/40">
                         VIRTUAL
                       </span>
-                      <span className="text-xs text-slate-600 dark:text-slate-400">
+                      <span className="text-sm text-slate-600 dark:text-slate-400">
                         Apr 20, 2025
                       </span>
                     </div>
-                    <h4 className="mb-1 font-medium text-slate-800 dark:text-white">
+                    <h4 className="mb-2 font-semibold text-slate-800 dark:text-white">
                       Advanced React Patterns Workshop
                     </h4>
-                    <p className="mb-3 text-xs text-slate-600 dark:text-slate-300">
+                    <p className="mb-4 text-sm text-slate-600 dark:text-slate-300">
                       Learn component composition, render props, and more
                     </p>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                      <span className="text-sm text-slate-500 dark:text-slate-400">
                         120 attending
                       </span>
                       <motion.button
-                        className="px-3 py-1 text-xs font-medium text-blue-700 rounded-lg bg-blue-50 hover:bg-blue-100 dark:text-blue-400 dark:bg-blue-900/20 dark:hover:bg-blue-900/40"
+                        className="px-4 py-2 text-sm font-semibold text-indigo-700 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:text-indigo-400 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
                         RSVP
                       </motion.button>
                     </div>
-                  </div>
+                  </motion.div>
 
-                  <div className="p-4 rounded-lg bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="px-2 py-1 text-xs font-medium text-orange-700 bg-orange-100 rounded-full dark:text-orange-400 dark:bg-orange-900/30">
+                  <motion.div
+                    className="p-5 rounded-xl bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40"
+                    whileHover={{ y: -3, boxShadow: "0 8px 20px rgba(0,0,0,0.1)" }}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="px-3 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full dark:text-orange-400 dark:bg-orange-900/40">
                         IN-PERSON
                       </span>
-                      <span className="text-xs text-slate-600 dark:text-slate-400">
+                      <span className="text-sm text-slate-600 dark:text-slate-400">
                         May 5, 2025
                       </span>
                     </div>
-                    <h4 className="mb-1 font-medium text-slate-800 dark:text-white">
+                    <h4 className="mb-2 font-semibold text-slate-800 dark:text-white">
                       Nexora Community Meetup
                     </h4>
-                    <p className="mb-3 text-xs text-slate-600 dark:text-slate-300">
+                    <p className="mb-4 text-sm text-slate-600 dark:text-slate-300">
                       Join us for networking, talks, and code sessions
                     </p>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                      <span className="text-sm text-slate-500 dark:text-slate-400">
                         72 attending
                       </span>
                       <motion.button
-                        className="px-3 py-1 text-xs font-medium text-orange-700 rounded-lg bg-orange-50 hover:bg-orange-100 dark:text-orange-400 dark:bg-orange-900/20 dark:hover:bg-orange-900/40"
+                        className="px-4 py-2 text-sm font-semibold text-orange-700 rounded-lg bg-orange-50 hover:bg-orange-100 dark:text-orange-400 dark:bg-orange-900/20 dark:hover:bg-orange-900/40"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
                         RSVP
                       </motion.button>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
               </motion.div>
             </div>
@@ -729,19 +791,19 @@ const HomePage = () => {
         </main>
 
         <motion.div
-          className="fixed z-20 right-6 bottom-6 md:hidden"
-          initial={{ opacity: 0, scale: 0.8 }}
+          className="fixed z-30 right-6 bottom-6 md:hidden"
+          initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 1, type: "spring" }}
+          transition={{ delay: 1.2, type: "spring", stiffness: 200 }}
         >
           <Link to="/forum/ask">
             <motion.button
-              className="flex items-center justify-center text-white rounded-full shadow-lg w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600"
-              whileHover={{ scale: 1.1 }}
+              className="flex items-center justify-center w-16 h-16 text-white rounded-full shadow-xl bg-gradient-to-r from-indigo-600 to-blue-600"
+              whileHover={{ scale: 1.15, rotate: 90 }}
               whileTap={{ scale: 0.9 }}
             >
               <svg
-                className="w-6 h-6"
+                className="w-8 h-8"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
