@@ -452,5 +452,7 @@ const SavedQuestions = () => {
     </ErrorBoundary>
   );
 };
+};
 
 export default SavedQuestions;
+

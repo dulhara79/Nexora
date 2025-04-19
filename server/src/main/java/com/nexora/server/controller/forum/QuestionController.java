@@ -33,7 +33,10 @@ public class QuestionController {
         String userId = (String) session.getAttribute("userId");
         System.out.println("..............session will print below...............");
         System.out.println("session: " + session);
+        System.out.println("..............session will print below...............");
+        System.out.println("session: " + session);
         System.out.println("User ID from session: " + userId);
+        System.out.println("Request body: " + question); // Log request body
         System.out.println("Request body: " + question); // Log request body
         if (userId == null) {
             return ResponseEntity.status(401).body("Unauthorized");
@@ -42,6 +45,7 @@ public class QuestionController {
             Question createdQuestion = questionService.createQuestion(question, userId);
             return ResponseEntity.ok(createdQuestion);
         } catch (Exception e) {
+            System.err.println("Error creating question: " + e.getMessage()); // Log error
             System.err.println("Error creating question: " + e.getMessage()); // Log error
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -179,6 +183,30 @@ public class QuestionController {
         try {
             questionService.unsaveQuestion(id, userId);
             return ResponseEntity.ok("Question unsaved");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/view")
+    public ResponseEntity<?> incrementQuestionViews(@PathVariable String id) {
+        try {
+            Question question = questionService.incrementViews(id);
+            return ResponseEntity.ok(question);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/pin")
+    public ResponseEntity<?> togglePinQuestion(@PathVariable String id, HttpSession session) {
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+        try {
+            Question question = questionService.togglePinQuestion(id, userId);
+            return ResponseEntity.ok(question);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
