@@ -12,12 +12,57 @@ const CreatePost = () => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const selectedFiles = Array.from(e.target.files);
+    
+    // Check if more than 3 files are selected
     if (selectedFiles.length > 3) {
       setError("Cannot upload more than 3 files.");
+      setFiles([]);
       return;
     }
+
+    // Check if all files are of the same type (all photos or all videos)
+    const isVideo = selectedFiles[0]?.type.startsWith("video");
+    const hasMixedTypes = selectedFiles.some(file => file.type.startsWith("video") !== isVideo);
+    if (hasMixedTypes) {
+      setError("You can upload either photos or videos, but not both in the same post.");
+      setFiles([]);
+      return;
+    }
+
+    // If videos, check duration (max 30 seconds)
+    if (isVideo) {
+      try {
+        const durationChecks = await Promise.all(
+          selectedFiles.map(file => 
+            new Promise((resolve) => {
+              const video = document.createElement("video");
+              video.preload = "metadata";
+              video.onloadedmetadata = () => {
+                window.URL.revokeObjectURL(video.src);
+                resolve(video.duration <= 30);
+              };
+              video.onerror = () => {
+                resolve(false); // If metadata can't be loaded, reject the file
+              };
+              video.src = window.URL.createObjectURL(file);
+            })
+          )
+        );
+
+        if (durationChecks.some(check => !check)) {
+          setError("All videos must be 30 seconds or shorter.");
+          setFiles([]);
+          return;
+        }
+      } catch (err) {
+        setError("Error checking video duration.");
+        setFiles([]);
+        return;
+      }
+    }
+
     setFiles(selectedFiles);
     setError(null);
   };
