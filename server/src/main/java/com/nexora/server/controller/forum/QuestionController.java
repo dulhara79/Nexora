@@ -211,28 +211,4 @@ public class QuestionController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-    @PostMapping("/{id}/view")
-    public ResponseEntity<?> incrementQuestionViews(@PathVariable String id) {
-        try {
-            Question question = questionService.incrementViews(id);
-            return ResponseEntity.ok(question);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @PostMapping("/{id}/pin")
-    public ResponseEntity<?> togglePinQuestion(@PathVariable String id, HttpSession session) {
-        String userId = (String) session.getAttribute("userId");
-        if (userId == null) {
-            return ResponseEntity.status(401).body("Unauthorized");
-        }
-        try {
-            Question question = questionService.togglePinQuestion(id, userId);
-            return ResponseEntity.ok(question);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
 }
