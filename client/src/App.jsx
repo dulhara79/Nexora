@@ -29,6 +29,7 @@ import ForumHomePage from "./pages/Forum/ForumHomePage";
 import QuestionDetailPage from "./pages/Forum/QuestionDetailPage";
 import AskQuestionPage from "./pages/Forum/AskQuestionPage";
 import SavedQuestions from "./pages/Forum/SavedQuestions";
+import TagPage from "./pages/Forum/TagPage";
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
           <Route path="/forum/ask" element={<AskQuestionPage />} />
           <Route path="/forum/edit/:id" element={<AskQuestionPage />} />
           <Route path="/forum/saved" element={<SavedQuestions />} />
+          <Route path="/forum/tags/:tag" element={<TagPage />} />
 
           {/* 404 Page */}
           <Route path="/*" element={<PageNotFound />} />
