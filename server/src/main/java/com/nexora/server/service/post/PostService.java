@@ -1,6 +1,5 @@
 package com.nexora.server.service.post;
 
-import com.nexora.server.model.User;
 import com.nexora.server.model.post.Notification;
 import com.nexora.server.model.post.Post;
 import com.nexora.server.repository.post.NotificationRepository;
@@ -48,14 +47,41 @@ public class PostService {
         post.setUserName(user.getName());
 
         if (files != null && !files.isEmpty()) {
+            // Limit to 3 files
+            if (files.size() > 3) {
+                throw new IllegalArgumentException("A post can contain a maximum of 3 photos or videos.");
+            }
+
+            // Check if all files are of the same type (all images or all videos)
+            boolean isVideo = files.get(0).getContentType().startsWith("video");
+            for (MultipartFile file : files) {
+                boolean currentIsVideo = file.getContentType().startsWith("video");
+                if (currentIsVideo != isVideo) {
+                    throw new IllegalArgumentException("A post can contain either photos or videos, but not both.");
+                }
+            }
+
             List<Post.Media> mediaList = new ArrayList<>();
             for (MultipartFile file : files) {
                 try {
                     // Upload to Cloudinary
                     Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), Map.of("resource_type", "auto"));
                     System.out.println("Cloudinary Upload Result: " + uploadResult);
+
+                    // Check video duration if it's a video
+                    if (isVideo) {
+                        Object durationObj = uploadResult.get("duration");
+                        if (durationObj == null) {
+                            throw new IllegalArgumentException("Unable to determine video duration.");
+                        }
+                        double duration = Double.parseDouble(durationObj.toString());
+                        if (duration > 30) {
+                            throw new IllegalArgumentException("Videos must be 30 seconds or less.");
+                        }
+                    }
+
                     String fileUrl = uploadResult.get("url").toString();
-                    String fileType = uploadResult.get("resource_type").equals("video") ? "video/mp4" : file.getContentType();
+                    String fileType = isVideo ? "video/mp4" : file.getContentType();
 
                     Post.Media media = new Post.Media();
                     media.setFileName(file.getOriginalFilename());
@@ -65,7 +91,7 @@ public class PostService {
                     mediaList.add(media);
                 } catch (Exception e) {
                     System.err.println("Error uploading file to Cloudinary: " + e.getMessage());
-                    throw new RuntimeException("Failed to upload media to Cloudinary", e);
+                    throw new RuntimeException("Failed to upload media to Cloudinary: " + e.getMessage(), e);
                 }
             }
             post.setMedia(mediaList);
@@ -88,9 +114,6 @@ public class PostService {
             }
             System.out.println("Post Media: " + post.getMedia());
         }
-        System.out.println("@.........posts.........");
-        System.out.println("All Posts: " + posts);
-        System.out.println("Total Posts: " + posts.size());
         return posts;
     }
 
@@ -118,13 +141,9 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
         Post.Comment comment = new Post.Comment();
         comment.setId(UUID.randomUUID().toString());
         comment.setUserId(userId);
-        comment.setName(user.getName());
         comment.setText(commentText);
         comment.setCreatedAt(LocalDateTime.now());
 
@@ -134,7 +153,6 @@ public class PostService {
             Notification notification = new Notification();
             notification.setId(UUID.randomUUID().toString());
             notification.setUserId(post.getUserId());
-            notification.setName(user.getName());
             notification.setMessage(userId + " commented on your post");
             notification.setCreatedAt(LocalDateTime.now());
             notificationRepository.save(notification);
