@@ -1,8 +1,11 @@
-package com.nexora.server.controller;
+package com.nexora.server.controller.forum;
 
-import com.nexora.server.model.Question;
-import com.nexora.server.repository.QuestionRepository;
-import com.nexora.server.service.QuestionService;
+// import com.nexora.server.model.User;
+import com.nexora.server.model.forum.ForumQuestion;
+import com.nexora.server.repository.forum.ForumQuestionRepository;
+// import com.nexora.server.service.UserService;
+import com.nexora.server.service.forum.ForumQuestionService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,38 +17,49 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/questions")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
-public class QuestionController {
+public class ForumQuestionController {
 
     @Autowired
-    private QuestionService questionService;
+    private ForumQuestionService questionService;
 
     @Autowired
-    private QuestionRepository questionRepository;
+    private ForumQuestionRepository questionRepository;
+
+    // @Autowired
+    // private UserService userService;
 
     @PostMapping("/add")
-    public ResponseEntity<?> createQuestion(@RequestBody Question question, HttpSession session) {
+    public ResponseEntity<?> createQuestion(@RequestBody ForumQuestion question, HttpSession session) {
         String userId = (String) session.getAttribute("userId");
+        System.out.println("..............session will print below...............");
+        System.out.println("session: " + session);
+        System.out.println("..............session will print below...............");
+        System.out.println("session: " + session);
         System.out.println("User ID from session: " + userId);
+        System.out.println("Request body: " + question); // Log request body
+        System.out.println("Request body: " + question); // Log request body
         if (userId == null) {
             return ResponseEntity.status(401).body("Unauthorized");
         }
         try {
-            Question createdQuestion = questionService.createQuestion(question, userId);
+            ForumQuestion createdQuestion = questionService.createQuestion(question, userId);
             return ResponseEntity.ok(createdQuestion);
         } catch (Exception e) {
+            System.err.println("Error creating question: " + e.getMessage()); // Log error
+            System.err.println("Error creating question: " + e.getMessage()); // Log error
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateQuestion(@PathVariable String id, @RequestBody Question question,
+    public ResponseEntity<?> updateQuestion(@PathVariable String id, @RequestBody ForumQuestion question,
             HttpSession session) {
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
             return ResponseEntity.status(401).body("Unauthorized");
         }
         try {
-            Question updatedQuestion = questionService.updateQuestion(id, question, userId);
+            ForumQuestion updatedQuestion = questionService.updateQuestion(id, question, userId);
             return ResponseEntity.ok(updatedQuestion);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -67,7 +81,7 @@ public class QuestionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Question>> getQuestions(
+    public ResponseEntity<List<ForumQuestion>> getQuestions(
             @RequestParam(required = false) String tag,
             @RequestParam(required = false) String search,
             @RequestParam(required = false, defaultValue = "newest") String sortBy) {
@@ -80,7 +94,7 @@ public class QuestionController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getQuestion(@PathVariable String id) {
         try {
-            Optional<Question> question = questionRepository.findById(id);
+            Optional<ForumQuestion> question = questionRepository.findById(id);
             if (question.isPresent()) {
                 return ResponseEntity.ok(question.get());
             }
@@ -97,7 +111,7 @@ public class QuestionController {
             return ResponseEntity.status(401).body("Unauthorized");
         }
         try {
-            Question question = questionService.upvoteQuestion(id, userId);
+            ForumQuestion question = questionService.upvoteQuestion(id, userId);
             return ResponseEntity.ok(question);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -111,7 +125,7 @@ public class QuestionController {
             return ResponseEntity.status(401).body("Unauthorized");
         }
         try {
-            Question question = questionService.downvoteQuestion(id, userId);
+            ForumQuestion question = questionService.downvoteQuestion(id, userId);
             return ResponseEntity.ok(question);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -153,7 +167,7 @@ public class QuestionController {
             return ResponseEntity.status(401).body("Unauthorized");
         }
         try {
-            List<Question> savedQuestions = questionService.getSavedQuestions(userId);
+            List<ForumQuestion> savedQuestions = questionService.getSavedQuestions(userId);
             return ResponseEntity.ok(savedQuestions);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -169,6 +183,30 @@ public class QuestionController {
         try {
             questionService.unsaveQuestion(id, userId);
             return ResponseEntity.ok("Question unsaved");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/view")
+    public ResponseEntity<?> incrementQuestionViews(@PathVariable String id) {
+        try {
+            ForumQuestion question = questionService.incrementViews(id);
+            return ResponseEntity.ok(question);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/pin")
+    public ResponseEntity<?> togglePinQuestion(@PathVariable String id, HttpSession session) {
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+        try {
+            ForumQuestion question = questionService.togglePinQuestion(id, userId);
+            return ResponseEntity.ok(question);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

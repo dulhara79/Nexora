@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useState, useEffect} from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Authentication
@@ -24,15 +24,24 @@ import ProgressPage from "./pages/LearningPlanPage/ProgressPage";
 import PlanPage from "./pages/LearningPlanPage/PlanPage";
 
 // Forum Pages
+import ForumDashBoard from "./pages/Forum/ForumDashBoard";
 import ForumHomePage from "./pages/Forum/ForumHomePage";
 import QuestionDetailPage from "./pages/Forum/QuestionDetailPage";
 import AskQuestionPage from "./pages/Forum/AskQuestionPage";
 import SavedQuestions from "./pages/Forum/SavedQuestions";
+import TagPage from "./pages/Forum/TagPage";
+
+import Navbar from "./components/post/Navbar";
+import Home from "./pages/post/Home";
+import CreatePost from "./pages/post/CreatePost";
+import Notifications from "./pages/post/Notifications";
 
 function App() {
+  
   return (
     <AuthProvider>
       <Router>
+    
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
@@ -52,11 +61,17 @@ function App() {
           <Route path="/progress/:cuisineName" element={<ProgressPage />} />
 
           {/* Forum Routes */}
+          <Route path="/forum/home" element={<ForumDashBoard />} />
           <Route path="/forum" element={<ForumHomePage />} />
           <Route path="/forum/question/:id" element={<QuestionDetailPage />} />
           <Route path="/forum/ask" element={<AskQuestionPage />} />
           <Route path="/forum/edit/:id" element={<AskQuestionPage />} />
           <Route path="/forum/saved" element={<SavedQuestions />} />
+          <Route path="/forum/tags/:tag" element={<TagPage />} />
+
+          <Route path="/post" element={<Home />} />
+          <Route path="/create-post" element={<CreatePost />} />
+          <Route path="/post-notifications" element={<Notifications  />} />
 
           {/* 404 Page */}
           <Route path="/*" element={<PageNotFound />} />

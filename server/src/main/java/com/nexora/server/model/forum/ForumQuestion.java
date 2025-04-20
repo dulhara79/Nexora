@@ -1,4 +1,4 @@
-package com.nexora.server.model;
+package com.nexora.server.model.forum;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -6,21 +6,24 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Document(collection = "questions")
-public class Question {
+public class ForumQuestion {
     @Id
     private String id;
     private String title;
     private String description;
     private String authorId;
-    private List<String> tags; // Now stores tag names directly
+    private String authorUsername; // Add username field
+    private List<String> tags;
     private List<String> upvoteUserIds;
     private List<String> downvoteUserIds;
     private List<String> commentIds;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private boolean isFlagged;
-
-    // Getters and setters (unchanged)
+    private int views;
+    private boolean isPinned;
+   
+    // Getters and Setters
     public String getId() {
         return id;
     }
@@ -51,6 +54,14 @@ public class Question {
 
     public void setAuthorId(String authorId) {
         this.authorId = authorId;
+    }
+
+    public String getAuthorUsername() {
+        return authorUsername;
+    }
+
+    public void setAuthorUsername(String authorUsername) {
+        this.authorUsername = authorUsername;
     }
 
     public List<String> getTags() {
@@ -106,6 +117,22 @@ public class Question {
     }
 
     public void setFlagged(boolean flagged) {
-        isFlagged = flagged;
+        this.isFlagged = flagged;
+    }
+
+    public int getViews() {
+        return views;
+    }
+
+    public void setViews(int views) {
+        this.views = views;
+    }
+
+    public boolean isPinned() {
+        return isPinned;
+    }
+
+    public void setPinned(boolean pinned) {
+        this.isPinned = pinned;
     }
 }

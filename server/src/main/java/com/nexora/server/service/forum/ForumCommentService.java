@@ -1,14 +1,16 @@
-package com.nexora.server.service;
+package com.nexora.server.service.forum;
 
-import com.nexora.server.model.Comment;
-import com.nexora.server.model.Notification;
-import com.nexora.server.model.Question;
 import com.nexora.server.model.Role;
 import com.nexora.server.model.User;
-import com.nexora.server.repository.CommentRepository;
-import com.nexora.server.repository.NotificationRepository;
-import com.nexora.server.repository.QuestionRepository;
+import com.nexora.server.model.forum.ForumComment;
+import com.nexora.server.model.forum.ForumNotification;
+import com.nexora.server.model.forum.ForumQuestion;
 import com.nexora.server.repository.UserRepository;
+import com.nexora.server.repository.forum.ForumCommentRepository;
+import com.nexora.server.repository.forum.ForumNotificationRepository;
+import com.nexora.server.repository.forum.ForumQuestionRepository;
+import com.nexora.server.service.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,48 +20,54 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 @Service
-public class CommentService {
-    private static final Logger LOGGER = Logger.getLogger(CommentService.class.getName());
+public class ForumCommentService {
+    private static final Logger LOGGER = Logger.getLogger(ForumCommentService.class.getName());
 
     @Autowired
-    private CommentRepository commentRepository;
+    private ForumCommentRepository commentRepository;
 
     @Autowired
-    private QuestionRepository questionRepository;
+    private ForumQuestionRepository questionRepository;
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
-    private NotificationRepository notificationRepository;
+    private ForumNotificationRepository notificationRepository;
 
-    public Comment createComment(Comment comment, String userId) throws Exception {
+    @Autowired
+    private UserService userService;
+
+    public ForumComment createComment(ForumComment comment, String userId) throws Exception {
         Optional<User> userOptional = userRepository.findById(userId);
         if (!userOptional.isPresent()) {
             throw new Exception("User not found");
         }
 
-        Optional<Question> questionOptional = questionRepository.findById(comment.getQuestionId());
+        User user = userService.getUserById(userId);
+
+        Optional<ForumQuestion> questionOptional = questionRepository.findById(comment.getQuestionId());
         if (!questionOptional.isPresent()) {
             throw new Exception("Question not found");
         }
 
         // Validate parent comment if it exists
         if (comment.getParentCommentId() != null) {
-            Optional<Comment> parentCommentOptional = commentRepository.findById(comment.getParentCommentId());
+            Optional<ForumComment> parentCommentOptional = commentRepository.findById(comment.getParentCommentId());
             if (!parentCommentOptional.isPresent()) {
                 throw new Exception("Parent comment not found");
             }
         }
 
         comment.setAuthorId(userId);
-        Comment savedComment = commentRepository.save(comment);
+        comment.setAuthorName(user.getName()); // Optional: can be fetched from User service
+        ForumComment savedComment = commentRepository.save(comment);
         LOGGER.info("Comment created with ID: " + savedComment.getId());
 
         // Notify question author
-        Question question = questionOptional.get();
+        ForumQuestion question = questionOptional.get();
         if (!question.getAuthorId().equals(userId)) {
-            Notification notification = new Notification();
+            ForumNotification notification = new ForumNotification();
             notification.setUserId(question.getAuthorId());
             notification.setMessage("User commented on your question: " + question.getTitle());
             notification.setRelatedQuestionId(question.getId());
@@ -70,13 +78,13 @@ public class CommentService {
         return savedComment;
     }
 
-    public Comment updateComment(String commentId, Comment updatedComment, String userId) throws Exception {
-        Optional<Comment> commentOptional = commentRepository.findById(commentId);
+    public ForumComment updateComment(String commentId, ForumComment updatedComment, String userId) throws Exception {
+        Optional<ForumComment> commentOptional = commentRepository.findById(commentId);
         if (!commentOptional.isPresent()) {
             throw new Exception("Comment not found");
         }
 
-        Comment comment = commentOptional.get();
+        ForumComment comment = commentOptional.get();
         if (!comment.getAuthorId().equals(userId) && !isAdminOrModerator(userId)) {
             throw new Exception("Unauthorized to edit this comment");
         }
@@ -92,12 +100,12 @@ public class CommentService {
     }
 
     public void deleteComment(String commentId, String userId) throws Exception {
-        Optional<Comment> commentOptional = commentRepository.findById(commentId);
+        Optional<ForumComment> commentOptional = commentRepository.findById(commentId);
         if (!commentOptional.isPresent()) {
             throw new Exception("Comment not found");
         }
 
-        Comment comment = commentOptional.get();
+        ForumComment comment = commentOptional.get();
         if (!comment.getAuthorId().equals(userId) && !isAdminOrModerator(userId)) {
             throw new Exception("Unauthorized to delete this comment");
         }
@@ -111,17 +119,17 @@ public class CommentService {
         LOGGER.info("Comment deleted with ID: " + commentId);
     }
 
-    public List<Comment> getCommentsByQuestionId(String questionId) {
+    public List<ForumComment> getCommentsByQuestionId(String questionId) {
         return commentRepository.findByQuestionId(questionId);
     }
 
-    public Comment upvoteComment(String commentId, String userId) throws Exception {
-        Optional<Comment> commentOptional = commentRepository.findById(commentId);
+    public ForumComment upvoteComment(String commentId, String userId) throws Exception {
+        Optional<ForumComment> commentOptional = commentRepository.findById(commentId);
         if (!commentOptional.isPresent()) {
             throw new Exception("Comment not found");
         }
 
-        Comment comment = commentOptional.get();
+        ForumComment comment = commentOptional.get();
         if (comment.getUpvoteUserIds().contains(userId)) {
             comment.getUpvoteUserIds().remove(userId);
         } else {
@@ -132,13 +140,13 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    public Comment downvoteComment(String commentId, String userId) throws Exception {
-        Optional<Comment> commentOptional = commentRepository.findById(commentId);
+    public ForumComment downvoteComment(String commentId, String userId) throws Exception {
+        Optional<ForumComment> commentOptional = commentRepository.findById(commentId);
         if (!commentOptional.isPresent()) {
             throw new Exception("Comment not found");
         }
 
-        Comment comment = commentOptional.get();
+        ForumComment comment = commentOptional.get();
         if (comment.getDownvoteUserIds().contains(userId)) {
             comment.getDownvoteUserIds().remove(userId);
         } else {
@@ -150,12 +158,12 @@ public class CommentService {
     }
 
     public void flagComment(String commentId, String userId) throws Exception {
-        Optional<Comment> commentOptional = commentRepository.findById(commentId);
+        Optional<ForumComment> commentOptional = commentRepository.findById(commentId);
         if (!commentOptional.isPresent()) {
             throw new Exception("Comment not found");
         }
 
-        Comment comment = commentOptional.get();
+        ForumComment comment = commentOptional.get();
         comment.setFlagged(true);
         commentRepository.save(comment);
         LOGGER.info("Comment flagged with ID: " + commentId);

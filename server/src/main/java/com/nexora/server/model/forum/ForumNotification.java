@@ -1,4 +1,4 @@
-package com.nexora.server.model;
+package com.nexora.server.model.forum;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Document(collection = "forum_notifications")
-public class Notification {
+public class ForumNotification {
     @Id
     private String id;
 

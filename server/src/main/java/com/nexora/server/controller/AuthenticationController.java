@@ -50,6 +50,7 @@ public class AuthenticationController {
     try {
       User user = authenticationService.verifyLoginOtp(email, otp);
       session.setAttribute("userId", user.getId());
+      session.setAttribute("name", user.getName());
       LOGGER.info("Session set with userId: " + user.getId());
       return ResponseEntity.ok(new UserResponse(user.getId(), user.getEmail(), user.getName()));
     } catch (Exception e) {

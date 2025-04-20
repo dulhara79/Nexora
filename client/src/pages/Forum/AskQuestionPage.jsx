@@ -2,28 +2,30 @@ import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AuthContext } from "../../context/AuthContext";
+import axios from "axios";
 
 const AskQuestionPage = () => {
   const { id } = useParams(); // For edit mode
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [description, setDescription] = useState(""); // Changed from content to description
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [isEditMode, setIsEditMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [fetchError, setFetchError] = useState(null);
 
   useEffect(() => {
-    // Check if user is logged in
     if (!user) {
-      navigate("/login", { state: { from: "/forum/ask" } });
+      navigate("/login", {
+        state: { from: `/forum/ask${id ? `/${id}` : ""}` },
+      });
       return;
     }
 
-    // If id exists, we're in edit mode
     if (id) {
       setIsEditMode(true);
       fetchQuestionData(id);
@@ -33,27 +35,32 @@ const AskQuestionPage = () => {
   const fetchQuestionData = async (questionId) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/questions/${questionId}`, {
-        credentials: "include",
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/questions/${questionId}`,
+        {
+          credentials: "include",
+        }
+      );
 
       if (!response.ok) {
-        throw new Error("Question not found");
+        throw new Error("Question not found or unauthorized");
       }
 
       const questionData = await response.json();
 
       // Check if current user is the author
-      if (questionData.author?.id !== user.id) {
+      if (questionData.authorId !== user.id) {
+        setFetchError("You are not authorized to edit this question");
         navigate("/forum");
         return;
       }
 
-      setTitle(questionData.title);
-      setContent(questionData.content);
+      setTitle(questionData.title || "");
+      setDescription(questionData.description || "");
       setTags(questionData.tags || []);
     } catch (error) {
       console.error("Error fetching question:", error);
+      setFetchError(error.message || "Failed to load question");
     } finally {
       setIsLoading(false);
     }
@@ -68,10 +75,10 @@ const AskQuestionPage = () => {
       newErrors.title = "Title must be at least 10 characters";
     }
 
-    if (!content.trim()) {
-      newErrors.content = "Content is required";
-    } else if (content.length < 30) {
-      newErrors.content = "Content must be at least 30 characters";
+    if (!description.trim()) {
+      newErrors.description = "Description is required";
+    } else if (description.length < 30) {
+      newErrors.description = "Description must be at least 30 characters";
     }
 
     if (tags.length === 0) {
@@ -93,13 +100,14 @@ const AskQuestionPage = () => {
 
     const questionData = {
       title,
-      content,
+      description,
       tags,
     };
 
     try {
-      const url = isEditMode ? `http://localhost:5000/api/questions/${id}` : "http://localhost:5000/api/questions/add";
-
+      const url = isEditMode
+        ? `http://localhost:5000/api/questions/${id}`
+        : "http://localhost:5000/api/questions/add";
       const method = isEditMode ? "PUT" : "POST";
 
       const response = await fetch(url, {
@@ -111,14 +119,20 @@ const AskQuestionPage = () => {
         body: JSON.stringify(questionData),
       });
 
+      console.log("questionData:", questionData); // Debugging line
+    
       if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(errorData || "Failed to save question");
+        let errorMessage = "Failed to save question";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData || errorData.error || errorMessage;
+        } catch (jsonError) {
+          errorMessage = await response.text() || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
-
+    
       const savedQuestion = await response.json();
-
-      // Redirect to the question page
       navigate(`/forum/question/${savedQuestion.id}`);
     } catch (error) {
       console.error("Error saving question:", error);
@@ -144,7 +158,6 @@ const AskQuestionPage = () => {
   };
 
   const handleTagInputKeyDown = (e) => {
-    // Add tag on Enter or comma
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
       addTag();
@@ -159,13 +172,22 @@ const AskQuestionPage = () => {
     );
   }
 
+  if (fetchError) {
+    return (
+      <div className="max-w-4xl p-4 mx-auto md:p-6">
+        <div className="p-4 text-red-700 bg-red-100 border border-red-200 rounded-lg">
+          {fetchError}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="max-w-4xl p-4 mx-auto md:p-6"
     >
-      {/* Breadcrumb navigation */}
       <div className="flex items-center mb-6 text-sm text-gray-600">
         <Link to="/forum" className="transition-colors hover:text-blue-600">
           Forum
@@ -200,7 +222,6 @@ const AskQuestionPage = () => {
           </h1>
 
           <form onSubmit={handleSubmit}>
-            {/* Title Input */}
             <div className="mb-6">
               <label
                 htmlFor="title"
@@ -228,28 +249,29 @@ const AskQuestionPage = () => {
               </p>
             </div>
 
-            {/* Content Input */}
             <div className="mb-6">
               <label
-                htmlFor="content"
+                htmlFor="description"
                 className="block mb-2 font-medium text-gray-700"
               >
                 Details
               </label>
               <textarea
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe your question in detail. Include any relevant information that might help others provide a solution."
                 rows="10"
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.content
+                  errors.description
                     ? "border-red-500 focus:ring-red-200"
                     : "border-gray-300 focus:ring-blue-200 focus:border-blue-500"
                 }`}
               />
-              {errors.content && (
-                <p className="mt-1 text-sm text-red-500">{errors.content}</p>
+              {errors.description && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.description}
+                </p>
               )}
               <p className="mt-1 text-sm text-gray-500">
                 Provide background, what you've tried, error messages, and any
@@ -257,7 +279,6 @@ const AskQuestionPage = () => {
               </p>
             </div>
 
-            {/* Tags Input */}
             <div className="mb-8">
               <label
                 htmlFor="tags"
@@ -314,14 +335,12 @@ const AskQuestionPage = () => {
               )}
             </div>
 
-            {/* Error Message */}
             {errors.submit && (
               <div className="px-4 py-3 mb-6 text-red-700 border border-red-200 rounded bg-red-50">
                 {errors.submit}
               </div>
             )}
 
-            {/* Buttons */}
             <div className="flex justify-end gap-3">
               <Link
                 to="/forum"
@@ -334,7 +353,7 @@ const AskQuestionPage = () => {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={isSubmitting}
-                className="flex items-center px-5 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
+                className="flex items-center px-5 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-400"
               >
                 {isSubmitting ? (
                   <>
@@ -348,7 +367,6 @@ const AskQuestionPage = () => {
             </div>
           </form>
 
-          {/* Guidelines for asking */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
