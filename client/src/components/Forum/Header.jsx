@@ -134,14 +134,6 @@ const Header = () => {
     visible: { opacity: 1, y: 0, scale: 1 },
   };
 
-  // Define navigation links
-  const navLinks = [
-    { name: "Home", path: "/forum/home" },
-    { name: "Forums", path: "/forum" },
-    { name: "Saved", path: "/forum/saved" },
-    { name: "Community", path: "/community" },
-  ];
-
   return (
     <motion.header
       className="sticky top-0 z-30 w-full transition-all"
@@ -286,7 +278,6 @@ const Header = () => {
               </button>
             </motion.div>
 
-
             <motion.button
               onClick={toggleDarkMode}
               className="p-2 transition-colors bg-gray-100 rounded-full text-slate-500 hover:text-blue-500 dark:bg-slate-700/50 dark:text-slate-300 dark:hover:text-blue-300"
@@ -406,7 +397,6 @@ const Header = () => {
             </div>
           </div>
 
-
           <div className="flex md:hidden">
             <motion.button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -443,7 +433,6 @@ const Header = () => {
           </div>
         </div>
       </div>
-
 
       {/* Mobile menu */}
       <AnimatePresence>
@@ -555,4 +544,3 @@ const Header = () => {
 };
 
 export default Header;
-
