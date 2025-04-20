@@ -125,7 +125,6 @@ const QuestionDetailPage = () => {
   };
 
   const handleSaveToggle = async () => {
-  const handleSaveToggle = async () => {
     if (!user) {
       toast.info("Please log in to save questions", {
         position: "top-right",
@@ -174,8 +173,6 @@ const QuestionDetailPage = () => {
       )
     ) {
       try {
-        await axios.delete(`http://localhost:5000/api/questions/${id}`, {
-          withCredentials: true,
         await axios.delete(`http://localhost:5000/api/questions/${id}`, {
           withCredentials: true,
         });
