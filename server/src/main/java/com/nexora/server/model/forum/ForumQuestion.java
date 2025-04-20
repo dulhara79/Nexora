@@ -1,4 +1,4 @@
-package com.nexora.server.model;
+package com.nexora.server.model.forum;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Document(collection = "questions")
-public class Question {
+public class ForumQuestion {
     @Id
     private String id;
     private String title;

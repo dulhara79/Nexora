@@ -19,6 +19,7 @@
     "axios": "^1.8.4",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.7.3",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.484.0",
     "react": "^18.3.1",
     "react-confetti": "^6.4.0",
@@ -31,7 +32,9 @@
     "react-tag-input": "^6.10.6",
     "react-tag-input-component": "^2.0.2",
     "react-toastify": "^11.0.5",
-    "react-type-animation": "^3.2.0"
+    "react-type-animation": "^3.2.0",
+    "react-virtualized-auto-sizer": "^1.0.26",
+    "react-window": "^1.8.11"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

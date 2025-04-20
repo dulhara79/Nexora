@@ -1,10 +1,12 @@
-package com.nexora.server.service;
+package com.nexora.server.service.forum;
 
-import com.nexora.server.model.Question;
 import com.nexora.server.model.Role;
 import com.nexora.server.model.User;
-import com.nexora.server.repository.QuestionRepository;
+import com.nexora.server.model.forum.ForumQuestion;
 import com.nexora.server.repository.UserRepository;
+import com.nexora.server.repository.forum.ForumQuestionRepository;
+import com.nexora.server.service.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +19,11 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 @Service
-public class QuestionService {
-    private static final Logger LOGGER = Logger.getLogger(QuestionService.class.getName());
+public class ForumQuestionService {
+    private static final Logger LOGGER = Logger.getLogger(ForumQuestionService.class.getName());
 
     @Autowired
-    private QuestionRepository questionRepository;
+    private ForumQuestionRepository questionRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -29,7 +31,7 @@ public class QuestionService {
     @Autowired
     private UserService userService;
 
-    public Question createQuestion(Question question, String userId) throws Exception {
+    public ForumQuestion createQuestion(ForumQuestion question, String userId) throws Exception {
         LOGGER.info("Creating question with title: " + question.getTitle());
         LOGGER.info("Description: " + question.getDescription());
         LOGGER.info("Tags: " + question.getTags());
@@ -54,18 +56,18 @@ public class QuestionService {
         question.setTags(question.getTags() != null ? question.getTags() : new ArrayList<>());
         LOGGER.warning(".......................question: " + user.getName() + ".......................");
         question.setAuthorUsername(username); // Set the username in the question object
-        Question savedQuestion = questionRepository.save(question);
+        ForumQuestion savedQuestion = questionRepository.save(question);
         LOGGER.info("Question created with ID: " + savedQuestion.getId());
         return savedQuestion;
     }
 
-    public Question updateQuestion(String questionId, Question updatedQuestion, String userId) throws Exception {
-        Optional<Question> questionOptional = questionRepository.findById(questionId);
+    public ForumQuestion updateQuestion(String questionId, ForumQuestion updatedQuestion, String userId) throws Exception {
+        Optional<ForumQuestion> questionOptional = questionRepository.findById(questionId);
         if (!questionOptional.isPresent()) {
             throw new Exception("Question not found");
         }
 
-        Question question = questionOptional.get();
+        ForumQuestion question = questionOptional.get();
         if (!question.getAuthorId().equals(userId) && !isAdminOrModerator(userId)) {
             throw new Exception("Unauthorized to edit this question");
         }
@@ -82,12 +84,12 @@ public class QuestionService {
     }
 
     public void deleteQuestion(String questionId, String userId) throws Exception {
-        Optional<Question> questionOptional = questionRepository.findById(questionId);
+        Optional<ForumQuestion> questionOptional = questionRepository.findById(questionId);
         if (!questionOptional.isPresent()) {
             throw new Exception("Question not found");
         }
 
-        Question question = questionOptional.get();
+        ForumQuestion question = questionOptional.get();
         if (!question.getAuthorId().equals(userId) && !isAdminOrModerator(userId)) {
             throw new Exception("Unauthorized to delete this question");
         }
@@ -100,8 +102,8 @@ public class QuestionService {
         LOGGER.info("Question deleted with ID: " + questionId);
     }
 
-    public List<Question> getQuestions(String tag, String search, String sortBy) {
-        List<Question> questions;
+    public List<ForumQuestion> getQuestions(String tag, String search, String sortBy) {
+        List<ForumQuestion> questions;
 
         if (tag != null && !tag.trim().isEmpty()) {
             // Search for questions with the exact tag name (case-insensitive)
@@ -121,23 +123,23 @@ public class QuestionService {
         // Sorting logic
         if ("newest".equalsIgnoreCase(sortBy)) {
             questions.sort(Comparator.comparing(
-                    Question::getCreatedAt,
+                    ForumQuestion::getCreatedAt,
                     Comparator.nullsLast(Comparator.naturalOrder())).reversed());
         } else if ("mostCommented".equalsIgnoreCase(sortBy)) {
             questions.sort(Comparator.comparingInt(
-                    (Question q) -> q.getCommentIds() != null ? q.getCommentIds().size() : 0).reversed());
+                    (ForumQuestion q) -> q.getCommentIds() != null ? q.getCommentIds().size() : 0).reversed());
         }
 
         return questions;
     }
 
-    public Question upvoteQuestion(String questionId, String userId) throws Exception {
-        Optional<Question> questionOptional = questionRepository.findById(questionId);
+    public ForumQuestion upvoteQuestion(String questionId, String userId) throws Exception {
+        Optional<ForumQuestion> questionOptional = questionRepository.findById(questionId);
         if (!questionOptional.isPresent()) {
             throw new Exception("Question not found");
         }
 
-        Question question = questionOptional.get();
+        ForumQuestion question = questionOptional.get();
         if (question.getUpvoteUserIds() == null) {
             question.setUpvoteUserIds(new ArrayList<>());
         }
@@ -155,13 +157,13 @@ public class QuestionService {
         return questionRepository.save(question);
     }
 
-    public Question downvoteQuestion(String questionId, String userId) throws Exception {
-        Optional<Question> questionOptional = questionRepository.findById(questionId);
+    public ForumQuestion downvoteQuestion(String questionId, String userId) throws Exception {
+        Optional<ForumQuestion> questionOptional = questionRepository.findById(questionId);
         if (!questionOptional.isPresent()) {
             throw new Exception("Question not found");
         }
 
-        Question question = questionOptional.get();
+        ForumQuestion question = questionOptional.get();
         if (question.getUpvoteUserIds() == null) {
             question.setUpvoteUserIds(new ArrayList<>());
         }
@@ -180,19 +182,19 @@ public class QuestionService {
     }
 
     public void flagQuestion(String questionId, String userId) throws Exception {
-        Optional<Question> questionOptional = questionRepository.findById(questionId);
+        Optional<ForumQuestion> questionOptional = questionRepository.findById(questionId);
         if (!questionOptional.isPresent()) {
             throw new Exception("Question not found");
         }
 
-        Question question = questionOptional.get();
+        ForumQuestion question = questionOptional.get();
         question.setFlagged(true);
         questionRepository.save(question);
         LOGGER.info("Question flagged with ID: " + questionId);
     }
 
     public void saveQuestion(String questionId, String userId) throws Exception {
-        Optional<Question> questionOptional = questionRepository.findById(questionId);
+        Optional<ForumQuestion> questionOptional = questionRepository.findById(questionId);
         if (!questionOptional.isPresent()) {
             throw new Exception("Question not found");
         }
@@ -214,7 +216,7 @@ public class QuestionService {
         }
     }
 
-    public List<Question> getSavedQuestions(String userId) throws Exception {
+    public List<ForumQuestion> getSavedQuestions(String userId) throws Exception {
         Optional<User> userOptional = userRepository.findById(userId);
         if (!userOptional.isPresent()) {
             throw new Exception("User not found");
@@ -227,15 +229,15 @@ public class QuestionService {
             return new ArrayList<>();
         }
 
-        List<Question> savedQuestions = questionRepository.findAllById(savedQuestionIds);
+        List<ForumQuestion> savedQuestions = questionRepository.findAllById(savedQuestionIds);
         savedQuestions.sort(Comparator.comparing(
-                Question::getCreatedAt,
+                ForumQuestion::getCreatedAt,
                 Comparator.nullsLast(Comparator.naturalOrder())).reversed());
         return savedQuestions;
     }
 
     public void unsaveQuestion(String questionId, String userId) throws Exception {
-        Optional<Question> questionOptional = questionRepository.findById(questionId);
+        Optional<ForumQuestion> questionOptional = questionRepository.findById(questionId);
         if (!questionOptional.isPresent()) {
             throw new Exception("Question not found");
         }
@@ -253,25 +255,25 @@ public class QuestionService {
         }
     }
 
-    public Question incrementViews(String questionId) throws Exception {
-        Optional<Question> questionOptional = questionRepository.findById(questionId);
+    public ForumQuestion incrementViews(String questionId) throws Exception {
+        Optional<ForumQuestion> questionOptional = questionRepository.findById(questionId);
         if (!questionOptional.isPresent()) {
             throw new Exception("Question not found");
         }
-        Question question = questionOptional.get();
+        ForumQuestion question = questionOptional.get();
         question.setViews(question.getViews() + 1);
         return questionRepository.save(question);
     }
 
-    public Question togglePinQuestion(String questionId, String userId) throws Exception {
+    public ForumQuestion togglePinQuestion(String questionId, String userId) throws Exception {
         if (!isAdminOrModerator(userId)) {
             throw new Exception("Unauthorized to pin/unpin question");
         }
-        Optional<Question> questionOptional = questionRepository.findById(questionId);
+        Optional<ForumQuestion> questionOptional = questionRepository.findById(questionId);
         if (!questionOptional.isPresent()) {
             throw new Exception("Question not found");
         }
-        Question question = questionOptional.get();
+        ForumQuestion question = questionOptional.get();
         question.setPinned(!question.isPinned());
         return questionRepository.save(question);
     }
