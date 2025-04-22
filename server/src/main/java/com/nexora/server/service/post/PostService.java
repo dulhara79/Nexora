@@ -117,6 +117,97 @@ public class PostService {
         return posts;
     }
 
+    public Post updatePost(String postId, String userId, String description, List<MultipartFile> files) throws Exception {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        // Check if the user is the owner of the post
+        if (!post.getUserId().equals(userId)) {
+            throw new SecurityException("You are not authorized to edit this post");
+        }
+
+        // Update description if provided
+        if (description != null && !description.trim().isEmpty()) {
+            post.setDescription(description);
+        }
+
+        // Update media if new files are provided
+        if (files != null && !files.isEmpty()) {
+            // Limit to 3 files
+            if (files.size() > 3) {
+                throw new IllegalArgumentException("A post can contain a maximum of 3 photos or videos.");
+            }
+
+            // Check if all files are of the same type
+            boolean isVideo = files.get(0).getContentType().startsWith("video");
+            for (MultipartFile file : files) {
+                boolean currentIsVideo = file.getContentType().startsWith("video");
+                if (currentIsVideo != isVideo) {
+                    throw new IllegalArgumentException("A post can contain either photos or videos, but not both.");
+                }
+            }
+
+            // Delete old media from Cloudinary
+            List<Post.Media> oldMedia = post.getMedia();
+            for (Post.Media media : oldMedia) {
+                String publicId = extractPublicIdFromUrl(media.getFileUrl());
+                cloudinary.uploader().destroy(publicId, Map.of("resource_type", isVideo ? "video" : "image"));
+            }
+
+            // Upload new media
+            List<Post.Media> mediaList = new ArrayList<>();
+            for (MultipartFile file : files) {
+                Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), Map.of("resource_type", "auto"));
+                if (isVideo) {
+                    Object durationObj = uploadResult.get("duration");
+                    if (durationObj == null) {
+                        throw new IllegalArgumentException("Unable to determine video duration.");
+                    }
+                    double duration = Double.parseDouble(durationObj.toString());
+                    if (duration > 30) {
+                        throw new IllegalArgumentException("Videos must be 30 seconds or less.");
+                    }
+                }
+
+                String fileUrl = uploadResult.get("url").toString();
+                String fileType = isVideo ? "video/mp4" : file.getContentType();
+
+                Post.Media media = new Post.Media();
+                media.setFileName(file.getOriginalFilename());
+                media.setFileUrl(fileUrl);
+                media.setFileType(fileType);
+                mediaList.add(media);
+            }
+            post.setMedia(mediaList);
+        }
+
+        return postRepository.save(post);
+    }
+
+    public void deletePost(String postId, String userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        // Check if the user is the owner of the post
+        if (!post.getUserId().equals(userId)) {
+            throw new SecurityException("You are not authorized to delete this post");
+        }
+
+        // Delete media from Cloudinary
+        List<Post.Media> mediaList = post.getMedia();
+        for (Post.Media media : mediaList) {
+            String publicId = extractPublicIdFromUrl(media.getFileUrl());
+            try {
+                cloudinary.uploader().destroy(publicId, Map.of("resource_type", media.getFileType().startsWith("video") ? "video" : "image"));
+            } catch (Exception e) {
+                System.err.println("Error deleting media from Cloudinary: " + e.getMessage());
+            }
+        }
+
+        // Delete the post from the database
+        postRepository.delete(post);
+    }
+
     public Post likePost(String postId, String userId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
@@ -146,6 +237,10 @@ public class PostService {
         comment.setUserId(userId);
         comment.setText(commentText);
         comment.setCreatedAt(LocalDateTime.now());
+
+        // Fetch username
+        com.nexora.server.model.User user = userRepository.findById(userId).orElse(null);
+        comment.setName(user != null ? user.getName() : "Unknown User");
 
         post.getComments().add(comment);
 
@@ -193,5 +288,12 @@ public class PostService {
 
         post.getComments().remove(comment);
         return postRepository.save(post);
+    }
+
+    // Helper method to extract Cloudinary public ID from URL
+    private String extractPublicIdFromUrl(String url) {
+        String[] parts = url.split("/");
+        String fileName = parts[parts.length - 1];
+        return fileName.substring(0, fileName.lastIndexOf("."));
     }
 }
