@@ -60,6 +60,48 @@ public class PostController {
         }
     }
 
+    @PutMapping("/{postId}")
+    public ResponseEntity<?> updatePost(
+            @PathVariable String postId,
+            @RequestParam("description") String description,
+            @RequestParam(value = "files", required = false) List<MultipartFile> files,
+            HttpSession session) {
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+
+        try {
+            Post updatedPost = postService.updatePost(postId, userId, description, files);
+            return ResponseEntity.ok(updatedPost);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating post: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<?> deletePost(@PathVariable String postId, HttpSession session) {
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+
+        try {
+            postService.deletePost(postId, userId);
+            return ResponseEntity.ok("Post deleted successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting post: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/{postId}/like")
     public ResponseEntity<?> likePost(@PathVariable String postId, HttpSession session) {
         String userId = (String) session.getAttribute("userId");
