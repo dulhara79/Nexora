@@ -1,7 +1,7 @@
 package com.nexora.server.controller.post;
 
 import com.nexora.server.model.post.Notification;
-import com.nexora.server.repository.post.NotificationRepository;
+import com.nexora.server.service.post.NotificationService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -17,19 +16,21 @@ import java.util.stream.Collectors;
 public class NotificationController {
 
     @Autowired
-    private NotificationRepository notificationRepository;
+    private NotificationService notificationService;
 
     @GetMapping
-    public ResponseEntity<?> getNotifications(HttpSession session) {
+    public ResponseEntity<List<Notification>> getNotifications(HttpSession session) {
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-
-        List<Notification> notifications = notificationRepository.findAll()
-                .stream()
-                .filter(n -> n.getUserId().equals(userId))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(notifications);
+        try {
+            List<Notification> notifications = notificationService.getNotifications(userId);
+            return ResponseEntity.ok(notifications);
+        } catch (Exception e) {
+            System.err.println("Error fetching notifications for userId " + userId + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 }
