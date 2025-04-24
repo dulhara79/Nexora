@@ -36,16 +36,6 @@ import Home from "./pages/post/Home";
 import CreatePost from "./pages/post/CreatePost";
 import Notifications from "./pages/post/Notifications";
 
-import Navbar from "./components/post/Navbar";
-import Home from "./pages/post/Home";
-import CreatePost from "./pages/post/CreatePost";
-import Notifications from "./pages/post/Notifications";
-
-import Navbar from "./components/post/Navbar";
-import Home from "./pages/post/Home";
-import CreatePost from "./pages/post/CreatePost";
-import Notifications from "./pages/post/Notifications";
-
 function App() {
   
   return (
