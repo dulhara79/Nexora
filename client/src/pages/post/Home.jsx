@@ -7,12 +7,15 @@ import { motion } from "framer-motion";
 import Navbar from "../../components/post/Navbar";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useLocation } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns"; // Add this import
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useContext(AuthContext);
+  const location = useLocation();
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -38,6 +41,24 @@ const Home = () => {
       setNotifications(response.data);
     } catch (error) {
       console.error("Error fetching notifications:", error);
+      const errorMessage = error.response?.data || "Failed to load notifications.";
+      toast.error(errorMessage, { position: "top-right" });
+    }
+  };
+
+  // Fetch updated post after returning from EditPost
+  const updatePostAfterEdit = async (postId) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/posts/${postId}`, {
+        withCredentials: true,
+      });
+      setPosts(prev =>
+        prev.map(p => (p.id === postId ? response.data : p))
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      );
+    } catch (error) {
+      console.error("Error updating post after edit:", error);
+      toast.error("Failed to update post.", { position: "top-right" });
     }
   };
 
@@ -49,6 +70,15 @@ const Home = () => {
       return () => clearInterval(interval);
     }
   }, [user]);
+
+  // Check if returning from EditPost and update the specific post
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const editedPostId = params.get("editedPostId");
+    if (editedPostId) {
+      updatePostAfterEdit(editedPostId);
+    }
+  }, [location]);
 
   const handlePostCreated = (newPost) => {
     setPosts(prev => [newPost, ...prev].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
