@@ -258,81 +258,119 @@ const ProgressPage = () => {
     <div className={`min-h-screen bg-gradient-to-br from-${theme.color}-50 to-white p-10`}>
       {showConfetti && <Confetti width={windowSize.width} height={windowSize.height} />}
       
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <h1 className={`text-4xl font-bold text-center mb-10 ${theme.text}`}>
           🍽️ My Plan – <span className="capitalize">{cuisine?.name}</span>
         </h1>
 
         {progress === 100 && (
           <div className="text-center mb-10 animate-bounce">
-            <h2 className="text-3xl font-bold text-green-600 drop-shadow-md">🎉 You Did It, Master Chef! 🎉</h2>
+            <h2 className="text-3xl font-bold text-blue-600 drop-shadow-md">🎉 You Did It, Master Chef! 🎉</h2>
             <p className="text-gray-600 mt-2">Every recipe completed. Go treat yourself to dessert 😋</p>
           </div>
         )}
 
-        {/* Progress Bar */}
-        <div className="mb-10">
-          <h3 className={`text-xl font-semibold mb-2 ${theme.text}`}>
-            Progress: {progress}%
-          </h3>
-          <div className="w-full h-4 bg-gray-200 rounded-full">
-            <div
-              className={`${theme.progressBar} h-4 rounded-full transition-all`}
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-        </div>
+{/* Progress Bar
+<div className="mb-10">
+  <h3 className={`text-xl font-semibold mb-2 ${theme.text}`}>
+    Progress: {progress}%
+  </h3>
+  <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden">
+    <div
+      className={`
+        h-4 rounded-full transition-all
+        ${progress === 100 ? 'bg-blue-500' : theme.progressBar}
+      `}
+      style={{ width: `${progress}%` }}
+    ></div>
+  </div>
+</div> */}
 
-        {/* Recipes Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {recipes.map((recipe, idx) => (
-            <div
-              key={idx}
-              className={`bg-white shadow-lg rounded-xl p-5 border-l-8 ${theme.border} hover:shadow-xl transition-all`}
-            >
-              <img
-                src={recipe.image || 'https://via.placeholder.com/400x200.png?text=Yummy+Dish'}
-                alt={recipe.name}
-                className="w-full h-40 object-cover rounded-lg mb-4"
-              />
-              <h2 className={`text-lg font-bold mb-2 ${theme.text}`}>{recipe.name}</h2>
+{/* Progress Bar
+<div className="mb-10">
+  <h3 className={`text-xl font-semibold mb-2 ${theme.text}`}>
+    Progress: {progress}%
+  </h3>
+  <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden">
+    <div
+      className={`
+        h-full rounded-full
+        transition-[width] duration-500 ease-out
+        ${`bg-${theme.color}-500`}
+      `}
+      style={{ width: `${progress}%` }}
+    />
+  </div>
+</div> */}
 
-              <div className="mb-3">
-                <span className="text-sm text-gray-500">⏱️ Time:</span>{' '}
-                <span className="font-medium text-gray-700">{recipe.time || '30 mins'}</span>
-              </div>
+{/* Progress Bar */}
+<div className="mb-10">
+  <h3 className={`text-xl font-semibold mb-2 ${theme.text}`}>
+    Progress: {progress}%
+  </h3>
+  <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden">
+    <div
+      className="h-full bg-blue-500 rounded-full transition-all duration-500 ease-out"
+      style={{ width: `${progress}%` }}
+    />
+  </div>
+</div>
 
-              <div>
-                <h4 className="font-semibold mb-1 text-gray-700">🧂 Ingredients</h4>
-                <ul className="list-disc list-inside text-gray-600 text-sm">
-                  {recipe.ingredients?.length ? (
-                    recipe.ingredients.map((item, i) => <li key={i}>{item}</li>)
-                  ) : (
-                    <li>Coming soon...</li>
-                  )}
-                </ul>
-              </div>
+{/* Recipes Grid */}
 
-              <div className="mt-3">
-                <h4 className="font-semibold mb-1 text-gray-700">👩‍🍳 Method</h4>
-                <p className="text-sm text-gray-600">
-                  {recipe.method || 'Method details will be available soon.'}
-                </p>
-              </div>
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8 justify-items-center">
+  {recipes.map((recipe, idx) => (
+    <div
+      key={idx}
+      className={`
+        w-full max-w-7xl
+        bg-white shadow-lg rounded-xl p-8
+        border-l-8 ${theme.border}
+        flex flex-col items-center text-center
+        hover:shadow-xl transition-all
+      `}
+    >
+      <img
+        src={recipe.image || 'https://via.placeholder.com/400x200.png?text=Yummy+Dish'}
+        alt={recipe.name}
+        className="w-full h-100 object-cover rounded-lg mb-4"
+      />
+      <h2 className={`text-3xl font-bold mb-5 ${theme.text}`}>{recipe.name}</h2>
 
-              {/* Mark as Done */}
-              <div className="flex items-center mt-4">
-                <input
-                  type="checkbox"
-                  checked={recipe.isCompleted}
-                  onChange={() => handleMarkAsDone(idx)}
-                  className={`accent-${theme.color}-600 w-4 h-4 mr-2`}
-                />
-                <span className="text-sm text-gray-700">Mark as Done</span>
-              </div>
-            </div>
-          ))}
-        </div>
+      <div className="mb-3">
+        <span className="text-sm text-gray-800">⏱️ Time:</span>{' '}
+        <span className="font-medium text-gray-700">{recipe.time || '30 mins'}</span>
+      </div>
+
+      <div>
+        <h4 className="font-semibold mb-1 text-gray-700">🧂 Ingredients</h4>
+        <ul className="list-disc list-inside text-gray-600 text-sm">
+          {recipe.ingredients?.length
+            ? recipe.ingredients.map((item, i) => <li key={i}>{item}</li>)
+            : <li>Coming soon...</li>}
+        </ul>
+      </div>
+
+      <div className="mt-3">
+        <h4 className="font-semibold mb-1 text-gray-700">👩‍🍳 Method</h4>
+        <p className="text-sm text-gray-600 whitespace-pre-line">
+          {recipe.method || 'Method details will be available soon.'}
+        </p>
+      </div>
+
+      {/* Mark as Done */}
+      <div className="flex items-center mt-4">
+        <input
+          type="checkbox"
+          checked={recipe.isCompleted}
+          onChange={() => handleMarkAsDone(idx)}
+          className={`accent-${theme.color}-600 w-4 h-4 mr-2`}
+        />
+        <span className="text-sm text-gray-700">Mark as Done</span>
+      </div>
+    </div>
+  ))}
+</div>
       </div>
     </div>
   );
