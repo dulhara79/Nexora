@@ -27,7 +27,7 @@ const NavbarLP = () => {
         {/* Nav links */}
         <ul className={`md:flex md:items-center space-x-6 text-blue-800 font-medium ${isOpen ? 'block mt-4 md:mt-0' : 'hidden md:flex'}`}>
           <li>
-            <Link to="/home" className="hover:text-blue-600 transition duration-200">Home</Link>
+            <Link to="/learninghome" className="hover:text-blue-600 transition duration-200">Home</Link>
           </li>
           <li>
             <Link to="/plan/beginner" className="hover:text-blue-600 transition duration-200">Explore</Link>
