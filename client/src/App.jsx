@@ -56,7 +56,7 @@ function App() {
           <Route path="/feed" element={<UserFeedPage />} />
           {/* <Route path="/register" element={<Register />} /> */}
           {/* Learning Plan Routes */}
-          <Route path="/home" element={<HomePage />} />
+          <Route path="/learninghome" element={<HomePage />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/plan/:level" element={<PlanPage />} />
           <Route path="/progress/:cuisineName" element={<ProgressPage />} />
