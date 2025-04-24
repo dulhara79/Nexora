@@ -47,32 +47,100 @@ Ensure you have the following installed:
 
 ### ⚡ Clone the Repository
 ```sh
- git clone https://github.com/yourusername/skill-sharing-platform.git
- cd skill-sharing-platform
+ git clone https://github.com/dulhara79/Nexora.git
+ cd Nexora
 ```
 
 ### 🖥️ Setting Up the Backend
 ```sh
  cd backend
- mvn clean install
- mvn spring-boot:run
+ mvnw clean install
+ mvnw spring-boot:run
 ```
 
 ### 🌐 Setting Up the Frontend
 ```sh
  cd frontend
  npm install
- npm start
+ npm run dev
 ```
 
-## 🔗 API Endpoints
-| Method | Endpoint | Description |
-|--------|---------|-------------|
-| `POST` | `/api/auth/login` | OAuth 2.0 Login |
-| `GET` | `/api/posts` | Fetch all posts |
-| `POST` | `/api/posts` | Create a new post |
-| `DELETE` | `/api/posts/{id}` | Delete a post |
-| `POST` | `/api/comments` | Add a comment |
+---
+
+## 🔗 REST API Endpoints
+
+This document lists all REST API endpoints for the forum application. Endpoints are grouped by resource for clarity. All endpoints are prefixed with the base URL (e.g., `http://localhost:5000`).
+
+### Users Endpoints
+| Method | Endpoint | Description | Authentication |
+|--------|----------|-------------|----------------|
+| POST   | `/api/users/register` | Registers a new user, optionally with a profile photo. Sets userId in session. | None |
+| POST   | `/api/users/register/google` | Registers a new user via Google OAuth, optionally with a profile photo. | None |
+| POST   | `/api/users/verify` | Verifies a user’s email with a verification code. | None |
+| POST   | `/api/users/{userId}/follow/{targetUserId}` | Allows a user to follow another user. | None |
+| POST   | `/api/users/{userId}/unfollow/{targetUserId}` | Allows a user to unfollow another user. | None |
+| GET    | `/api/users/{userId}` | Retrieves a user’s details by ID. | None |
+| GET    | `/api/users/` | Retrieves a list of all users. | None |
+| PUT    | `/api/users/edit/{id}` | Updates a user’s profile (name, username, email, about, password, images, social media). | Session-based (userId in session, must match id) |
+| DELETE | `/api/users/deactivate/{userId}` | Deactivates a user account by ID. | None |
+
+### Authentication Endpoints
+| Method | Endpoint | Description | Authentication |
+|--------|----------|-------------|----------------|
+| POST   | `/api/auth/login` | Initiates login by sending an OTP to the user’s email. | None |
+| POST   | `/api/auth/login/verify` | Verifies the login OTP and sets userId in session. | None |
+| GET    | `/api/auth/google-success` | Handles successful Google OAuth login, sets userId in session, and closes the popup. | OAuth2 (Google) |
+| GET    | `/api/auth/login/failure` | Returns an error response for failed Google OAuth login. | None |
+| GET    | `/api/auth/check-session` | Checks if a session is active and returns user details. | Session-based (userId in session) |
+| POST   | `/api/auth/logout` | Invalidates the session to log out the user. | None |
+
+### Comments Endpoints
+| Method | Endpoint | Description | Authentication |
+|--------|----------|-------------|----------------|
+| POST   | `/api/forum/comments` | Creates a new comment for a question. | Session-based (userId in session) |
+| PUT    | `/api/forum/comments/{id}` | Updates an existing comment by ID. | Session-based (userId in session) |
+| DELETE | `/api/forum/comments/{id}` | Deletes a comment by ID. | Session-based (userId in session) |
+| GET    | `/api/forum/comments/question/{questionId}` | Retrieves all comments for a specific question by question ID. | None |
+| POST   | `/api/forum/comments/{id}/upvote` | Upvotes a comment by ID. | Session-based (userId in session) |
+| POST   | `/api/forum/comments/{id}/downvote` | Downvotes a comment by ID. | Session-based (userId in session) |
+| POST   | `/api/forum/comments/{id}/flag` | Flags a comment by ID for review. | Session-based (userId in session) |
+
+### Communities Endpoints
+| Method | Endpoint | Description | Authentication |
+|--------|----------|-------------|----------------|
+| GET    | `/api/communities` | Retrieves a list of all communities. | None (authentication check commented out) |
+
+### Notifications Endpoints
+| Method | Endpoint | Description | Authentication |
+|--------|----------|-------------|----------------|
+| GET    | `/api/forum/notifications` | Retrieves unread notifications for the authenticated user. | Session-based (userId in session) |
+| POST   | `/api/forum/notifications/{id}/read` | Marks a notification as read by ID. | None |
+
+### Questions Endpoints
+| Method | Endpoint | Description | Authentication |
+|--------|----------|-------------|----------------|
+| POST   | `/api/questions/add` | Creates a new question. | Session-based (userId in session) |
+| PUT    | `/api/questions/{id}` | Updates an existing question by ID. | Session-based (userId in session) |
+| DELETE | `/api/questions/{id}` | Deletes a question by ID. | Session-based (userId in session) |
+| GET    | `/api/questions` | Retrieves a list of questions, optionally filtered by tag, search query, or sorted by a criterion (e.g., newest). | None |
+| GET    | `/api/questions/{id}` | Retrieves a specific question by ID. | None |
+| POST   | `/api/questions/{id}/upvote` | Upvotes a question by ID. | Session-based (userId in session) |
+| POST   | `/api/questions/{id}/downvote` | Downvotes a question by ID. | Session-based (userId in session) |
+| POST   | `/api/questions/{id}/flag` | Flags a question by ID for review. | Session-based (userId in session) |
+| POST   | `/api/questions/{id}/save` | Saves a question for the authenticated user. | Session-based (userId in session) |
+| GET    | `/api/questions/saved` | Retrieves all saved questions for the authenticated user. | Session-based (userId in session) |
+| DELETE | `/api/questions/{id}/unsave` | Unsaves a question for the authenticated user. | Session-based (userId in session) |
+| POST   | `/api/questions/{id}/view` | Increments the view count for a question by ID. | None |
+| POST   | `/api/questions/{id}/pin` | Toggles the pinned status of a question by ID. | Session-based (userId in session) |
+
+### Tags Endpoints
+| Method | Endpoint | Description | Authentication |
+|--------|----------|-------------|----------------|
+| GET    | `/api/tags` | Retrieves a list of all tags. | None |
+| GET    | `/api/tags/search` | Searches for tags matching a query string. | None |
+| GET    | `/api/tags/trending` | Retrieves the top 10 trending tags based on questions from the last 7 days. | None |
+
+---
 
 ## 👥 Contributors
 - [Dulhara Kaushalya](https://github.com/dulhara79)  

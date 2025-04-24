@@ -2,6 +2,8 @@ package com.nexora.server.controller;
 
 import com.nexora.server.model.User;
 import com.nexora.server.service.AuthenticationService;
+
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -48,6 +50,7 @@ public class AuthenticationController {
     try {
       User user = authenticationService.verifyLoginOtp(email, otp);
       session.setAttribute("userId", user.getId());
+      session.setAttribute("name", user.getName());
       LOGGER.info("Session set with userId: " + user.getId());
       return ResponseEntity.ok(new UserResponse(user.getId(), user.getEmail(), user.getName()));
     } catch (Exception e) {
@@ -60,22 +63,38 @@ public class AuthenticationController {
   }
 
   @GetMapping("/google-success")
-  public ResponseEntity<?> googleLoginSuccess(
+  public void googleLoginSuccess(
       @AuthenticationPrincipal OAuth2User principal,
-      HttpSession session) {
+      HttpSession session,
+      HttpServletResponse response) {
     try {
       String email = principal.getAttribute("email");
       String name = principal.getAttribute("name");
       User user = authenticationService.handleGoogleLogin(email, name);
       session.setAttribute("userId", user.getId());
-      return ResponseEntity.ok().body(Map.of(
-          "message", "Google login successful",
-          "userId", user.getId()));
+      LOGGER.info("Google login successful for userId: " + user.getId());
+
+      // Send postMessage to frontend and close popup
+      response.setContentType("text/html");
+      response.getWriter().write(
+          "<html><body>" +
+          "<script>" +
+          "window.opener.postMessage({ type: 'google-auth-success', userId: '" + user.getId() + "' }, 'http://localhost:5173');" +
+          "window.close();" +
+          "</script>" +
+          "</body></html>"
+      );
     } catch (Exception e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
+      LOGGER.severe("Google login error: " + e.getMessage());
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      try {
+        response.getWriter().write("Google login failed: " + e.getMessage());
+      } catch (Exception ex) {
+        LOGGER.severe("Error writing response: " + ex.getMessage());
+      }
     }
   }
-
+  
   @GetMapping("/login/failure")
   public ResponseEntity<?> googleLoginFailure() {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

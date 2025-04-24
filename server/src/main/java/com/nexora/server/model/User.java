@@ -7,6 +7,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,81 +29,54 @@ public class User {
   @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
   private String name;
 
-  @NotBlank(message = "Skill is required")
+  @NotBlank(message = "Username is required")
+  @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
+  private String username;
+
+  private String about;
+  private String profilePhotoUrl;
+  private String bannerPhotoUrl;
   private String likeSkill;
 
-  private String profilePhotoUrl = null;
-  // private String profilePhotoUrl;
   private boolean emailVerified = false;
   private String verificationCode;
+  private LocalDateTime createdAt = LocalDateTime.now();
+  private LocalDateTime lastLogin;
 
   private List<String> followers = new ArrayList<>();
   private List<String> following = new ArrayList<>();
+  private List<SocialMediaLink> socialMedia = new ArrayList<>(); // Updated reference
+  private List<String> bookmarkedPosts = new ArrayList<>();
+  private List<String> savedQuestionIds = new ArrayList<>();
 
-  private Role role; // No @Enumerated needed for MongoDB
+  private Role role;
 
-  // Fields added for EditProfile
-  private String username;
-  private String about;
-  private String bannerPhotoUrl;
-  private List<SocialMediaLink> socialMedia = new ArrayList<>(); // Using a custom class for social media
-
-  // Default constructor
   public User() {
   }
 
-  // Parameterized constructor (updated)
-  public User(String id, String email, String password, String name, String likeSkill, String profilePhotoUrl,
-      boolean emailVerified, String verificationCode, List<String> followers, List<String> following,
-      Role role, String username, String about, String bannerPhotoUrl, List<SocialMediaLink> socialMedia) {
+  public User(String id, String email, String password, String name, String username, String about,
+      String profilePhotoUrl,
+      String bannerPhotoUrl, String likeSkill, boolean emailVerified, String verificationCode,
+      LocalDateTime createdAt, LocalDateTime lastLogin, List<String> followers, List<String> following,
+      List<SocialMediaLink> socialMedia, List<String> bookmarkedPosts, Role role) {
     this.id = id;
     this.email = email;
     this.password = password;
     this.name = name;
-    this.likeSkill = likeSkill;
+    this.username = username;
+    this.about = about;
     this.profilePhotoUrl = profilePhotoUrl;
+    this.bannerPhotoUrl = bannerPhotoUrl;
+    this.likeSkill = likeSkill;
     this.emailVerified = emailVerified;
     this.verificationCode = verificationCode;
+    this.createdAt = createdAt;
+    this.lastLogin = lastLogin;
     this.followers = followers;
     this.following = following;
+    this.socialMedia = socialMedia;
+    this.bookmarkedPosts = bookmarkedPosts;
     this.role = role;
-    this.username = username;
-    this.about = about;
-    this.bannerPhotoUrl = bannerPhotoUrl;
-    this.socialMedia = socialMedia;
-  }
-
-  // Getters and Setters (updated)
-  public String getUsername() {
-    return username;
-  }
-
-  public void setUsername(String username) {
-    this.username = username;
-  }
-
-  public String getAbout() {
-    return about;
-  }
-
-  public void setAbout(String about) {
-    this.about = about;
-  }
-
-  public String getBannerPhotoUrl() {
-    return bannerPhotoUrl;
-  }
-
-  public void setBannerPhotoUrl(String bannerPhotoUrl) {
-    this.bannerPhotoUrl = bannerPhotoUrl;
-  }
-
-  public List<SocialMediaLink> getSocialMedia() {
-    return socialMedia;
-  }
-
-  public void setSocialMedia(List<SocialMediaLink> socialMedia) {
-    this.socialMedia = socialMedia;
   }
 
   // Getters and Setters
@@ -137,12 +112,20 @@ public class User {
     this.name = name;
   }
 
-  public String getLikeSkill() {
-    return likeSkill;
+  public String getUsername() {
+    return username;
   }
 
-  public void setLikeSkill(String likeSkill) {
-    this.likeSkill = likeSkill;
+  public void setUsername(String username) {
+    this.username = username;
+  }
+
+  public String getAbout() {
+    return about;
+  }
+
+  public void setAbout(String about) {
+    this.about = about;
   }
 
   public String getProfilePhotoUrl() {
@@ -151,6 +134,22 @@ public class User {
 
   public void setProfilePhotoUrl(String profilePhotoUrl) {
     this.profilePhotoUrl = profilePhotoUrl;
+  }
+
+  public String getBannerPhotoUrl() {
+    return bannerPhotoUrl;
+  }
+
+  public void setBannerPhotoUrl(String bannerPhotoUrl) {
+    this.bannerPhotoUrl = bannerPhotoUrl;
+  }
+
+  public String getLikeSkill() {
+    return likeSkill;
+  }
+
+  public void setLikeSkill(String likeSkill) {
+    this.likeSkill = likeSkill;
   }
 
   public boolean isEmailVerified() {
@@ -169,6 +168,22 @@ public class User {
     this.verificationCode = verificationCode;
   }
 
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public LocalDateTime getLastLogin() {
+    return lastLogin;
+  }
+
+  public void setLastLogin(LocalDateTime lastLogin) {
+    this.lastLogin = lastLogin;
+  }
+
   public List<String> getFollowers() {
     return followers;
   }
@@ -183,5 +198,37 @@ public class User {
 
   public void setFollowing(List<String> following) {
     this.following = following;
+  }
+
+  public List<SocialMediaLink> getSocialMedia() {
+    return socialMedia;
+  }
+
+  public void setSocialMedia(List<SocialMediaLink> socialMedia) {
+    this.socialMedia = socialMedia;
+  }
+
+  public List<String> getBookmarkedPosts() {
+    return bookmarkedPosts;
+  }
+
+  public void setBookmarkedPosts(List<String> bookmarkedPosts) {
+    this.bookmarkedPosts = bookmarkedPosts;
+  }
+
+  public Role getRole() {
+    return role;
+  }
+
+  public void setRole(Role role) {
+    this.role = role;
+  }
+
+  public List<String> getSavedQuestionIds() {
+    return savedQuestionIds;
+  }
+
+  public void setSavedQuestionIds(List<String> savedQuestionIds) {
+    this.savedQuestionIds = savedQuestionIds;
   }
 }
