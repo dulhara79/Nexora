@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import Confetti from 'react-confetti';
+import NavbarLP from '../../components/LearningPlan/NavbarLP';
 
 const RecipePage = () => {
   const location = useLocation();
@@ -63,6 +64,8 @@ const RecipePage = () => {
   const progress = calculateProgress();
 
   return (
+    <>
+    <NavbarLP />
     <div className={`min-h-screen bg-gradient-to-br from-${theme.color}-50 to-white p-10`}>
       {showConfetti && <Confetti width={windowSize.width} height={windowSize.height} />}
       
@@ -181,6 +184,7 @@ const RecipePage = () => {
 </div>
       </div>
     </div>
+    </>
   );
 };
 
