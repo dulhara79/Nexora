@@ -11,9 +11,10 @@ public class Notification {
     @Id
     private String id;
     private String userId;
-    private String name; // Type of notification (e.g., "like", "comment", etc.)
+    private String type; // e.g., "like", "comment"
     private String message;
     private LocalDateTime createdAt;
+    private boolean read; // Add read field
 
     // Getters and Setters
     public String getId() {
@@ -48,11 +49,19 @@ public class Notification {
         this.createdAt = createdAt;
     }
 
-    public String getName() {
-        return name;
+    public String getType() {
+        return type;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public boolean isRead() {
+        return read;
+    }
+
+    public void setRead(boolean read) {
+        this.read = read;
     }
 }
