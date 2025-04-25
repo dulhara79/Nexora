@@ -75,7 +75,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/cuisines/**").permitAll() // Allow all cuisine endpoints
                 .requestMatchers("/api/learningplan/**").permitAll() // Allow all learning plan endpoints
                 
-                        .requestMatchers("/api/users/**", "/api/auth/**", "/api/questions/**", "/api/forum/comments/**", "/api/forum/notifications/**", "/api/tags/**", "/api/communities/**", "/api/posts/**", "/api/feedposts/**").permitAll() // Ensure all auth and user
+                        .requestMatchers("/api/users/**", "/api/auth/**", "/api/questions/**", "/api/forum/comments/**", "/api/forum/notifications/**", "/api/tags/**", "/api/communities/**", "/api/posts/**", "/api/feedposts/**", "/api/challenges/**").permitAll() // Ensure all auth and user
                                                                                       // endpoints are public
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
