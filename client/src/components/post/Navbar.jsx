@@ -20,6 +20,9 @@ const Navbar = () => {
         <Link to="/create-post" className="text-blue-500 hover:text-blue-700">
           Create Post
         </Link>
+        <Link to="/learninghome" className="text-blue-500 hover:text-blue-700">
+          Create Learning Plan
+        </Link>
         <Link
           to="/post-notifications"
           className="text-blue-500 hover:text-blue-700"
