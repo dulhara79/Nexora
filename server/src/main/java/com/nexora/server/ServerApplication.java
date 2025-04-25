@@ -183,7 +183,7 @@ public class ServerApplication {
 				Recipe tomYum = new Recipe();
 				tomYum.setName("Tom Yum Soup");
 				tomYum.setTime("25 mins");
-				tomYum.setImage("https://www.seriouseats.com/thmb/YoZ8Am6ADr29RZKZH8e9FzU_o78=/1500x0/...jpg");
+				tomYum.setImage("https://biancazapatka.com/wp-content/uploads/2023/01/thai-suppe-tom-yum.jpg");
 				tomYum.setIngredients(List.of("Lemongrass", "Galangal", "Shrimp"));
 				tomYum.setMethod("1. Boil broth. 2. Add herbs, mushrooms, and seafood.");
 
