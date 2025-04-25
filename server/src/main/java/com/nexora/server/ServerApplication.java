@@ -137,7 +137,7 @@ public class ServerApplication {
 
 				sriLankan.setRecipes(List.of(dhal, koththu, eggHoppers, fishAmbulThiyal, coconutRoti, watalappan));
 
-				cuisineRepo.save(sriLankan); // Save Sri Lankan
+				cuisineRepo.save(sriLankan);
 
 			}
 
