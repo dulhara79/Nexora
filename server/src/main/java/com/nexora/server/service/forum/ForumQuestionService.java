@@ -31,6 +31,9 @@ public class ForumQuestionService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private ForumTagService tagService;
+
     public ForumQuestion createQuestion(ForumQuestion question, String userId) throws Exception {
         LOGGER.info("Creating question with title: " + question.getTitle());
         LOGGER.info("Description: " + question.getDescription());
@@ -53,7 +56,9 @@ public class ForumQuestionService {
 
         question.setAuthorId(userId);
         question.setCreatedAt(LocalDateTime.now());
-        question.setTags(question.getTags() != null ? question.getTags() : new ArrayList<>());
+        List<String> tags = question.getTags() != null ? question.getTags() : new ArrayList<>();
+        question.setTags(tags);
+        tagService.saveTags(tags); // Save new tags to ForumTagRepository
         LOGGER.warning(".......................question: " + user.getName() + ".......................");
         question.setAuthorUsername(username); // Set the username in the question object
         ForumQuestion savedQuestion = questionRepository.save(question);
@@ -78,7 +83,9 @@ public class ForumQuestionService {
 
         question.setTitle(updatedQuestion.getTitle());
         question.setDescription(updatedQuestion.getDescription());
-        question.setTags(updatedQuestion.getTags() != null ? updatedQuestion.getTags() : new ArrayList<>());
+        List<String> tags = updatedQuestion.getTags() != null ? updatedQuestion.getTags() : new ArrayList<>();
+        question.setTags(tags);
+        tagService.saveTags(tags); // Save new tags to ForumTagRepository
         question.setUpdatedAt(LocalDateTime.now());
         return questionRepository.save(question);
     }
