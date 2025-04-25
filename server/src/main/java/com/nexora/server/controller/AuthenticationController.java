@@ -140,6 +140,7 @@ public class AuthenticationController {
           .body("No valid token provided");
     }
     String token = authHeader.substring(7);
+    LOGGER.info("...Extracted token: " + token);
     try {
       User user = authenticationService.validateJwtToken(token);
       Map<String, String> links = new HashMap<>();
@@ -156,19 +157,29 @@ public class AuthenticationController {
     }
   }
 
+  /**
+   * 
+   * const handleLogout = () => {
+   * localStorage.removeItem("jwt"); // or sessionStorage, or cookies
+   * navigate("/login");
+   * };
+   * 
+   */
   @PostMapping("/logout")
   public ResponseEntity<?> logout() {
     LOGGER.info("Handling logout");
-    try {
-      Map<String, String> links = new HashMap<>();
-      links.put("login", "/api/auth/login");
-      return ResponseEntity.ok()
-          .header(HttpHeaders.CACHE_CONTROL, "no-store")
-          .body(Map.of("message", "Logged out successfully", "_links", links));
-    } catch (Exception e) {
-      return ResponseEntity.badRequest()
-          .header(HttpHeaders.CACHE_CONTROL, "no-store")
-          .body(Map.of("error", e.getMessage()));
-    }
+
+    // Tell the client to clear the JWT
+    Map<String, String> links = new HashMap<>();
+    links.put("login", "/api/auth/login");
+
+    LOGGER.info("Logout successful, instructing client to clear token");
+
+    return ResponseEntity.ok()
+        .header(HttpHeaders.CACHE_CONTROL, "no-store")
+        .body(Map.of(
+            "message", "Logged out successfully. Please clear the token on client side.",
+            "_links", links));
   }
+
 }
