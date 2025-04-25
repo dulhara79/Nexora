@@ -44,7 +44,6 @@ public class ForumCommentController {
             Map<String, String> links = new HashMap<>();
             links.put("self", "/api/forum/comments/" + createdComment.getId());
             links.put("question", "/api/questions/" + createdComment.getQuestionId());
-            links.put("upvote", "/api/forum/comments/" + createdComment.getId() + "/upvote");
             Map<String, Object> response = new HashMap<>();
             response.put("comment", createdComment);
             response.put("_links", links);
@@ -110,17 +109,34 @@ public class ForumCommentController {
     }
 
     @GetMapping(value = "/question/{questionId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ForumComment>> getCommentsByQuestionId(@PathVariable String questionId) {
+    public ResponseEntity<?> getCommentsByQuestionId(
+            @PathVariable String questionId,
+            @RequestHeader(value = "If-None-Match", required = false) String ifNoneMatch) {
         List<ForumComment> comments = commentService.getCommentsByQuestionId(questionId);
+        String etag = "\"" + Integer.toHexString(comments.hashCode()) + "\"";
+        if (ifNoneMatch != null && ifNoneMatch.equals(etag)) {
+            return ResponseEntity.status(304)
+                    .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                    .header(HttpHeaders.ETAG, etag)
+                    .build();
+        }
+        Map<String, String> links = new HashMap<>();
+        links.put("self", "/api/forum/comments/question/" + questionId);
+        links.put("question", "/api/questions/" + questionId);
+        Map<String, Object> response = new HashMap<>();
+        response.put("comments", comments);
+        response.put("_links", links);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
-                .body(comments);
+                .header(HttpHeaders.ETAG, etag)
+                .body(response);
     }
 
-    @PostMapping(value = "/{id}/upvote", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> upvoteComment(
+    @PatchMapping(value = "/{id}/vote", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> voteComment(
             @PathVariable String id,
-            @RequestHeader("Authorization") String authHeader) {
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody Map<String, String> voteRequest) {
         String userId = extractUserIdFromToken(authHeader);
         if (userId == null) {
             return ResponseEntity.status(401)
@@ -128,7 +144,17 @@ public class ForumCommentController {
                     .body(createErrorResponse("Unauthorized"));
         }
         try {
-            ForumComment comment = commentService.upvoteComment(id, userId);
+            String voteType = voteRequest.get("voteType"); // "upvote" or "downvote"
+            ForumComment comment;
+            if ("upvote".equalsIgnoreCase(voteType)) {
+                comment = commentService.upvoteComment(id, userId);
+            } else if ("downvote".equalsIgnoreCase(voteType)) {
+                comment = commentService.downvoteComment(id, userId);
+            } else {
+                return ResponseEntity.badRequest()
+                        .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                        .body(createErrorResponse("Invalid vote type"));
+            }
             Map<String, String> links = new HashMap<>();
             links.put("self", "/api/forum/comments/" + id);
             links.put("question", "/api/questions/" + comment.getQuestionId());
@@ -145,35 +171,7 @@ public class ForumCommentController {
         }
     }
 
-    @PostMapping(value = "/{id}/downvote", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> downvoteComment(
-            @PathVariable String id,
-            @RequestHeader("Authorization") String authHeader) {
-        String userId = extractUserIdFromToken(authHeader);
-        if (userId == null) {
-            return ResponseEntity.status(401)
-                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                    .body(createErrorResponse("Unauthorized"));
-        }
-        try {
-            ForumComment comment = commentService.downvoteComment(id, userId);
-            Map<String, String> links = new HashMap<>();
-            links.put("self", "/api/forum/comments/" + id);
-            links.put("question", "/api/questions/" + comment.getQuestionId());
-            Map<String, Object> response = new HashMap<>();
-            response.put("comment", comment);
-            response.put("_links", links);
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                    .body(response);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                    .body(createErrorResponse(e.getMessage()));
-        }
-    }
-
-    @PostMapping(value = "/{id}/flag", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/{id}/flag", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> flagComment(
             @PathVariable String id,
             @RequestHeader("Authorization") String authHeader) {
@@ -185,9 +183,14 @@ public class ForumCommentController {
         }
         try {
             commentService.flagComment(id, userId);
+            Map<String, String> links = new HashMap<>();
+            links.put("self", "/api/forum/comments/" + id);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Comment flagged");
+            response.put("_links", links);
             return ResponseEntity.ok()
                     .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                    .body(Map.of("message", "Comment flagged"));
+                    .body(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .header(HttpHeaders.CACHE_CONTROL, "no-store")
