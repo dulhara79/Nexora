@@ -1,16 +1,23 @@
 package com.nexora.server.controller.post;
 
 import com.nexora.server.model.post.Notification;
-import com.nexora.server.service.UserService;
 import com.nexora.server.service.post.NotificationService;
-import com.nexora.server.model.User;
-import jakarta.servlet.http.HttpSession;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -20,15 +27,51 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
 
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
+    // Extract userId from JWT token
+    private String extractUserIdFromToken(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+        String token = authHeader.substring(7); // Remove "Bearer " prefix
+        try {
+            SecretKey jwtSecretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+            return Jwts.parserBuilder()
+                .setSigningKey(jwtSecretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject(); // Assumes userId is stored as the subject in the JWT
+        } catch (Exception e) {
+            System.err.println("Error parsing JWT: " + e.getMessage());
+            return null;
+        }
+    }
+
     @GetMapping
-    public ResponseEntity<List<Notification>> getNotifications(HttpSession session) {
-        String userId = (String) session.getAttribute("userId");
+    public ResponseEntity<List<Map<String, Object>>> getNotifications(
+            @RequestHeader("Authorization") String authHeader,
+            HttpServletResponse response) {
+        String userId = extractUserIdFromToken(authHeader);
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
         try {
             List<Notification> notifications = notificationService.getNotifications(userId);
-            return ResponseEntity.ok(notifications);
+            List<Map<String, Object>> responseBody = notifications.stream().map(notification -> {
+                Map<String, Object> notificationWithLinks = new HashMap<>();
+                notificationWithLinks.put("notification", notification);
+                notificationWithLinks.put("_links", Arrays.asList(
+                    Map.of("rel", "self", "href", "/api/notifications/" + notification.getId()),
+                    Map.of("rel", "mark-as-read", "href", "/api/notifications/" + notification.getId() + "/read")
+                ));
+                return notificationWithLinks;
+            }).collect(Collectors.toList());
+
+            response.setHeader("Cache-Control", "max-age=3600"); // Cache for 1 hour
+            return ResponseEntity.ok(responseBody);
         } catch (Exception e) {
             System.err.println("Error fetching notifications for userId " + userId + ": " + e.getMessage());
             e.printStackTrace();
@@ -37,8 +80,11 @@ public class NotificationController {
     }
 
     @PutMapping("/{notificationId}/read")
-    public ResponseEntity<?> markAsRead(@PathVariable String notificationId, HttpSession session) {
-        String userId = (String) session.getAttribute("userId");
+    public ResponseEntity<?> markAsRead(
+            @PathVariable String notificationId,
+            @RequestHeader("Authorization") String authHeader,
+            HttpServletResponse response) {
+        String userId = extractUserIdFromToken(authHeader);
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
         }
@@ -51,7 +97,15 @@ public class NotificationController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not authorized to mark this notification as read");
             }
             notificationService.markAsRead(notificationId);
-            return ResponseEntity.ok("Notification marked as read");
+            response.setHeader("Cache-Control", "no-cache"); // Prevent caching for PUT
+
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("message", "Notification marked as read");
+            responseBody.put("_links", Arrays.asList(
+                Map.of("rel", "notifications", "href", "/api/notifications")
+            ));
+
+            return ResponseEntity.ok(responseBody);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
@@ -62,14 +116,24 @@ public class NotificationController {
     }
 
     @PutMapping("/read-all")
-    public ResponseEntity<?> markAllAsRead(HttpSession session) {
-        String userId = (String) session.getAttribute("userId");
+    public ResponseEntity<?> markAllAsRead(
+            @RequestHeader("Authorization") String authHeader,
+            HttpServletResponse response) {
+        String userId = extractUserIdFromToken(authHeader);
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
         }
         try {
             notificationService.markAllAsRead(userId);
-            return ResponseEntity.ok("All notifications marked as read");
+            response.setHeader("Cache-Control", "no-cache"); // Prevent caching for PUT
+
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("message", "All notifications marked as read");
+            responseBody.put("_links", Arrays.asList(
+                Map.of("rel", "notifications", "href", "/api/notifications")
+            ));
+
+            return ResponseEntity.ok(responseBody);
         } catch (Exception e) {
             System.err.println("Error marking all notifications as read: " + e.getMessage());
             e.printStackTrace();
