@@ -2,6 +2,7 @@ package com.nexora.server.controller.forum;
 
 import com.nexora.server.model.forum.ForumQuestion;
 import com.nexora.server.repository.forum.ForumQuestionRepository;
+import com.nexora.server.service.AuthenticationService;
 import com.nexora.server.service.forum.ForumQuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -27,6 +28,8 @@ public class ForumQuestionController {
     @Autowired
     private ForumQuestionRepository questionRepository;
 
+    @Autowired
+    private AuthenticationService authenticationService;
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createQuestion(
             @RequestHeader("Authorization") String authHeader,
@@ -361,7 +364,7 @@ public class ForumQuestionController {
         }
         String token = authHeader.substring(7);
         try {
-            return token; // Placeholder
+            return authenticationService.validateJwtToken(token).getId();
         } catch (Exception e) {
             return null;
         }
