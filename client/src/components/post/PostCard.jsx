@@ -1,7 +1,9 @@
 import { useState, useCallback, memo, useRef } from "react";
+import { useState, useCallback, memo, useRef } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
+import { FaHeart, FaComment, FaEdit, FaTrash, FaSpinner, FaTimes, FaShare } from "react-icons/fa";
 import { FaHeart, FaComment, FaEdit, FaTrash, FaSpinner, FaTimes, FaShare } from "react-icons/fa";
 import { toast } from "react-toastify";
 
@@ -17,11 +19,16 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
   const [zoomedMedia, setZoomedMedia] = useState(null);
   const [showComments, setShowComments] = useState(false);
   const commentInputRef = useRef(null);
+  const [zoomedMedia, setZoomedMedia] = useState(null);
+  const [showComments, setShowComments] = useState(false);
+  const commentInputRef = useRef(null);
 
   const isOwner = user === post.userId;
   const formattedDate = post.createdAt
     ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })
     : "Unknown date";
+  
+  const hasComments = post.comments && post.comments.length > 0;
   
   const hasComments = post.comments && post.comments.length > 0;
 
@@ -42,6 +49,16 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
       toast.error("Failed to like the post.", { position: "top-right" });
     } finally {
       setLoading(prev => ({ ...prev, like: false }));
+    }
+  };
+
+  const handleCommentToggle = () => {
+    setShowComments(!showComments);
+    // Focus the comment input when opening comments
+    if (!showComments && commentInputRef.current) {
+      setTimeout(() => {
+        commentInputRef.current.focus();
+      }, 300);
     }
   };
 
@@ -161,7 +178,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
       );
       onUpdatePost(response.data);
       setIsEditingPost(false);
-      toast.success("Post updated successfully!", { position: "top-right" });
+      toast.success("Recipe updated successfully!", { position: "top-right" });
     } catch (error) {
       console.error("Error updating post:", error);
       if (error.response?.status === 404) {
@@ -183,11 +200,11 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
     try {
       await axios.delete(`http://localhost:5000/api/posts/${post.id}`, { withCredentials: true });
       onDeletePost(post.id);
-      toast.success("Post deleted successfully!", { position: "top-right" });
+      toast.success("Recipe deleted successfully!", { position: "top-right" });
     } catch (error) {
       console.error("Error deleting post:", error);
       if (error.response?.status === 404) {
-        toast.error("Post not found.", { position: "top-right" });
+        toast.error("Recipe not found.", { position: "top-right" });
         onDeletePost(post.id); // Remove from UI anyway
       } else if (error.response?.status === 403) {
         toast.error("You are not authorized to delete this Post.", { position: "top-right" });
@@ -236,11 +253,18 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="mb-8 overflow-hidden transition-all duration-300 bg-white border border-gray-100 shadow-sm rounded-2xl hover:shadow-md"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="mb-8 overflow-hidden transition-all duration-300 bg-white border border-gray-100 shadow-sm rounded-2xl hover:shadow-md"
     >
       {/* Post Header */}
       <div className="flex items-center justify-between p-5 border-b border-gray-100">
+      <div className="flex items-center justify-between p-5 border-b border-gray-100">
         <div className="flex items-center space-x-3">
           <motion.div
+            className="flex items-center justify-center w-12 h-12 text-lg font-semibold text-white rounded-full bg-gradient-to-br from-orange-400 to-red-500"
+            whileHover={{ scale: 1.05 }}
             className="flex items-center justify-center w-12 h-12 text-lg font-semibold text-white rounded-full bg-gradient-to-br from-orange-400 to-red-500"
             whileHover={{ scale: 1.05 }}
           >
@@ -312,10 +336,20 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading.edit}
               className="flex items-center justify-center w-1/2 px-5 py-3 font-medium text-white transition-colors rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 disabled:opacity-50 hover:from-orange-600 hover:to-orange-700"
+              className="flex items-center justify-center w-1/2 px-5 py-3 font-medium text-white transition-colors rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 disabled:opacity-50 hover:from-orange-600 hover:to-orange-700"
             >
+              {loading.edit ? (
+                <>
+                  <FaSpinner className="mr-2 animate-spin" /> Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
               {loading.edit ? (
                 <>
                   <FaSpinner className="mr-2 animate-spin" /> Saving...
@@ -327,8 +361,11 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="button"
               onClick={() => setIsEditingPost(false)}
+              className="w-1/2 px-5 py-3 font-medium text-gray-700 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200"
               className="w-1/2 px-5 py-3 font-medium text-gray-700 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200"
             >
               Cancel
@@ -339,9 +376,11 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
         <>
           {/* Post Description */}
           <div className="p-5">
+          <div className="p-5">
             <motion.p
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.1, duration: 0.3 }}
               transition={{ delay: 0.1, duration: 0.3 }}
               className="text-base leading-relaxed text-gray-700"
             >
@@ -352,14 +391,19 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
           {/* Post Media */}
           {post.media && post.media.length > 0 && (
             <div className={`grid gap-2 p-5 pt-0 ${post.media.length === 1 ? 'grid-cols-1' : post.media.length === 2 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3'}`}>
+            <div className={`grid gap-2 p-5 pt-0 ${post.media.length === 1 ? 'grid-cols-1' : post.media.length === 2 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3'}`}>
               {post.media.map((media, index) => (
                 <motion.div
                   key={index}
                   whileHover={{ scale: 1.02 }}
                   className="relative overflow-hidden transition-transform duration-200 bg-gray-100 rounded-lg cursor-pointer"
                   onClick={() => handleMediaClick(media, index)}
+                  whileHover={{ scale: 1.02 }}
+                  className="relative overflow-hidden transition-transform duration-200 bg-gray-100 rounded-lg cursor-pointer"
+                  onClick={() => handleMediaClick(media, index)}
                 >
                   {mediaError[index] ? (
+                    <div className="flex items-center justify-center w-full h-56 text-gray-500 bg-gray-200">
                     <div className="flex items-center justify-center w-full h-56 text-gray-500 bg-gray-200">
                       Failed to load media
                     </div>
@@ -373,6 +417,14 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                       />
                     </div>
                   ) : (
+                    <div className="overflow-hidden aspect-[4/3]">
+                      <video
+                        src={media.fileUrl}
+                        controls
+                        className="object-cover w-full h-full"
+                        onError={() => handleMediaError(index)}
+                      />
+                    </div>
                     <div className="overflow-hidden aspect-[4/3]">
                       <video
                         src={media.fileUrl}
@@ -614,7 +666,33 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                   autoPlay
                   className="object-contain w-full h-full"
                 />
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="absolute p-2 text-white bg-black bg-opacity-50 rounded-full top-4 right-4 hover:bg-opacity-70"
+              onClick={handleCloseZoom}
+            >
+              <FaTimes size={24} />
+            </motion.button>
+
+            <div className="relative w-full h-full max-w-4xl max-h-screen p-4" onClick={(e) => e.stopPropagation()}>
+              {zoomedMedia.fileType?.startsWith("image") ? (
+                <img
+                  src={zoomedMedia.fileUrl}
+                  alt={zoomedMedia.fileName || "Full screen image"}
+                  className="object-contain w-full h-full"
+                />
+              ) : (
+                <video
+                  src={zoomedMedia.fileUrl}
+                  controls
+                  autoPlay
+                  className="object-contain w-full h-full"
+                />
               )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
             </div>
           </motion.div>
         )}

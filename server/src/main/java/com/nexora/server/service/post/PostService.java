@@ -1,10 +1,12 @@
 package com.nexora.server.service.post;
 
 import com.nexora.server.model.User;
+import com.nexora.server.model.User;
 import com.nexora.server.model.post.Notification;
 import com.nexora.server.model.post.Post;
 import com.nexora.server.repository.post.NotificationRepository;
 import com.nexora.server.repository.post.PostRepository;
+import com.nexora.server.service.UserService;
 import com.nexora.server.service.UserService;
 import com.nexora.server.repository.UserRepository;
 import com.cloudinary.Cloudinary;
@@ -32,6 +34,9 @@ public class PostService {
 
     @Autowired
     private Cloudinary cloudinary;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private UserService userService;
@@ -244,9 +249,12 @@ public class PostService {
 
         User user = userService.getUserById(userId);
 
+        User user = userService.getUserById(userId);
+
         Post.Comment comment = new Post.Comment();
         comment.setId(UUID.randomUUID().toString());
         comment.setUserId(userId);
+        comment.setName(user.getName());
         comment.setName(user.getName());
         comment.setText(commentText);
         comment.setCreatedAt(LocalDateTime.now());

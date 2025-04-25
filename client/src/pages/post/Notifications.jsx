@@ -1,13 +1,18 @@
 import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../../context/AuthContext";
+import { formatDistanceToNow } from "date-fns";
+import Navbar from "../../components/post/Navbar";
 import { formatDistanceToNow } from "date-fns";
 import Navbar from "../../components/post/Navbar";
 
 const Notifications = ({ onNewNotification }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("all");
+  const [unreadCount, setUnreadCount] = useState(0);
   const [filter, setFilter] = useState("all");
   const [unreadCount, setUnreadCount] = useState(0);
   const { user } = useContext(AuthContext);
@@ -18,7 +23,12 @@ const Notifications = ({ onNewNotification }) => {
         withCredentials: true,
       });
       console.log("Fetched notifications:", response.data);
+      console.log("Fetched notifications:", response.data);
       setNotifications(response.data);
+      
+      // Count unread notifications
+      const unread = response.data.filter(notification => !notification.read).length;
+      setUnreadCount(unread);
       
       // Count unread notifications
       const unread = response.data.filter(notification => !notification.read).length;
