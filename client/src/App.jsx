@@ -1,4 +1,4 @@
-import React,{useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Authentication
@@ -39,11 +39,9 @@ import CreatePost from "./pages/post/CreatePost";
 import Notifications from "./pages/post/Notifications";
 
 function App() {
-  
   return (
-    <AuthProvider>
-      <Router>
-    
+    <Router>
+      <AuthProvider>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
@@ -76,21 +74,21 @@ function App() {
 
           <Route path="/post" element={<Home />} />
           <Route path="/create-post" element={<CreatePost />} />
-          <Route path="/post-notifications" element={<Notifications  />} />
+          <Route path="/post-notifications" element={<Notifications />} />
 
           <Route path="/post" element={<Home />} />
           <Route path="/create-post" element={<CreatePost />} />
-          <Route path="/post-notifications" element={<Notifications  />} />
+          <Route path="/post-notifications" element={<Notifications />} />
 
           <Route path="/post" element={<Home />} />
           <Route path="/create-post" element={<CreatePost />} />
-          <Route path="/post-notifications" element={<Notifications  />} />
+          <Route path="/post-notifications" element={<Notifications />} />
 
           {/* 404 Page */}
           <Route path="/*" element={<PageNotFound />} />
         </Routes>
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

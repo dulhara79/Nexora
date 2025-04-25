@@ -1,35 +1,38 @@
-import { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import { useEffect } from "react";
 
 const GoogleCallback = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
   useEffect(() => {
+    // Check if the window contains the JSON response
     const fetchUserData = async () => {
       try {
-        // Fetch user data from the success endpoint
-        const response = await axios.get('http://localhost:5000/api/users/google-success', {
-          withCredentials: true
-        });
-        const { userId } = response.data;
+        // Since the page is loaded at /api/auth/google-redirect, the JSON is in the document body
+        const jsonText = document.body.textContent;
+        const data = JSON.parse(jsonText); // Parse the JSON response
+        const { id, token, email, name } = data;
 
-        if (userId) {
-          // Post message to parent window
-          window.opener.postMessage({ userId }, 'http://localhost:5173');
-          navigate(`/edit/${userId}`);
+        if (id && token) {
+          // Send user data to the parent window
+          window.opener.postMessage(
+            { userId: id, token, email, name },
+            "http://localhost:5173"
+          );
+        } else {
+          throw new Error("Invalid user data");
         }
       } catch (error) {
-        console.error('Error fetching Google login data:', error);
-        window.opener.postMessage({ error: 'Google login failed' }, 'http://localhost:5173');
+        console.error("Error processing Google login data:", error);
+        window.opener.postMessage(
+          { error: "Google login failed" },
+          "http://localhost:5173"
+        );
       } finally {
+        // Close the popup window
         window.close();
       }
     };
 
     fetchUserData();
-  }, [navigate]);
+  }, []);
 
   return <div>Authenticating...</div>;
 };
