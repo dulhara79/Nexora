@@ -1513,7 +1513,7 @@ const PlanPage = () => {
   }, []);
 
   const handleSelectCuisine = (cuisine, level) => {
-    navigate(`/progress/${cuisine.name}`, {
+    navigate(`/recipe/${cuisine.name}`, {
       state: { cuisine, level }
     });
   };
