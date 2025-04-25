@@ -93,7 +93,8 @@ public class SecurityConfig {
                 .formLogin().disable()
                 .httpBasic().disable()
                 .logout()
-                .logoutUrl("/api/auth/logout") // Match AuthenticationController
+                // .logoutUrl("/api/auth/logout") // Match AuthenticationController
+                .logoutUrl("/spring-security-logout") // Avoids conflict
                 .logoutSuccessHandler((req, res, auth) -> res.setStatus(200))
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID");
