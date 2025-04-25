@@ -21,7 +21,7 @@ import EditProfile from "./pages/User/EditProfilePage";
 // Learning Plan Pages
 import HomePage from "./pages/LearningPlanPage/HomePage";
 import RecipePage from "./pages/LearningPlanPage/RecipePage";
-import PlanPage from "./pages/LearningPlanPage/PlanPage";
+import CuisinePage from "./pages/LearningPlanPage/CuisinePage";
 
 // Forum Pages
 import ForumDashBoard from "./pages/Forum/ForumDashBoard";
@@ -59,7 +59,7 @@ function App() {
           {/* Learning Plan Routes */}
           <Route path="/learninghome" element={<HomePage />} />
           {/* <Route path="/recipe" element={<RecipePage />} /> */}
-          <Route path="/plan/:level" element={<PlanPage />} />
+          <Route path="/cuisine/:level" element={<CuisinePage />} />
           <Route path="/recipe/:cuisineName" element={<RecipePage />} />
 
           {/* Forum Routes */}
