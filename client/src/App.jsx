@@ -39,6 +39,12 @@ import Home from "./pages/post/Home";
 import CreatePost from "./pages/post/CreatePost";
 import Notifications from "./pages/post/Notifications";
 
+// Challanges Pages
+import ChallengeDetail from "./pages/Challenge/ChallengeDetail";
+import ChallengeList from "./pages/Challenge/ChallengeList";
+import CreateChallenge from "./pages/Challenge/CreateChallenge";
+
+
 function App() {
   
   return (
@@ -88,6 +94,12 @@ function App() {
           <Route path="/post" element={<Home />} />
           <Route path="/create-post" element={<CreatePost />} />
           <Route path="/post-notifications" element={<Notifications  />} />
+
+          {/* Challenges Routes */}
+          <Route path="/challenges" element={<ChallengeList />} />
+          <Route path="/challenge/:challengeId" element={<ChallengeDetail />} />
+          <Route path="/create-challenge" element={<CreateChallenge />} />
+          <Route path="/edit-challenge/:challengeId" element={<CreateChallenge />} />
 
           {/* 404 Page */}
           <Route path="/*" element={<PageNotFound />} />
