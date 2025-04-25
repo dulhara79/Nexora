@@ -8,7 +8,7 @@ import Footer from '../components/layout/Footer';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import '../styles/LandingPage.css'
-
+// test merge to develop/api branch
 const LandingPage = () => {
   useEffect(() => {
     AOS.init({
