@@ -9,7 +9,7 @@ const HomePage = () => {
   const levels = [
     {
       name: "Beginner",
-      route: "/plan/beginner",
+      route: "/cuisine/beginner",
       description:
         "Start with simple recipes to build your kitchen confidence. Enjoy easy-to-follow recipes and begin your culinary journey!",
       borderClass: "border-blue-600",
@@ -20,7 +20,7 @@ const HomePage = () => {
     },
     {
       name: "Intermediate",
-      route: "/plan/intermediate",
+      route: "/cuisine/intermediate",
       description:
         "Take your skills up a notch with diverse and challenging dishes. Perfect for those who have mastered the basics and are ready for more adventure!",
       borderClass: "border-yellow-600",
@@ -31,7 +31,7 @@ const HomePage = () => {
     },
     {
       name: "Advanced",
-      route: "/plan/advanced",
+      route: "/cuisine/advanced",
       description:
         "Master your craft with complex recipes and advanced techniques. For the seasoned cook looking to refine every detail.",
       borderClass: "border-red-600",
