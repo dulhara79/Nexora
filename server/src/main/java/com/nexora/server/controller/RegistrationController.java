@@ -2,10 +2,11 @@ package com.nexora.server.controller;
 
 import com.nexora.server.model.User;
 import com.nexora.server.service.RegistrationService;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -16,52 +17,53 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@CrossOrigin(origins = "http://localhost:5173")
 @Validated
 public class RegistrationController {
 
     @Autowired
     private RegistrationService registrationService;
 
-    @PostMapping("/register")
+    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> register(
-            @Valid @ModelAttribute User user,
-            @RequestParam(required = false) MultipartFile profilePhoto,
-            HttpSession session) {
+            @Valid @RequestPart("user") UserRequest userRequest,
+            @RequestPart(value = "profilePhoto", required = false) MultipartFile profilePhoto) {
         try {
-            User registeredUser = registrationService.registerUser(user, profilePhoto);
-            session.setAttribute("userId", registeredUser.getId());
-            return ResponseEntity.ok("Registration successful. Please verify your email.");
+            User registeredUser = registrationService.registerUser(userRequest, profilePhoto);
+            Map<String, String> links = new HashMap<>();
+            links.put("verify", "/api/users/" + registeredUser.getEmail() + "/verification");
+            links.put("self", "/api/users/" + registeredUser.getId());
+            String token = registrationService.generateJwtToken(registeredUser);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(new UserResponse(registeredUser.getId(), registeredUser.getEmail(),
+                            "Registration successful. Please verify your email.", links));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest()
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
-    @PostMapping("/register/google")
-    public ResponseEntity<?> registerWithGoogle(
-            @Valid @ModelAttribute User user,
-            @RequestParam(required = false) MultipartFile profilePhoto) {
-        try {
-            User registeredUser = registrationService.registerWithGoogle(user, profilePhoto);
-            return ResponseEntity.ok("Registration successful. Please verify your email.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @PostMapping("/verify")
+    @PostMapping(value = "/{email}/verification", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> verifyEmail(
-            @RequestParam String email,
-            @RequestParam String code) {
+            @PathVariable String email,
+            @RequestBody Map<String, String> verificationRequest) {
         try {
+            String code = verificationRequest.get("code");
             String result = registrationService.verifyEmail(email, code);
-            return ResponseEntity.ok(result);
+            Map<String, String> links = new HashMap<>();
+            links.put("self", "/api/users/" + email + "/verification");
+            links.put("login", "/api/auth/login");
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(Map.of("message", result, "_links", links));
         } catch (Exception e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
-            errorResponse.put("email", email);
-            errorResponse.put("code", code);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(Map.of("error", e.getMessage(), "email", email));
         }
     }
 }
+
+record UserResponse(String id, String email, String message, Map<String, String> _links) {}
