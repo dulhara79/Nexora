@@ -29,6 +29,12 @@ import QuestionDetailPage from "./pages/Forum/QuestionDetailPage";
 import AskQuestionPage from "./pages/Forum/AskQuestionPage";
 import SavedQuestions from "./pages/Forum/SavedQuestions";
 
+// Challanges Pages
+import ChallengeDetail from "./pages/Challenge/ChallengeDetail";
+import ChallengeList from "./pages/Challenge/ChallengeList";
+import CreateChallenge from "./pages/Challenge/CreateChallenge";
+
+
 function App() {
   return (
     <AuthProvider>
@@ -57,6 +63,12 @@ function App() {
           <Route path="/forum/ask" element={<AskQuestionPage />} />
           <Route path="/forum/edit/:id" element={<AskQuestionPage />} />
           <Route path="/forum/saved" element={<SavedQuestions />} />
+
+          {/* Challenges Routes */}
+          <Route path="/challenges" element={<ChallengeList />} />
+          <Route path="/challenge/:challengeId" element={<ChallengeDetail />} />
+          <Route path="/create-challenge" element={<CreateChallenge />} />
+          <Route path="/edit-challenge/:challengeId" element={<CreateChallenge />} />
 
           {/* 404 Page */}
           <Route path="/*" element={<PageNotFound />} />
