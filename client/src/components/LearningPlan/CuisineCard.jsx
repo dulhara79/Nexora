@@ -71,7 +71,7 @@ const CuisineCard = ({ cuisine, onSelectCuisine, color = 'blue' }) => {
           onClick={onSelectCuisine}
           className={`mt-2 px-5 py-2 rounded-full bg-${color}-500 hover:bg-${color}-600 text-white font-semibold transition`}
         >
-          Add to My Plan
+          View Recipes
         </button>
       </div>
     </div>
