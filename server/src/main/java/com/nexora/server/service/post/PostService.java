@@ -1,9 +1,11 @@
 package com.nexora.server.service.post;
 
+import com.nexora.server.model.User;
 import com.nexora.server.model.post.Notification;
 import com.nexora.server.model.post.Post;
 import com.nexora.server.repository.post.NotificationRepository;
 import com.nexora.server.repository.post.PostRepository;
+import com.nexora.server.service.UserService;
 import com.nexora.server.repository.UserRepository;
 import com.cloudinary.Cloudinary;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ public class PostService {
 
     @Autowired
     private Cloudinary cloudinary;
+
+    @Autowired
+    private UserService userService;
 
     public Post createPost(String userId, String description, List<MultipartFile> files) throws Exception {
         if (userId == null) {
@@ -215,11 +220,14 @@ public class PostService {
         if (!post.getLikes().contains(userId)) {
             post.getLikes().add(userId);
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
             if (!userId.equals(post.getUserId())) {
                 Notification notification = new Notification();
                 notification.setId(UUID.randomUUID().toString());
                 notification.setUserId(post.getUserId());
-                notification.setMessage(userId + " liked your post");
+                notification.setMessage(user.getName() + " liked your post");
                 notification.setCreatedAt(LocalDateTime.now());
                 notificationRepository.save(notification);
             }
@@ -232,15 +240,18 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
+        User user = userService.getUserById(userId);
+
         Post.Comment comment = new Post.Comment();
         comment.setId(UUID.randomUUID().toString());
         comment.setUserId(userId);
+        comment.setName(user.getName());
         comment.setText(commentText);
         comment.setCreatedAt(LocalDateTime.now());
 
-        // Fetch username
-        com.nexora.server.model.User user = userRepository.findById(userId).orElse(null);
-        comment.setName(user != null ? user.getName() : "Unknown User");
+        // // Fetch username
+        // user = userRepository.findById(userId).orElse(null);
+        // comment.setName(user != null ? user.getName() : "Unknown User");
 
         post.getComments().add(comment);
 
@@ -248,7 +259,8 @@ public class PostService {
             Notification notification = new Notification();
             notification.setId(UUID.randomUUID().toString());
             notification.setUserId(post.getUserId());
-            notification.setMessage(userId + " commented on your post");
+            notification.setName(post.getUserName());
+            notification.setMessage(user.getName() + " commented on your post");
             notification.setCreatedAt(LocalDateTime.now());
             notificationRepository.save(notification);
         }

@@ -11,6 +11,7 @@ public class Notification {
     @Id
     private String id;
     private String userId;
+    private String name; // Type of notification (e.g., "like", "comment", etc.)
     private String message;
     private LocalDateTime createdAt;
 
@@ -45,5 +46,13 @@ public class Notification {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
