@@ -28,7 +28,7 @@ public class User {
   @NotBlank(message = "Name is required")
   @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
   private String name;
-  
+
   @NotBlank(message = "Username is required")
   @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
   private String username;
@@ -47,6 +47,7 @@ public class User {
   private List<String> following = new ArrayList<>();
   private List<SocialMediaLink> socialMedia = new ArrayList<>(); // Updated reference
   private List<String> bookmarkedPosts = new ArrayList<>();
+  private List<String> savedQuestionIds = new ArrayList<>();
 
   private Role role;
 
@@ -166,7 +167,7 @@ public class User {
   public void setVerificationCode(String verificationCode) {
     this.verificationCode = verificationCode;
   }
-  
+
   public LocalDateTime getCreatedAt() {
     return createdAt;
   }
@@ -221,5 +222,13 @@ public class User {
 
   public void setRole(Role role) {
     this.role = role;
+  }
+
+  public List<String> getSavedQuestionIds() {
+    return savedQuestionIds;
+  }
+
+  public void setSavedQuestionIds(List<String> savedQuestionIds) {
+    this.savedQuestionIds = savedQuestionIds;
   }
 }
