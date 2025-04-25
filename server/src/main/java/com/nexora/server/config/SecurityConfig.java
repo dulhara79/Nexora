@@ -77,7 +77,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/completedplans/**").permitAll()
                 .requestMatchers("/api/progress/**").permitAll()
                 
-                        .requestMatchers("/api/users/**", "/api/auth/**", "/api/questions/**", "/api/forum/comments/**", "/api/forum/notifications/**", "/api/tags/**", "/api/communities/**", "/api/posts/**", "/api/feedposts/**").permitAll() // Ensure all auth and user
+                        .requestMatchers("/api/users/**", "/api/auth/**", "/api/questions/**", "/api/forum/comments/**", "/api/forum/notifications/**", "/api/tags/**", "/api/communities/**", "/api/posts/**", "/api/feedposts/**", "/api/challenges/**").permitAll() // Ensure all auth and user
                                                                                       // endpoints are public
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
