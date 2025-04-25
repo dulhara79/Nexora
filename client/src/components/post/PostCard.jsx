@@ -161,15 +161,15 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
       );
       onUpdatePost(response.data);
       setIsEditingPost(false);
-      toast.success("Recipe updated successfully!", { position: "top-right" });
+      toast.success("Post updated successfully!", { position: "top-right" });
     } catch (error) {
       console.error("Error updating post:", error);
       if (error.response?.status === 404) {
         toast.error("Post not found.", { position: "top-right" });
       } else if (error.response?.status === 403) {
-        toast.error("You are not authorized to edit this recipe.", { position: "top-right" });
+        toast.error("You are not authorized to edit this Post.", { position: "top-right" });
       } else {
-        toast.error("Failed to update recipe.", { position: "top-right" });
+        toast.error("Failed to update Post.", { position: "top-right" });
       }
     } finally {
       setLoading(prev => ({ ...prev, edit: false }));
@@ -177,22 +177,22 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
   };
 
   const handleDeletePost = async () => {
-    if (!window.confirm("Are you sure you want to delete this recipe?") || loading.delete) return;
+    if (!window.confirm("Are you sure you want to delete this Post?") || loading.delete) return;
     setLoading(prev => ({ ...prev, delete: true }));
 
     try {
       await axios.delete(`http://localhost:5000/api/posts/${post.id}`, { withCredentials: true });
       onDeletePost(post.id);
-      toast.success("Recipe deleted successfully!", { position: "top-right" });
+      toast.success("Post deleted successfully!", { position: "top-right" });
     } catch (error) {
       console.error("Error deleting post:", error);
       if (error.response?.status === 404) {
-        toast.error("Recipe not found.", { position: "top-right" });
+        toast.error("Post not found.", { position: "top-right" });
         onDeletePost(post.id); // Remove from UI anyway
       } else if (error.response?.status === 403) {
-        toast.error("You are not authorized to delete this recipe.", { position: "top-right" });
+        toast.error("You are not authorized to delete this Post.", { position: "top-right" });
       } else {
-        toast.error("Failed to delete recipe.", { position: "top-right" });
+        toast.error("Failed to delete Post.", { position: "top-right" });
       }
     } finally {
       setLoading(prev => ({ ...prev, delete: false }));
@@ -217,11 +217,11 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: `Recipe by ${post.userName}`,
+        title: `Post by ${post.userName}`,
         text: post.description,
         url: window.location.href,
       })
-      .then(() => toast.success("Recipe shared successfully!", { position: "top-right" }))
+      .then(() => toast.success("Post shared successfully!", { position: "top-right" }))
       .catch((error) => console.error("Error sharing:", error));
     } else {
       navigator.clipboard.writeText(window.location.href)
@@ -258,7 +258,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsEditingPost(true)}
               className="p-2 text-orange-500 rounded-full bg-orange-50 hover:bg-orange-100"
-              aria-label="Edit recipe"
+              aria-label="Edit Post"
             >
               <FaEdit />
             </motion.button>
@@ -268,7 +268,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
               onClick={handleDeletePost}
               disabled={loading.delete}
               className="p-2 text-red-500 rounded-full bg-red-50 hover:bg-red-100"
-              aria-label="Delete recipe"
+              aria-label="Delete Post"
             >
               {loading.delete ? <FaSpinner className="animate-spin" /> : <FaTrash />}
             </motion.button>
@@ -280,12 +280,12 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
       {isEditingPost ? (
         <form onSubmit={handleEditPostSubmit} className="p-5">
           <div className="mb-4">
-            <label htmlFor="recipe-description" className="block mb-2 text-sm font-medium text-gray-700">Recipe Description</label>
+            <label htmlFor="Post-description" className="block mb-2 text-sm font-medium text-gray-700">Post Description</label>
             <textarea
-              id="recipe-description"
+              id="Post-description"
               value={editDescription}
               onChange={(e) => setEditDescription(e.target.value)}
-              placeholder="Share your recipe or cooking tip..."
+              placeholder="Share your Recipe or cooking skill..."
               className="w-full p-4 text-gray-700 transition-all duration-200 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               rows="4"
               required
@@ -367,7 +367,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                     <div className="overflow-hidden aspect-[4/3]">
                       <img
                         src={media.fileUrl}
-                        alt={media.fileName || `Recipe image ${index + 1}`}
+                        alt={media.fileName || `Post image ${index + 1}`}
                         className="object-cover w-full h-full transition-transform duration-700 hover:scale-105"
                         onError={() => handleMediaError(index)}
                       />
@@ -482,7 +482,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                         exit={{ opacity: 0 }}
                         className="flex flex-col items-center justify-center py-6"
                       >
-                        <p className="text-gray-500">Be the first to comment on this recipe!</p>
+                        <p className="text-gray-500">Be the first to comment on this Post!</p>
                       </motion.div>
                     ) : (
                       <motion.ul className="space-y-3">

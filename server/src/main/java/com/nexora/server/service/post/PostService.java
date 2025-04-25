@@ -220,15 +220,17 @@ public class PostService {
         if (!post.getLikes().contains(userId)) {
             post.getLikes().add(userId);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
             if (!userId.equals(post.getUserId())) {
                 Notification notification = new Notification();
                 notification.setId(UUID.randomUUID().toString());
                 notification.setUserId(post.getUserId());
+                notification.setType("like");
                 notification.setMessage(user.getName() + " liked your post");
                 notification.setCreatedAt(LocalDateTime.now());
+                notification.setRead(false); // Set as unread
                 notificationRepository.save(notification);
             }
         }
@@ -249,19 +251,16 @@ public class PostService {
         comment.setText(commentText);
         comment.setCreatedAt(LocalDateTime.now());
 
-        // // Fetch username
-        // user = userRepository.findById(userId).orElse(null);
-        // comment.setName(user != null ? user.getName() : "Unknown User");
-
         post.getComments().add(comment);
 
         if (!userId.equals(post.getUserId())) {
             Notification notification = new Notification();
             notification.setId(UUID.randomUUID().toString());
             notification.setUserId(post.getUserId());
-            notification.setName(post.getUserName());
+            notification.setType("comment");
             notification.setMessage(user.getName() + " commented on your post");
             notification.setCreatedAt(LocalDateTime.now());
+            notification.setRead(false); // Set as unread
             notificationRepository.save(notification);
         }
 
