@@ -23,6 +23,7 @@ import HomePage from "./pages/LearningPlanPage/HomePage";
 import RecipePage from "./pages/LearningPlanPage/RecipePage";
 import CuisinePage from "./pages/LearningPlanPage/CuisinePage";
 import UserPlanPage from "./pages/LearningPlanPage/UserPlanPage";
+import ProgressPage from "./pages/LearningPlanPage/ProgressPage";
 
 // Forum Pages
 import ForumDashBoard from "./pages/Forum/ForumDashBoard";
@@ -68,6 +69,8 @@ function App() {
           <Route path="/cuisine/:level" element={<CuisinePage />} />
           <Route path="/cuisine" element={<CuisinePage />} />
           <Route path="/userplan" element={<UserPlanPage />} />
+          <Route path="/progress" element={<ProgressPage />} />
+          <Route path="/progress/:userId" element={<ProgressPage />} />
 
           {/* Forum Routes */}
           <Route path="/forum/home" element={<ForumDashBoard />} />
