@@ -30,7 +30,7 @@ const NavbarLP = () => {
             <Link to="/learninghome" className="hover:text-blue-600 transition duration-200">Home</Link>
           </li>
           <li>
-            <Link to="/plan/beginner" className="hover:text-blue-600 transition duration-200">Explore</Link>
+            <Link to="/cuisine/beginner" className="hover:text-blue-600 transition duration-200">Explore</Link>
           </li>
           <li>
             <Link to="/learning-plan" className="hover:text-blue-600 transition duration-200">My Plan</Link>
