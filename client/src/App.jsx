@@ -55,6 +55,7 @@ function App() {
           <Route path="/edit/:userId" element={<EditProfile />} />
           <Route path="/feed" element={<UserFeedPage />} />
           {/* <Route path="/register" element={<Register />} /> */}
+          
           {/* Learning Plan Routes */}
           <Route path="/learninghome" element={<HomePage />} />
           <Route path="/progress" element={<ProgressPage />} />
