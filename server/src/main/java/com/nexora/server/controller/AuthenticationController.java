@@ -2,6 +2,7 @@ package com.nexora.server.controller;
 
 import com.nexora.server.model.User;
 import com.nexora.server.service.AuthenticationService;
+import com.nexora.server.controller.UserResponse;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +23,6 @@ record LoginRequest(String email, String password) {
 }
 
 record VerifyOtpRequest(String email, String otp) {
-}
-
-record UserResponse(String id, String email, String name, String token, Map<String, String> _links) {
 }
 
 @RestController
