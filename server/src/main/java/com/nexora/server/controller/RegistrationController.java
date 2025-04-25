@@ -37,7 +37,7 @@ public class RegistrationController {
             return ResponseEntity.ok()
                     .header(HttpHeaders.CACHE_CONTROL, "no-store")
                     .body(new UserResponse(registeredUser.getId(), registeredUser.getEmail(),
-                            "Registration successful. Please verify your email.", links));
+                            registeredUser.getName(), token, links));
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .header(HttpHeaders.CACHE_CONTROL, "no-store")
@@ -65,5 +65,3 @@ public class RegistrationController {
         }
     }
 }
-
-record UserResponse(String id, String email, String message, Map<String, String> _links) {}
