@@ -74,11 +74,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/**", "/api/auth/**", "/api/questions/**", "/api/forum/comments/**", "/api/forum/notifications/**", "/api/tags/**", "/api/communities/**", "/api/posts/**", "/api/feedposts/**").permitAll() // Ensure all auth and user
                                                                                       // endpoints are public
+                        .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/api/auth/google")
-                        .defaultSuccessUrl("/api/auth/google-success", true) // Adjust to match AuthenticationController
+                        .defaultSuccessUrl("/api/auth/google-redirect", true) // Adjust to match AuthenticationController
                         .failureUrl("/api/auth/login/failure")) // Adjust to match AuthenticationController
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {

@@ -1,38 +1,55 @@
 import React, { createContext, useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true); // Added loading state
+  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(localStorage.getItem("token"));
 
   useEffect(() => {
     const checkSession = async () => {
+      if (!token) {
+        setUser(null);
+        setIsAuthenticated(false);
+        setLoading(false);
+        navigate("/login"); // Redirect to login if no token
+        return;
+      }
       try {
-        const response = await axios.get("http://localhost:5000/api/auth/check-session", {
-          withCredentials: true,
-        });
-        // Ensure response.data matches UserResponse format from backend
+        const response = await axios.get(
+          "http://localhost:5000/api/auth/check-session",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         if (response.data && response.data.id) {
           setUser({
-            id: (response.data.id)? response.data.id : 0,
-            email: (response.data.email)? response.data.email : "",
-            name: (response.data.name)? response.data.name : "",
-            profileImage: (response.data.profileImage)? response.data.profileImage : "",
+            id: response.data.id || 0,
+            email: response.data.email || "",
+            name: response.data.name || "",
             role: response.data.role || "USER",
           });
           setIsAuthenticated(true);
+          navigate("/feed"); // Redirect to feed after successful session check
         } else {
           throw new Error("Invalid session data");
         }
       } catch (err) {
         setUser(null);
         setIsAuthenticated(false);
-        console.error("Session check failed:", err.response?.data || err.message);
+        localStorage.removeItem("token");
+        console.error(
+          "Session check failed:",
+          err.response?.data || err.message
+        );
+        navigate("/login"); // Redirect to login on failure
       } finally {
-        setLoading(false); // Set loading to false after check
+        setLoading(false);
       }
     };
     checkSession();
@@ -43,43 +60,51 @@ export const AuthProvider = ({ children }) => {
       timeout = setTimeout(logout, 30 * 60 * 1000); // 30 minutes
     };
 
-    // Use a single event listener function for better performance
     const activityListener = () => resetTimer();
     window.addEventListener("mousemove", activityListener);
     window.addEventListener("keypress", activityListener);
     resetTimer();
 
-    // Cleanup
     return () => {
       clearTimeout(timeout);
       window.removeEventListener("mousemove", activityListener);
       window.removeEventListener("keypress", activityListener);
     };
-  }, []); // Empty dependency array since this runs once on mount
+  }, [token, navigate]);
 
-  const login = (userData) => {
+  const login = (userData, newToken) => {
     setUser(userData);
+    setToken(newToken);
+    localStorage.setItem("token", newToken);
     setIsAuthenticated(true);
-    setLoading(false); // Ensure loading is false after manual login
+    setLoading(false);
+    navigate("/feed"); // Redirect to feed after login
   };
 
   const logout = async () => {
     try {
-      await axios.post("http://localhost:5000/api/auth/logout", {}, { withCredentials: true });
+      await axios.post("http://localhost:5000/api/auth/logout", {});
       setUser(null);
+      setToken(null);
+      localStorage.removeItem("token");
       setIsAuthenticated(false);
       setLoading(false);
-      window.location.href = "/login"; // Redirect to login page
+      navigate("/login"); // Redirect to login after logout
     } catch (err) {
       console.error("Logout error:", err.response?.data || err.message);
       setUser(null);
+      setToken(null);
+      localStorage.removeItem("token");
       setIsAuthenticated(false);
       setLoading(false);
+      navigate("/login");
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, logout, loading }}>
+    <AuthContext.Provider
+      value={{ user, isAuthenticated, login, logout, loading, token }}
+    >
       {children}
     </AuthContext.Provider>
   );
