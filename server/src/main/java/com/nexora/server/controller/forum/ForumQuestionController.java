@@ -30,7 +30,6 @@ public class ForumQuestionController {
 
     @Autowired
     private AuthenticationService authenticationService;
-
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createQuestion(
             @RequestHeader("Authorization") String authHeader,
