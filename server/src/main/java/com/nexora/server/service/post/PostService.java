@@ -250,7 +250,6 @@ public class PostService {
         comment.setName(user.getName());
         comment.setText(commentText);
         comment.setCreatedAt(LocalDateTime.now());
-
         post.getComments().add(comment);
 
         if (!userId.equals(post.getUserId())) {

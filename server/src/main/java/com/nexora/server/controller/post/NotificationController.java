@@ -1,7 +1,9 @@
 package com.nexora.server.controller.post;
 
 import com.nexora.server.model.post.Notification;
+import com.nexora.server.service.UserService;
 import com.nexora.server.service.post.NotificationService;
+import com.nexora.server.model.User;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

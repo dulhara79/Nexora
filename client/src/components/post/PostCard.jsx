@@ -161,7 +161,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
       );
       onUpdatePost(response.data);
       setIsEditingPost(false);
-      toast.success("Post updated successfully!", { position: "top-right" });
+      toast.success("Recipe updated successfully!", { position: "top-right" });
     } catch (error) {
       console.error("Error updating post:", error);
       if (error.response?.status === 404) {
@@ -183,11 +183,11 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
     try {
       await axios.delete(`http://localhost:5000/api/posts/${post.id}`, { withCredentials: true });
       onDeletePost(post.id);
-      toast.success("Post deleted successfully!", { position: "top-right" });
+      toast.success("Recipe deleted successfully!", { position: "top-right" });
     } catch (error) {
       console.error("Error deleting post:", error);
       if (error.response?.status === 404) {
-        toast.error("Post not found.", { position: "top-right" });
+        toast.error("Recipe not found.", { position: "top-right" });
         onDeletePost(post.id); // Remove from UI anyway
       } else if (error.response?.status === 403) {
         toast.error("You are not authorized to delete this Post.", { position: "top-right" });
