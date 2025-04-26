@@ -72,7 +72,10 @@ public class SecurityConfig {
                 // Use IF_REQUIRED instead of STATELESS to support HttpSession for OTP flow
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/**", "/api/auth/**", "/api/questions/**", "/api/comments/**", "/api/notifications/**", "/api/tags/**" ,"/api/post/**", "/api/challenges/**").permitAll() // Ensure all auth and user
+                .requestMatchers("/api/cuisines/**").permitAll() // Allow all cuisine endpoints
+                .requestMatchers("/api/learningplan/**").permitAll() // Allow all learning plan endpoints
+                
+                        .requestMatchers("/api/users/**", "/api/auth/**", "/api/questions/**", "/api/forum/comments/**", "/api/forum/notifications/**", "/api/tags/**", "/api/communities/**", "/api/posts/**", "/api/feedposts/**", "/api/challenges/**").permitAll() // Ensure all auth and user
                                                                                       // endpoints are public
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())

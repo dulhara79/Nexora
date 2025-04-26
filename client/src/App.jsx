@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useState, useEffect} from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Authentication
@@ -20,14 +20,23 @@ import EditProfile from "./pages/User/EditProfilePage";
 
 // Learning Plan Pages
 import HomePage from "./pages/LearningPlanPage/HomePage";
-import ProgressPage from "./pages/LearningPlanPage/ProgressPage";
-import PlanPage from "./pages/LearningPlanPage/PlanPage";
+import RecipePage from "./pages/LearningPlanPage/RecipePage";
+import CuisinePage from "./pages/LearningPlanPage/CuisinePage";
+import UserPlanPage from "./pages/LearningPlanPage/UserPlanPage";
 
 // Forum Pages
+import ForumDashBoard from "./pages/Forum/ForumDashBoard";
 import ForumHomePage from "./pages/Forum/ForumHomePage";
 import QuestionDetailPage from "./pages/Forum/QuestionDetailPage";
 import AskQuestionPage from "./pages/Forum/AskQuestionPage";
 import SavedQuestions from "./pages/Forum/SavedQuestions";
+import TagPage from "./pages/Forum/TagPage";
+
+// import Navbar from "./components/post/Navbar";
+
+import Home from "./pages/post/Home";
+import CreatePost from "./pages/post/CreatePost";
+import Notifications from "./pages/post/Notifications";
 
 // Challanges Pages
 import ChallengeDetail from "./pages/Challenge/ChallengeDetail";
@@ -36,9 +45,11 @@ import CreateChallenge from "./pages/Challenge/CreateChallenge";
 
 
 function App() {
+  
   return (
     <AuthProvider>
       <Router>
+    
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
@@ -51,18 +62,35 @@ function App() {
           <Route path="/edit/:userId" element={<EditProfile />} />
           <Route path="/feed" element={<UserFeedPage />} />
           {/* <Route path="/register" element={<Register />} /> */}
+          
           {/* Learning Plan Routes */}
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/progress" element={<ProgressPage />} />
-          <Route path="/plan/:level" element={<PlanPage />} />
-          <Route path="/progress/:cuisineName" element={<ProgressPage />} />
+          <Route path="/learninghome" element={<HomePage />} />
+          <Route path="/recipe" element={<RecipePage />} />
+          <Route path="/recipe/:cuisineName" element={<RecipePage />} />
+          <Route path="/cuisine/:level" element={<CuisinePage />} />
+          <Route path="/cuisine" element={<CuisinePage />} />
+          <Route path="/userplan" element={<UserPlanPage />} />
 
           {/* Forum Routes */}
+          <Route path="/forum/home" element={<ForumDashBoard />} />
           <Route path="/forum" element={<ForumHomePage />} />
           <Route path="/forum/question/:id" element={<QuestionDetailPage />} />
           <Route path="/forum/ask" element={<AskQuestionPage />} />
           <Route path="/forum/edit/:id" element={<AskQuestionPage />} />
           <Route path="/forum/saved" element={<SavedQuestions />} />
+          <Route path="/forum/tags/:tag" element={<TagPage />} />
+
+          <Route path="/post" element={<Home />} />
+          <Route path="/create-post" element={<CreatePost />} />
+          <Route path="/post-notifications" element={<Notifications  />} />
+
+          <Route path="/post" element={<Home />} />
+          <Route path="/create-post" element={<CreatePost />} />
+          <Route path="/post-notifications" element={<Notifications  />} />
+
+          <Route path="/post" element={<Home />} />
+          <Route path="/create-post" element={<CreatePost />} />
+          <Route path="/post-notifications" element={<Notifications  />} />
 
           {/* Challenges Routes */}
           <Route path="/challenges" element={<ChallengeList />} />
