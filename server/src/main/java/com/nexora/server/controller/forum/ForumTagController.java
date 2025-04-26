@@ -3,7 +3,6 @@ package com.nexora.server.controller.forum;
 import com.nexora.server.model.forum.ForumQuestion;
 import com.nexora.server.model.forum.ForumTag;
 import com.nexora.server.repository.forum.ForumQuestionRepository;
-import com.nexora.server.repository.forum.ForumTagRepository;
 import com.nexora.server.service.AuthenticationService;
 import com.nexora.server.service.forum.ForumTagService;
 
