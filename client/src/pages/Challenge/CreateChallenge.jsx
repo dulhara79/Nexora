@@ -4,7 +4,6 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AuthContext } from '../../context/AuthContext';
 
-
 const CreateChallenge = () => {
   const { isAuthenticated } = useContext(AuthContext);
   const { challengeId } = useParams();
