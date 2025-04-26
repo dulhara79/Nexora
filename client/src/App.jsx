@@ -23,6 +23,7 @@ import HomePage from "./pages/LearningPlanPage/HomePage";
 import RecipePage from "./pages/LearningPlanPage/RecipePage";
 import CuisinePage from "./pages/LearningPlanPage/CuisinePage";
 import UserPlanPage from "./pages/LearningPlanPage/UserPlanPage";
+import ProgressPage from "./pages/LearningPlanPage/ProgressPage";
 
 // Forum Pages
 import ForumDashBoard from "./pages/Forum/ForumDashBoard";
@@ -37,6 +38,12 @@ import TagPage from "./pages/Forum/TagPage";
 import Home from "./pages/post/Home";
 import CreatePost from "./pages/post/CreatePost";
 import Notifications from "./pages/post/Notifications";
+
+// Challanges Pages
+import ChallengeDetail from "./pages/Challenge/ChallengeDetail";
+import ChallengeList from "./pages/Challenge/ChallengeList";
+import CreateChallenge from "./pages/Challenge/CreateChallenge";
+
 
 function App() {
   return (
@@ -62,6 +69,8 @@ function App() {
           <Route path="/cuisine/:level" element={<CuisinePage />} />
           <Route path="/cuisine" element={<CuisinePage />} />
           <Route path="/userplan" element={<UserPlanPage />} />
+          <Route path="/progress" element={<ProgressPage />} />
+          <Route path="/progress/:userId" element={<ProgressPage />} />
 
           {/* Forum Routes */}
           <Route path="/forum/home" element={<ForumDashBoard />} />
@@ -83,6 +92,12 @@ function App() {
           <Route path="/post" element={<Home />} />
           <Route path="/create-post" element={<CreatePost />} />
           <Route path="/post-notifications" element={<Notifications />} />
+
+          {/* Challenges Routes */}
+          <Route path="/challenges" element={<ChallengeList />} />
+          <Route path="/challenge/:challengeId" element={<ChallengeDetail />} />
+          <Route path="/create-challenge" element={<CreateChallenge />} />
+          <Route path="/edit-challenge/:challengeId" element={<CreateChallenge />} />
 
           {/* 404 Page */}
           <Route path="/*" element={<PageNotFound />} />
