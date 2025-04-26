@@ -11,6 +11,7 @@ const ChallengeDetail = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch challenge details
   useEffect(() => {
     const fetchChallenge = async () => {
       try {
