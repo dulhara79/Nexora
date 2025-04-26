@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 
-
 const ChallengeDetail = () => {
   const { challengeId } = useParams();
   const navigate = useNavigate();
