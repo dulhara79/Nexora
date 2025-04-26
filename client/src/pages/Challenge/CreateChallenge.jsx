@@ -10,6 +10,7 @@ const CreateChallenge = () => {
   const navigate = useNavigate();
   const isEditMode = !!challengeId;
 
+  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
