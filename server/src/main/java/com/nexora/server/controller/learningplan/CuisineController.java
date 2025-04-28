@@ -4,46 +4,67 @@
 // import com.nexora.server.repository.learningplan.CuisineRepository;
 // import org.springframework.web.bind.annotation.*;
 // import java.util.List;
+// import java.util.Optional;
+
+// // import these two for exception handling
+// import org.springframework.web.server.ResponseStatusException;
+// import org.springframework.http.HttpStatus;
 
 // @RestController
 // @RequestMapping("/api/cuisines")
 // public class CuisineController {
+
 //     private final CuisineRepository cuisineRepository;
 
 //     public CuisineController(CuisineRepository cuisineRepository) {
 //         this.cuisineRepository = cuisineRepository;
 //     }
 
+//     /**
+//      * Get all cuisines by level (e.g., beginner, intermediate, advanced)
+//      */
 //     @GetMapping
 //     public List<Cuisine> getCuisinesByLevel(@RequestParam String level) {
 //         return cuisineRepository.findByLevel(level);
 //     }
 
-//     // ← new endpoint to fetch a full cuisine by its name
+//     /**
+//      * Fetch a single cuisine (with all recipes) by its exact name.
+//      * Throws 404 if not found.
+//      */
 //     @GetMapping("/by-name")
-//     public Cuisine getCuisineByName(@RequestParam String name) {
-//         return cuisineRepository.findByName(name)
-//             .orElseThrow(() -> new ResponseStatusException(
-//                 HttpStatus.NOT_FOUND, "Cuisine not found: " + name
-//             ));
+//     public Cuisine getByName(@RequestParam String name) {
+//       return cuisineRepository.findByName(name)
+//         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cuisine not found: " + name));
 //     }
+    
 // }
 
 
+
+
+
+
+
+
+//REST
+// src/main/java/com/nexora/server/controller/learningplan/CuisineController.java
 package com.nexora.server.controller.learningplan;
 
 import com.nexora.server.model.learningplan.Cuisine;
 import com.nexora.server.repository.learningplan.CuisineRepository;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import java.util.Optional;
-
-// import these two for exception handling
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 @RestController
 @RequestMapping("/api/cuisines")
+@CrossOrigin(origins = "http://localhost:5173")
 public class CuisineController {
 
     private final CuisineRepository cuisineRepository;
@@ -53,21 +74,26 @@ public class CuisineController {
     }
 
     /**
-     * Get all cuisines by level (e.g., beginner, intermediate, advanced)
+     * GET /api/cuisines?level={level}
      */
-    @GetMapping
-    public List<Cuisine> getCuisinesByLevel(@RequestParam String level) {
-        return cuisineRepository.findByLevel(level);
+    @GetMapping(produces = "application/json")
+    public ResponseEntity<List<Cuisine>> getCuisinesByLevel(@RequestParam("level") String level) {
+        List<Cuisine> cuisines = cuisineRepository.findByLevel(level);
+        return ResponseEntity.ok()
+            .cacheControl(CacheControl.noCache())
+            .body(cuisines);
     }
 
     /**
-     * Fetch a single cuisine (with all recipes) by its exact name.
-     * Throws 404 if not found.
+     * GET /api/cuisines/{name}
      */
-    @GetMapping("/by-name")
-    public Cuisine getByName(@RequestParam String name) {
-      return cuisineRepository.findByName(name)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cuisine not found: " + name));
+    @GetMapping(path = "/{name}", produces = "application/json")
+    public ResponseEntity<Cuisine> getCuisineByName(@PathVariable String name) {
+        return cuisineRepository.findByName(name)
+            .map(c -> ResponseEntity.ok()
+                .cacheControl(CacheControl.noCache())
+                .body(c))
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Cuisine not found: " + name));
     }
-    
 }
