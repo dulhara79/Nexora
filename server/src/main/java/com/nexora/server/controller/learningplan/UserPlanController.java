@@ -139,6 +139,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.bind.annotation.RequestMethod;
+
 
 import java.net.URI;
 import java.time.Instant;
@@ -169,7 +171,7 @@ public class UserPlanController {
     public ResponseEntity<List<UserPlan>> getPlans(@PathVariable String userId) {
         List<UserPlan> plans = userPlanRepo.findByUserId(userId);
         return ResponseEntity.ok()
-            .cacheControl(CacheControl.maxAge(300, TimeUnit.SECONDS).mustRevalidate())
+            .cacheControl(CacheControl.noCache())
             .body(plans);
     }
 
@@ -236,10 +238,10 @@ public class UserPlanController {
     }
 
     /**
-     * PATCH /api/users/{userId}/learning-plans/{planId}/recipes/{recipeName}
+     * PUT /api/users/{userId}/learning-plans/{planId}/recipes/{recipeName}
      * toggle one recipe’s isDone; archives plan if all done
      */
-    @PatchMapping(path = "/{planId}/recipes/{recipeName}", consumes = "application/json", produces = "application/json")
+    @PutMapping(path = "/{planId}/recipes/{recipeName}", consumes = "application/json", produces = "application/json")
     public ResponseEntity<UserPlan> updateRecipeDone(
         @PathVariable String userId,
         @PathVariable String planId,
