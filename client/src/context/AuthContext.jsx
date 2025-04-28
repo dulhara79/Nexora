@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
             role: response.data.role || "USER",
           });
           setIsAuthenticated(true);
-          navigate("/feed"); // Redirect to feed after successful session check
+          //navigate("/feed"); // Redirect to feed after successful session check
         } else {
           throw new Error("Invalid session data");
         }
