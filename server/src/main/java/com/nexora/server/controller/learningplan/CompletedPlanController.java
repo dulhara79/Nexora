@@ -54,7 +54,7 @@ public class CompletedPlanController {
     public ResponseEntity<List<CompletedPlan>> getCompletedPlans(@PathVariable String userId) {
         List<CompletedPlan> completedPlans = repo.findByUserId(userId);
         return ResponseEntity.ok()
-            .cacheControl(CacheControl.maxAge(300, TimeUnit.SECONDS).mustRevalidate())
+            .cacheControl(CacheControl.noCache())
             .body(completedPlans);
     }
 }
