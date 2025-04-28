@@ -349,11 +349,16 @@ const UserPlanPage = () => {
       },
       body: JSON.stringify(selectedNames)
     });
-    setPlans(plans.map(p =>
-      p.id === planId
-        ? { ...p, recipes: p.recipes.filter(r => selectedNames.includes(r.name)) }
-        : p
-    ));
+    const updatedRecipes = allRecipes
+  .filter(r => selectedNames.includes(r.name))
+  .map(r => ({ ...r, isDone: false })); // Assume isDone false when adding back
+
+setPlans(plans.map(p =>
+  p.id === planId
+    ? { ...p, recipes: updatedRecipes }
+    : p
+));
+
     setEditingPlan(null);
   };
 
