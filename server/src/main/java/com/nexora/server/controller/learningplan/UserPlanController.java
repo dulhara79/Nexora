@@ -131,16 +131,17 @@ package com.nexora.server.controller.learningplan;
 
 import com.nexora.server.model.learningplan.UserPlan;
 import com.nexora.server.model.learningplan.CompletedPlan;
+import com.nexora.server.model.learningplan.Cuisine;
 import com.nexora.server.repository.learningplan.UserPlanRepository;
 import com.nexora.server.repository.learningplan.CompletedPlanRepository;
+import com.nexora.server.repository.learningplan.CuisineRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.bind.annotation.RequestMethod;
-
 
 import java.net.URI;
 import java.time.Instant;
@@ -155,13 +156,16 @@ public class UserPlanController {
 
     private final UserPlanRepository userPlanRepo;
     private final CompletedPlanRepository completedRepo;
+    private final CuisineRepository cuisineRepo;
 
     public UserPlanController(
         UserPlanRepository userPlanRepo,
-        CompletedPlanRepository completedRepo
+        CompletedPlanRepository completedRepo,
+        CuisineRepository cuisineRepo
     ) {
         this.userPlanRepo = userPlanRepo;
         this.completedRepo = completedRepo;
+        this.cuisineRepo = cuisineRepo;
     }
 
     /**
@@ -217,6 +221,7 @@ public class UserPlanController {
      * PUT /api/users/{userId}/learning-plans/{planId}/recipes
      * full replace of recipe list
      */
+
     @PutMapping(path = "/{planId}/recipes", consumes = "application/json", produces = "application/json")
     public ResponseEntity<UserPlan> replaceRecipes(
         @PathVariable String userId,
@@ -226,11 +231,21 @@ public class UserPlanController {
         UserPlan plan = userPlanRepo.findById(planId)
             .orElseThrow(() -> new ResponseStatusException(ResponseEntity.notFound().build().getStatusCode()));
 
+        Cuisine cuisine = cuisineRepo.findByName(plan.getCuisineName())
+        .orElseThrow(() -> new ResponseStatusException(ResponseEntity.notFound().build().getStatusCode()));    
+
         plan.setRecipes(
-            plan.getRecipes().stream()
-                .filter(r -> keepRecipeNames.contains(r.getName()))
-                .toList()
-        );
+    cuisine.getRecipes().stream()
+        .filter(r -> keepRecipeNames.contains(r.getName()))
+        .map(r -> {
+            // check if already exists in plan to preserve isDone status
+            return plan.getRecipes().stream()
+                .filter(existing -> existing.getName().equals(r.getName()))
+                .findFirst()
+                .orElse(r); // use existing if found, otherwise use new one
+        })
+        .toList()
+);
         UserPlan updated = userPlanRepo.save(plan);
         return ResponseEntity.ok()
             .cacheControl(CacheControl.noCache())
