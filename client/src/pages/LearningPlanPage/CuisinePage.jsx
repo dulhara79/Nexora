@@ -3,6 +3,8 @@
 // import CuisineCard from '../../components/LearningPlan/CuisineCard';
 // import NavbarLP from '../../components/LearningPlan/NavbarLP';
 
+// const API_BASE = 'http://localhost:5000';
+
 // const CuisinePage = () => {
 //   const navigate = useNavigate();
 //   const location = useLocation();
@@ -26,7 +28,6 @@
 //   useEffect(() => {
 //     const fetchCuisines = async () => {
 //       try {
-//         const API_BASE = 'http://localhost:5000';
 //         const levels = ['beginner', 'intermediate', 'advanced'];
 //         const results = await Promise.all(
 //           levels.map(level =>
@@ -100,6 +101,13 @@
 
 
 
+
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import CuisineCard from '../../components/LearningPlan/CuisineCard';
@@ -116,9 +124,17 @@ const CuisinePage = () => {
     advanced: []
   });
 
+  // helper to unwrap Spring HATEOAS payloads
+  const extractEmbedded = (data) => {
+    const embedded = data._embedded || {};
+    const key = Object.keys(embedded)[0];
+    return embedded[key] ?? [];
+  };
+
   useEffect(() => {
     if (location.hash) {
-      const target = document.getElementById(location.hash.replace('#', ''));
+      const targetId = location.hash.replace('#', '');
+      const target = document.getElementById(targetId);
       if (target) {
         setTimeout(() => {
           target.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -141,9 +157,9 @@ const CuisinePage = () => {
           )
         );
         setCuisinesByLevel({
-          beginner: results[0],
-          intermediate: results[1],
-          advanced: results[2]
+          beginner: extractEmbedded(results[0]),
+          intermediate: extractEmbedded(results[1]),
+          advanced: extractEmbedded(results[2])
         });
       } catch (err) {
         console.error('Error loading cuisines:', err);
@@ -198,18 +214,6 @@ const CuisinePage = () => {
 };
 
 export default CuisinePage;
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
