@@ -79,14 +79,15 @@ public class AuthenticationController {
         }
     }
 
-    @GetMapping(value = "/google-redirect", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/google-redirect", produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<?> googleRedirect(@AuthenticationPrincipal OAuth2User principal) {
         LOGGER.info("Handling Google redirect for OAuth2 authentication");
         if (principal == null) {
             LOGGER.severe("OAuth2User principal is null");
+            String errorScript = "<script>window.opener.postMessage({ error: 'No authenticated user found' }, 'http://localhost:5173'); window.close();</script>";
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                    .body(Map.of("error", "No authenticated user found"));
+                    .body(errorScript);
         }
         try {
             String email = principal.getAttribute("email");
@@ -94,9 +95,10 @@ public class AuthenticationController {
             String picture = principal.getAttribute("picture");
             if (email == null || name == null) {
                 LOGGER.severe("Email or name missing in OAuth2User principal");
+                String errorScript = "<script>window.opener.postMessage({ error: 'Invalid user data from Google' }, 'http://localhost:5173'); window.close();</script>";
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                        .body(Map.of("error", "Invalid user data from Google"));
+                        .body(errorScript);
             }
             User user = authenticationService.handleGoogleLogin(email, name);
             user.setProfilePhotoUrl(picture != null ? picture : user.getProfilePhotoUrl());
@@ -106,23 +108,41 @@ public class AuthenticationController {
             links.put("self", "/api/auth/check-session");
             links.put("logout", "/api/auth/logout");
             LOGGER.info("Google login successful for userId: " + user.getId());
+
+            String script = String.format(
+                    "<script>" +
+                    "window.opener.postMessage({" +
+                    "  userId: '%s'," +
+                    "  token: '%s'," +
+                    "  email: '%s'," +
+                    "  name: '%s'" +
+                    "}, 'http://localhost:5173');" +
+                    "window.close();" +
+                    "</script>",
+                    user.getId(), token, user.getEmail(), user.getName()
+            );
             return ResponseEntity.ok()
                     .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                    .body(new UserResponse(user.getId(), user.getEmail(), user.getName(), token, links));
+                    .body(script);
         } catch (Exception e) {
             LOGGER.severe("Google login error: " + e.getMessage());
+            String errorScript = String.format(
+                    "<script>window.opener.postMessage({ error: 'Google login failed: %s' }, 'http://localhost:5173'); window.close();</script>",
+                    e.getMessage()
+            );
             return ResponseEntity.badRequest()
                     .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                    .body(Map.of("error", "Google login failed: " + e.getMessage()));
+                    .body(errorScript);
         }
     }
 
     @GetMapping("/login/failure")
     public ResponseEntity<?> googleLoginFailure() {
         LOGGER.info("Handling login failure");
+        String errorScript = "<script>window.opener.postMessage({ error: 'Google login failed' }, 'http://localhost:5173'); window.close();</script>";
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                .body(Map.of("error", "Google login failed"));
+                .body(errorScript);
     }
 
     @GetMapping("/check-session")
