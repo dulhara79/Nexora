@@ -35,9 +35,9 @@ const GoogleCallback = () => {
       // Navigate to the desired page (e.g., /feed)
       navigate("/feed", { replace: true });
     };
-
     window.addEventListener("message", handleMessage);
 
+    window.addEventListener("message", handleMessage);
     // Open the Google OAuth popup
     const popup = window.open(
       "http://localhost:5000/api/auth/google-redirect",
