@@ -32,7 +32,6 @@ public class AuthenticationController {
     @Autowired
     private AuthenticationService authenticationService;
 
-
     @Autowired
     private UserRepository userRepository;
 
@@ -141,7 +140,6 @@ public ResponseEntity<String> googleRedirect(@AuthenticationPrincipal OAuth2User
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .body(Map.of("error", "Google login failed"));
     }
-
 
     @GetMapping("/check-session")
 public ResponseEntity<?> checkSession(@RequestHeader(value = "Authorization", required = false) String authHeader) {
