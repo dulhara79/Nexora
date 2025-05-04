@@ -35,6 +35,7 @@ const GoogleCallback = () => {
       // Navigate to the desired page (e.g., /feed)
       navigate("/feed", { replace: true });
     };
+
     window.addEventListener("message", handleMessage);
 
     window.addEventListener("message", handleMessage);
