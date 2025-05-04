@@ -26,7 +26,14 @@ public class ForumCommunityController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllCommunities(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestHeader(value = "If-None-Match", required = false) String ifNoneMatch) {
+        String userId = extractUserIdFromToken(authHeader);
+        if (userId == null) {
+            return ResponseEntity.status(401)
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(createErrorResponse("Unauthorized"));
+        }
         List<ForumCommunity> communities = communityRepository.findAll();
         String etag = "\"" + Integer.toHexString(communities.hashCode()) + "\"";
         if (ifNoneMatch != null && ifNoneMatch.equals(etag)) {
