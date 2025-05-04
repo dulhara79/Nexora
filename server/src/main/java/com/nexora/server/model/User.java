@@ -4,8 +4,8 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
+// import javax.validation.constraints.Email;
+// import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 import java.time.LocalDateTime;
@@ -18,19 +18,19 @@ public class User {
   @Id
   private String id;
 
-  @NotBlank(message = "Email is required")
-  @Email(message = "Invalid email format")
+  // @NotBlank(message = "Email is required")
+  // @Email(message = "Invalid email format")
   private String email;
 
-  @Size(min = 6, message = "Password must be at least 6 characters")
+  // @Size(min = 6, message = "Password must be at least 6 characters")
   private String password;
 
-  @NotBlank(message = "Name is required")
-  @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
+  // @NotBlank(message = "Name is required")
+  // @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
   private String name;
 
-  @NotBlank(message = "Username is required")
-  @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
+  // @NotBlank(message = "Username is required")
+  // @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
   private String username;
 
   private String about;
