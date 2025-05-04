@@ -1,12 +1,13 @@
 package com.nexora.server.controller;
 
 import com.nexora.server.model.User;
+import com.nexora.server.repository.UserRepository;
 import com.nexora.server.service.AuthenticationService;
-
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -17,118 +18,167 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+record LoginRequest(String email, String password) {}
+record VerifyOtpRequest(String email, String otp) {}
+
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 @Validated
 public class AuthenticationController {
 
-  private static final Logger LOGGER = Logger.getLogger(AuthenticationController.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AuthenticationController.class.getName());
 
-  @Autowired
-  private AuthenticationService authenticationService;
+    @Autowired
+    private AuthenticationService authenticationService;
 
-  @PostMapping("/login")
-  public ResponseEntity<?> login(
-      @RequestParam String email,
-      @RequestParam String password) {
-    LOGGER.info("Received login request for email: " + email);
-    try {
-      String result = authenticationService.sendLoginOtp(email, password);
-      return ResponseEntity.ok(result);
-    } catch (Exception e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
+    @Autowired
+    private UserRepository userRepository;
+
+    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
+        LOGGER.info("Received login request for email: " + loginRequest.email());
+        try {
+            String result = authenticationService.sendLoginOtp(loginRequest.email(), loginRequest.password());
+            Map<String, String> links = new HashMap<>();
+            links.put("verify", "/api/auth/login/verify");
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", result);
+            response.put("_links", links);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
-  }
 
-  @PostMapping("/login/verify")
-  public ResponseEntity<?> verifyLogin(
-      @RequestParam String email,
-      @RequestParam String otp,
-      HttpSession session) {
-    LOGGER.info("Received OTP verification request for email: " + email + " with OTP: " + otp);
-    try {
-      User user = authenticationService.verifyLoginOtp(email, otp);
-      session.setAttribute("userId", user.getId());
-      session.setAttribute("name", user.getName());
-      LOGGER.info("Session set with userId: " + user.getId());
-      return ResponseEntity.ok(new UserResponse(user.getId(), user.getEmail(), user.getName()));
-    } catch (Exception e) {
-      Map<String, String> errorResponse = new HashMap<>();
-      errorResponse.put("error", e.getMessage());
-      errorResponse.put("email", email);
-      LOGGER.warning("Verification failed: " + e.getMessage());
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    @PostMapping(value = "/login/verify", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> verifyLogin(@Valid @RequestBody VerifyOtpRequest verifyRequest) {
+        LOGGER.info("Received OTP verification request for email: " + verifyRequest.email());
+        try {
+            User user = authenticationService.verifyLoginOtp(verifyRequest.email(), verifyRequest.otp());
+            String token = authenticationService.generateJwtToken(user);
+            Map<String, String> links = new HashMap<>();
+            links.put("self", "/api/auth/check-session");
+            links.put("logout", "/api/auth/logout");
+            LOGGER.info("Login successful for userId: " + user.getId());
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(new UserResponse(user.getId(), user.getEmail(), user.getName(), token, links));
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("email", verifyRequest.email());
+            LOGGER.warning("Verification failed: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(errorResponse);
+        }
     }
-  }
 
-  @GetMapping("/google-success")
-  public void googleLoginSuccess(
-      @AuthenticationPrincipal OAuth2User principal,
-      HttpSession session,
-      HttpServletResponse response) {
-    try {
-      String email = principal.getAttribute("email");
-      String name = principal.getAttribute("name");
-      User user = authenticationService.handleGoogleLogin(email, name);
-      session.setAttribute("userId", user.getId());
-      LOGGER.info("Google login successful for userId: " + user.getId());
-
-      // Send postMessage to frontend and close popup
-      response.setContentType("text/html");
-      response.getWriter().write(
-          "<html><body>" +
-          "<script>" +
-          "window.opener.postMessage({ type: 'google-auth-success', userId: '" + user.getId() + "' }, 'http://localhost:5173');" +
-          "window.close();" +
-          "</script>" +
-          "</body></html>"
-      );
-    } catch (Exception e) {
-      LOGGER.severe("Google login error: " + e.getMessage());
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      try {
-        response.getWriter().write("Google login failed: " + e.getMessage());
-      } catch (Exception ex) {
-        LOGGER.severe("Error writing response: " + ex.getMessage());
-      }
-    }
-  }
-  
-  @GetMapping("/login/failure")
-  public ResponseEntity<?> googleLoginFailure() {
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-        .body(Map.of("error", "Google login failed"));
-  }
-
-  @GetMapping("/check-session")
-  public ResponseEntity<?> checkSession(HttpSession session) {
-    String userId = (String) session.getAttribute("userId");
-    if (userId == null) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No active session");
+    
+    @GetMapping(value = "/google-redirect", produces = MediaType.TEXT_HTML_VALUE)
+public ResponseEntity<String> googleRedirect(@AuthenticationPrincipal OAuth2User principal) {
+    LOGGER.info("Handling Google redirect for OAuth2 authentication");
+    if (principal == null) {
+        LOGGER.severe("OAuth2User principal is null");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body("<script>window.opener.postMessage({ error: 'No authenticated user found' }, 'http://localhost:5173'); window.close();</script>");
     }
     try {
-      User user = authenticationService.findById(userId);
-      if (user == null) {
-        session.invalidate();
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
-      }
-      return ResponseEntity.ok(new UserResponse(user.getId(), user.getEmail(), user.getName()));
-    } catch (Exception e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
-    }
-  }
+        String email = principal.getAttribute("email");
+        String name = principal.getAttribute("name");
+        String picture = principal.getAttribute("picture");
+        if (email == null || name == null) {
+            LOGGER.severe("Email or name missing in OAuth2User principal");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body("<script>window.opener.postMessage({ error: 'Invalid user data from Google' }, 'http://localhost:5173'); window.close();</script>");
+        }
+        User user = authenticationService.handleGoogleLogin(email, name);
+        user.setProfilePhotoUrl(picture != null ? picture : user.getProfilePhotoUrl());
+        user = userRepository.save(user);
+        String token = authenticationService.generateJwtToken(user);
 
-  @PostMapping("/logout")
-  public ResponseEntity<?> logout(HttpSession session) {
-    try {
-      session.invalidate();
-      return ResponseEntity.ok("Logged out successfully");
+        // HTML response to send postMessage and close the popup
+        String htmlResponse = String.format(
+                "<script>" +
+                "window.opener.postMessage({" +
+                "  userId: '%s'," +
+                "  token: '%s'," +
+                "  email: '%s'," +
+                "  name: '%s'" +
+                "}, 'http://localhost:5173');" +
+                "window.close();" +
+                "</script>",
+                user.getId(), token, user.getEmail(), user.getName()
+        );
+        LOGGER.info("Google login successful for userId: " + user.getId());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(htmlResponse);
     } catch (Exception e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
+        LOGGER.severe("Google login error: " + e.getMessage());
+        String errorHtml = String.format(
+                "<script>window.opener.postMessage({ error: '%s' }, 'http://localhost:5173'); window.close();</script>",
+                "Google login failed: " + e.getMessage()
+        );
+        return ResponseEntity.badRequest()
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(errorHtml);
     }
-  }
 }
 
-record UserResponse(String id, String email, String name) {
+    @GetMapping("/login/failure")
+    public ResponseEntity<?> googleLoginFailure() {
+        LOGGER.info("Handling login failure");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(Map.of("error", "Google login failed"));
+    }
+
+    @GetMapping("/check-session")
+public ResponseEntity<?> checkSession(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+    LOGGER.info("Checking session with auth header: " + authHeader);
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(Map.of("error", "No valid token provided"));
+    }
+    String token = authHeader.substring(7);
+    try {
+        User user = authenticationService.validateJwtToken(token);
+        Map<String, String> links = new HashMap<>();
+        links.put("self", "/api/auth/check-session");
+        links.put("logout", "/api/auth/logout");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                .header(HttpHeaders.ETAG, "\"" + user.getId() + "\"")
+                .body(new UserResponse(
+                    user.getId(),
+                    user.getEmail(),
+                    user.getName(),
+                    token,
+                    links
+                ));
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(Map.of("error", "Invalid or expired token: " + e.getMessage()));
+    }
+}
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        LOGGER.info("Handling logout");
+        Map<String, String> links = new HashMap<>();
+        links.put("login", "/api/auth/login");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(Map.of("message", "Logged out successfully. Please clear the token on client side.", "_links", links));
+    }
 }
