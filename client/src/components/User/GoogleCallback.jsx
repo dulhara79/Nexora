@@ -1,40 +1,62 @@
+// src/components/User/GoogleCallback.jsx
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 const GoogleCallback = () => {
-  useEffect(() => {
-    // Check if the window contains the JSON response
-    const fetchUserData = async () => {
-      try {
-        // Since the page is loaded at /api/auth/google-redirect, the JSON is in the document body
-        const jsonText = document.body.textContent;
-        const data = JSON.parse(jsonText); // Parse the JSON response
-        const { id, token, email, name } = data;
+  const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
-        if (id && token) {
-          // Send user data to the parent window
-          window.opener.postMessage(
-            { userId: id, token, email, name },
-            "http://localhost:5173"
-          );
-        } else {
-          throw new Error("Invalid user data");
-        }
-      } catch (error) {
-        console.error("Error processing Google login data:", error);
-        window.opener.postMessage(
-          { error: "Google login failed" },
-          "http://localhost:5173"
-        );
-      } finally {
-        // Close the popup window
-        window.close();
+  useEffect(() => {
+    const handleMessage = (event) => {
+      // Ensure the message is from the expected origin
+      if (event.origin !== "http://localhost:5173") return;
+
+      const { userId, token, email, name, error } = event.data;
+
+      if (error) {
+        console.error("Google login error:", error);
+        navigate("/login", { replace: true });
+        return;
       }
+
+      // Call the login function from AuthContext
+      login(
+        {
+          id: userId,
+          email,
+          name,
+          profilePhotoUrl: "", // Will be updated by backend
+        },
+        token
+      );
+
+      // Navigate to the desired page (e.g., /feed)
+      navigate("/feed", { replace: true });
     };
 
-    fetchUserData();
-  }, []);
+    window.addEventListener("message", handleMessage);
 
-  return <div>Authenticating...</div>;
+    // Open the Google OAuth popup
+    const popup = window.open(
+      "http://localhost:5000/api/auth/google-redirect",
+      "GoogleLogin",
+      "width=600,height=600"
+    );
+
+    // Check if popup was blocked
+    if (!popup) {
+      console.error("Popup blocked");
+      navigate("/login", { replace: true });
+    }
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, [navigate, login]);
+
+  return null; // No UI, just handles the callback
 };
 
 export default GoogleCallback;
