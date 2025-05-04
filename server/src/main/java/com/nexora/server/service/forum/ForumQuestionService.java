@@ -600,10 +600,6 @@ public class ForumQuestionService {
         return questionRepository.save(question);
     }
 
-    public List<ForumQuestion> getLikedQuestions(String userId) {
-        return questionRepository.findByUpvoteUserIdsContaining(userId);
-    }
-
     private boolean isAdminOrModerator(String userId) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
