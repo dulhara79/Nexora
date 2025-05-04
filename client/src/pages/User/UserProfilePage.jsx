@@ -3,7 +3,7 @@ import { AuthContext } from '../../context/AuthContext';
 import axios from "axios";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
-import Navbar from '../../components/User/Navbar';
+import Navbar from '../../components/common/Navbar';
 import ProfileHeader from '../../components/User/Profile/ProfileHeader';
 import ProfileInfo from '../../components/User/Profile/ProfileInfo';
 import ProfileStats from '../../components/User/Profile/ProfileStats';
