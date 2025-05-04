@@ -26,6 +26,7 @@ public class ForumCommunityController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllCommunities(
+      
             @RequestHeader(value = "If-None-Match", required = false) String ifNoneMatch) {
         List<ForumCommunity> communities = communityRepository.findAll();
         String etag = "\"" + Integer.toHexString(communities.hashCode()) + "\"";

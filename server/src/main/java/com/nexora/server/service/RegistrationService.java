@@ -315,6 +315,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -383,6 +384,9 @@ public class RegistrationService {
     public User registerWithGoogle(User user, MultipartFile profilePhoto) throws Exception {
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             throw new Exception("Email is required");
+        }
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            throw new Exception("Username already exists");
         }
 
         Optional<User> existingUser = userRepository.findByEmail(user.getEmail());

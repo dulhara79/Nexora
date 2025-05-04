@@ -7,8 +7,6 @@ import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-axios.defaults.withCredentials = true;
-
 const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -22,13 +20,11 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
 
+  // Listen for postMessage from GoogleCallback
   useEffect(() => {
-    const savedEmail = localStorage.getItem("rememberedEmail");
-    if (savedEmail) {
-      setEmail(savedEmail);
-      setRememberMe(true);
-    }
-
+    const handleMessage = (event) => {
+      if (event.origin !== "http://localhost:5000") return; // Match the backend origin
+      const { userId, token, email, name, error } = event.data;
     const handleMessage = (event) => {
       console.log("Received postMessage:", event.origin, event.data);
       if (event.origin !== "http://localhost:5000") {
@@ -54,17 +50,24 @@ const Login = () => {
         setError("Invalid Google login data received");
         setLoading(false);
       }
-    };
 
+      if (userId && token && email && name) {
+        // Log the user in using AuthContext
+        login({ id: userId, email, name }, token);
+        navigate("/feed"); // Redirect to feed page
+      } else {
+        setError("Invalid Google login data");
+      }
+    };
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
   }, [login, navigate]);
 
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [login, navigate]);
   const handleEmailLogin = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-
     try {
       const response = await axios.post(
         "http://localhost:5000/api/auth/login",
@@ -79,6 +82,7 @@ const Login = () => {
         } else {
           localStorage.removeItem("rememberedEmail");
         }
+
         setStep("verify");
         setError("");
       }
@@ -149,24 +153,11 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center w-screen min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
-      <motion.div ref={ref} variants={containerVariants} initial="hidden" animate={inView ? "visible" : "hidden"} className="w-full max-w-xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="p-8 border border-white shadow-2xl bg-white/50 backdrop-blur-lg rounded-3xl sm:p-10">
-          <div className="mb-10 text-center">
-            <motion.h2 variants={itemVariants} className="mb-2 text-4xl font-bold text-transparent text-gray-900 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text">
-              Welcome Back
-            </motion.h2>
-            <motion.p variants={itemVariants} className="mt-2 font-medium text-gray-500">
-              Continue your learning journey
-            </motion.p>
-          </div>
-
-          {error && (
-            <motion.div variants={itemVariants} className={`mb-6 text-sm text-center ${error.includes("success") ? "text-green-600" : "text-red-600"}`}>
-              {error}
-            </motion.div>
-          )}
-
+    <div
+      style={{ maxWidth: "400px", margin: "50px auto", textAlign: "center" }}
+    >
+      <h2>Login</h2>
+      {error && <p style={{ color: "red" }}>{error}</p>}
           {step === "login" ? (
             <>
               <motion.button
@@ -281,7 +272,7 @@ const Login = () => {
             </form>
           )}
         </div>
-      </motion.div>
+      )}
     </div>
   );
 };

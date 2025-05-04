@@ -120,6 +120,7 @@ public class RegistrationController {
     @Autowired
     private RegistrationService registrationService;
 
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -158,6 +159,7 @@ public class RegistrationController {
             @RequestBody Map<String, String> verificationRequest) {
         try {
             String code = verificationRequest.get("code");
+
             if (code == null || code.isBlank()) {
                 throw new IllegalArgumentException("Verification code is required");
             }

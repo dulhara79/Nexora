@@ -6,6 +6,50 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(localStorage.getItem("token"));
+
+  useEffect(() => {
+    const checkSession = async () => {
+      if (!token) {
+        setUser(null);
+        setIsAuthenticated(false);
+        setLoading(false);
+        navigate("/login"); // Redirect to login if no token
+        return;
+      }
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/auth/check-session",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (response.data && response.data.id) {
+          setUser({
+            id: response.data.id || 0,
+            email: response.data.email || "",
+            name: response.data.name || "",
+            role: response.data.role || "USER",
+          });
+          setIsAuthenticated(true);
+          navigate("/feed"); // Redirect to feed after successful session check
+        } else {
+          throw new Error("Invalid session data");
+        }
+      } catch (err) {
+        setUser(null);
+        setIsAuthenticated(false);
+        localStorage.removeItem("token");
+        console.error(
+          "Session check failed:",
+          err.response?.data || err.message
+        );
+        navigate("/login"); // Redirect to login on failure
+      } finally {
+        setLoading(false);
   const location = useLocation();
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);

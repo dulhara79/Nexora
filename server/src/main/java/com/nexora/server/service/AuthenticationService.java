@@ -79,6 +79,7 @@ public class AuthenticationService {
         }
 
         if (user.getVerificationCode() == null || !user.getVerificationCode().equals(otp)) {
+
             LOGGER.warning("OTP mismatch for email: " + email);
             throw new Exception("Invalid OTP");
         }
