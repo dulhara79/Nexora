@@ -79,43 +79,59 @@ public class AuthenticationController {
         }
     }
 
-    @GetMapping(value = "/google-redirect", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> googleRedirect(@AuthenticationPrincipal OAuth2User principal) {
-        LOGGER.info("Handling Google redirect for OAuth2 authentication");
-        if (principal == null) {
-            LOGGER.severe("OAuth2User principal is null");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                    .body(Map.of("error", "No authenticated user found"));
-        }
-        try {
-            String email = principal.getAttribute("email");
-            String name = principal.getAttribute("name");
-            String picture = principal.getAttribute("picture");
-            if (email == null || name == null) {
-                LOGGER.severe("Email or name missing in OAuth2User principal");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                        .body(Map.of("error", "Invalid user data from Google"));
-            }
-            User user = authenticationService.handleGoogleLogin(email, name);
-            user.setProfilePhotoUrl(picture != null ? picture : user.getProfilePhotoUrl());
-            user = userRepository.save(user);
-            String token = authenticationService.generateJwtToken(user);
-            Map<String, String> links = new HashMap<>();
-            links.put("self", "/api/auth/check-session");
-            links.put("logout", "/api/auth/logout");
-            LOGGER.info("Google login successful for userId: " + user.getId());
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                    .body(new UserResponse(user.getId(), user.getEmail(), user.getName(), token, links));
-        } catch (Exception e) {
-            LOGGER.severe("Google login error: " + e.getMessage());
-            return ResponseEntity.badRequest()
-                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                    .body(Map.of("error", "Google login failed: " + e.getMessage()));
-        }
+    
+    @GetMapping(value = "/google-redirect", produces = MediaType.TEXT_HTML_VALUE)
+public ResponseEntity<String> googleRedirect(@AuthenticationPrincipal OAuth2User principal) {
+    LOGGER.info("Handling Google redirect for OAuth2 authentication");
+    if (principal == null) {
+        LOGGER.severe("OAuth2User principal is null");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body("<script>window.opener.postMessage({ error: 'No authenticated user found' }, 'http://localhost:5173'); window.close();</script>");
     }
+    try {
+        String email = principal.getAttribute("email");
+        String name = principal.getAttribute("name");
+        String picture = principal.getAttribute("picture");
+        if (email == null || name == null) {
+            LOGGER.severe("Email or name missing in OAuth2User principal");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body("<script>window.opener.postMessage({ error: 'Invalid user data from Google' }, 'http://localhost:5173'); window.close();</script>");
+        }
+        User user = authenticationService.handleGoogleLogin(email, name);
+        user.setProfilePhotoUrl(picture != null ? picture : user.getProfilePhotoUrl());
+        user = userRepository.save(user);
+        String token = authenticationService.generateJwtToken(user);
+
+        // HTML response to send postMessage and close the popup
+        String htmlResponse = String.format(
+                "<script>" +
+                "window.opener.postMessage({" +
+                "  userId: '%s'," +
+                "  token: '%s'," +
+                "  email: '%s'," +
+                "  name: '%s'" +
+                "}, 'http://localhost:5173');" +
+                "window.close();" +
+                "</script>",
+                user.getId(), token, user.getEmail(), user.getName()
+        );
+        LOGGER.info("Google login successful for userId: " + user.getId());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(htmlResponse);
+    } catch (Exception e) {
+        LOGGER.severe("Google login error: " + e.getMessage());
+        String errorHtml = String.format(
+                "<script>window.opener.postMessage({ error: '%s' }, 'http://localhost:5173'); window.close();</script>",
+                "Google login failed: " + e.getMessage()
+        );
+        return ResponseEntity.badRequest()
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(errorHtml);
+    }
+}
 
     @GetMapping("/login/failure")
     public ResponseEntity<?> googleLoginFailure() {
@@ -126,29 +142,35 @@ public class AuthenticationController {
     }
 
     @GetMapping("/check-session")
-    public ResponseEntity<?> checkSession(@RequestHeader(value = "Authorization", required = false) String authHeader) {
-        LOGGER.info("Checking session with auth header: " + authHeader);
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                    .body(Map.of("error", "No valid token provided"));
-        }
-        String token = authHeader.substring(7);
-        try {
-            User user = authenticationService.validateJwtToken(token);
-            Map<String, String> links = new HashMap<>();
-            links.put("self", "/api/auth/check-session");
-            links.put("logout", "/api/auth/logout");
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
-                    .header(HttpHeaders.ETAG, "\"" + user.getId() + "\"")
-                    .body(new UserResponse(user.getId(), user.getEmail(), user.getName(), token, links));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                    .body(Map.of("error", "Invalid or expired token: " + e.getMessage()));
-        }
+public ResponseEntity<?> checkSession(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+    LOGGER.info("Checking session with auth header: " + authHeader);
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(Map.of("error", "No valid token provided"));
     }
+    String token = authHeader.substring(7);
+    try {
+        User user = authenticationService.validateJwtToken(token);
+        Map<String, String> links = new HashMap<>();
+        links.put("self", "/api/auth/check-session");
+        links.put("logout", "/api/auth/logout");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                .header(HttpHeaders.ETAG, "\"" + user.getId() + "\"")
+                .body(new UserResponse(
+                    user.getId(),
+                    user.getEmail(),
+                    user.getName(),
+                    token,
+                    links
+                ));
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(Map.of("error", "Invalid or expired token: " + e.getMessage()));
+    }
+}
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
