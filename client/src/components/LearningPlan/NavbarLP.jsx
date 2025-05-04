@@ -36,7 +36,7 @@ const NavbarLP = () => {
             <Link to="/userplan?userId=demoUser" className="hover:text-blue-600 transition duration-200">My Plan</Link>
           </li>
           <li>
-            <Link to="/progress" className="hover:text-blue-600 transition duration-200">My Progress</Link>
+            <Link to="/progress?userId=demoUser" className="hover:text-blue-600 transition duration-200">My Progress</Link>
           </li>
         </ul>
       </div>

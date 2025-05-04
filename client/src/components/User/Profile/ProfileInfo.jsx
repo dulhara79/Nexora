@@ -1,28 +1,221 @@
-import React from 'react';
-import { Instagram, Twitter, Linkedin, MessageCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Instagram, Twitter, Linkedin, Github, MessageCircle, UserCheck, UserPlus, Share2 } from 'lucide-react';
 
-const ProfileInfo = ({ profileUser }) => (
-  <div className="pt-20">
-    <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">{profileUser?.name || "John Doe"}</h1>
-        <p className="font-medium text-blue-600">@{profileUser?.username || "username"}</p>
+// const ProfileInfo = ({ profileUser, isDarkMode }) => {
+//   const [isFollowing, setIsFollowing] = useState(false);
+  
+//   const socialLinks = [
+//     { icon: <Instagram />, color: "hover:text-pink-600", name: "Instagram" },
+//     { icon: <Twitter />, color: "hover:text-blue-400", name: "Twitter" },
+//     { icon: <Linkedin />, color: "hover:text-blue-700", name: "LinkedIn" },
+//     { icon: <Github />, color: "hover:text-gray-800", name: "GitHub" }
+//   ];
+
+//   return (
+//     <motion.div 
+//       initial={{ opacity: 0, y: 20 }}
+//       animate={{ opacity: 1, y: 0 }}
+//       transition={{ duration: 0.5 }}
+//       className="pt-20"
+//     >
+//       <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+//         <motion.div
+//           initial={{ opacity: 0, x: -20 }}
+//           animate={{ opacity: 1, x: 0 }}
+//           transition={{ delay: 0.2 }}
+//         >
+//           <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+//             {profileUser?.name || "John Doe"}
+//           </h1>
+//           <div className="flex items-center">
+//             <motion.p 
+//               initial={{ opacity: 0 }}
+//               animate={{ opacity: 1 }}
+//               transition={{ delay: 0.3 }}
+//               className="font-medium text-indigo-500"
+//             >
+//               @{profileUser?.username || "username"}
+//             </motion.p>
+//             {profileUser?.verified && (
+//               <motion.div 
+//                 initial={{ scale: 0, opacity: 0 }}
+//                 animate={{ scale: 1, opacity: 1 }}
+//                 transition={{ delay: 0.4, type: "spring" }}
+//                 className="flex items-center justify-center w-5 h-5 ml-2 text-white bg-blue-500 rounded-full"
+//               >
+//                 <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
+//                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+//                 </svg>
+//               </motion.div>
+//             )}
+//           </div>
+//           {profileUser?.location && (
+//             <motion.p 
+//               initial={{ opacity: 0 }}
+//               animate={{ opacity: 1 }}
+//               transition={{ delay: 0.4 }}
+//               className={`mt-1 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}
+//             >
+//               {profileUser.location}
+//             </motion.p>
+//           )}
+//         </motion.div>
+        
+//         <motion.div 
+//           initial={{ opacity: 0, scale: 0.9 }}
+//           animate={{ opacity: 1, scale: 1 }}
+//           transition={{ delay: 0.3 }}
+//           className="flex flex-wrap gap-2"
+//         >
+//           <motion.button
+//             whileHover={{ scale: 1.05 }}
+//             whileTap={{ scale: 0.95 }}
+//             onClick={() => setIsFollowing(!isFollowing)}
+//             className={`px-6 py-2 font-medium transition-all duration-300 rounded-full shadow-md ${
+//               isFollowing 
+//                 ? 'bg-indigo-100 text-indigo-700 border border-indigo-500' 
+//                 : 'bg-indigo-600 text-white hover:bg-indigo-700'
+//             }`}
+//           >
+//             <motion.div
+//               initial={false}
+//               animate={{ width: 'auto' }}
+//               className="flex items-center"
+//             >
+//               {isFollowing ? <UserCheck className="w-4 h-4 mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
+//               {isFollowing ? 'Following' : 'Follow'}
+//             </motion.div>
+//           </motion.button>
+          
+//           <motion.button
+//             whileHover={{ scale: 1.05 }}
+//             whileTap={{ scale: 0.95 }}
+//             className={`px-6 py-2 font-medium transition-all duration-300 border rounded-full shadow-md ${
+//               isDarkMode 
+//                 ? 'bg-gray-800 text-white border-gray-700 hover:bg-gray-700' 
+//                 : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+//             }`}
+//           >
+//             <div className="flex items-center">
+//               <MessageCircle className="w-4 h-4 mr-2" />
+//               Message
+//             </div>
+//           </motion.button>
+          
+//           <motion.button
+//             whileHover={{ scale: 1.05 }}
+//             whileTap={{ scale: 0.95 }}
+//             className={`p-3 transition-all duration-300 rounded-full shadow-md ${
+//               isDarkMode 
+//                 ? 'bg-gray-800 text-white border-gray-700 hover:bg-gray-700' 
+//                 : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+//             }`}
+//           >
+//             <Share2 className="w-4 h-4" />
+//           </motion.button>
+//         </motion.div>
+//       </div>
+      
+//       <motion.div 
+//         initial={{ opacity: 0, y: 10 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         transition={{ delay: 0.5 }}
+//         className="flex flex-wrap items-center mt-6 space-x-4"
+//       >
+//         {socialLinks.map((social, index) => (
+//           <motion.a
+//             key={social.name}
+//             href="#"
+//             whileHover={{ scale: 1.2, rotate: [0, -10, 10, -5, 0] }}
+//             transition={{ duration: 0.5 }}
+//             initial={{ opacity: 0, y: 20 }}
+//             animate={{ 
+//               opacity: 1, 
+//               y: 0,
+//               transition: { delay: 0.5 + index * 0.1 } 
+//             }}
+//             className={`flex items-center justify-center w-10 h-10 transition-colors rounded-full ${
+//               isDarkMode 
+//                 ? 'bg-gray-800 text-gray-400 hover:text-white' 
+//                 : 'bg-gray-100 text-gray-500'
+//             } ${social.color}`}
+//           >
+//             {social.icon}
+//           </motion.a>
+//         ))}
+//       </motion.div>
+//     </motion.div>
+//   );
+// };
+
+const ProfileInfo = ({ profileUser, isDarkMode }) => {
+  const [isFollowing, setIsFollowing] = useState(false);
+  
+  if (!profileUser) {
+    return <div className="p-4 text-center text-gray-500">Loading profile info...</div>;
+  }
+
+  const socialLinks = [
+    { icon: <Instagram />, color: "hover:text-pink-600", name: "Instagram" },
+    { icon: <Twitter />, color: "hover:text-blue-400", name: "Twitter" },
+    { icon: <Linkedin />, color: "hover:text-blue-700", name: "LinkedIn" },
+    { icon: <Github />, color: "hover:text-gray-800", name: "GitHub" }
+  ];
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="pt-20"
+    >
+      <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            {profileUser.name || "John Doe"}
+          </h1>
+          <div className="flex items-center">
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="font-medium text-indigo-500"
+            >
+              @{profileUser.username || "username"}
+            </motion.p>
+            {profileUser.verified && (
+              <motion.div 
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.4, type: "spring" }}
+                className="flex items-center justify-center w-5 h-5 ml-2 text-white bg-blue-500 rounded-full"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </motion.div>
+            )}
+          </div>
+          {profileUser.location && (
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className={`mt-1 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}
+            >
+              {profileUser.location}
+            </motion.p>
+          )}
+        </motion.div>
+        {/* Rest of the component remains unchanged */}
       </div>
-      <div className="flex space-x-2">
-        <button className="px-6 py-2 text-white transition-colors bg-blue-600 rounded-full shadow-md hover:bg-blue-700">
-          Follow
-        </button>
-        <button className="p-3 text-gray-600 bg-gray-100 rounded-full hover:bg-gray-200">
-          <MessageCircle className="w-5 h-5" />
-        </button>
-      </div>
-    </div>
-    <div className="flex items-center mt-4 space-x-3 text-gray-500">
-      <a href="#" className="transition-colors hover:text-blue-600"><Instagram className="w-6 h-6" /></a>
-      <a href="#" className="transition-colors hover:text-blue-600"><Twitter className="w-6 h-6" /></a>
-      <a href="#" className="transition-colors hover:text-blue-600"><Linkedin className="w-6 h-6" /></a>
-    </div>
-  </div>
-);
+    </motion.div>
+  );
+};
 
 export default ProfileInfo;

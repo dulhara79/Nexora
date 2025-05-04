@@ -73,16 +73,20 @@ const SavedQuestions = () => {
 
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/questions/saved",
+          "http://localhost:5000/api/questions/saved-questions",
           {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
             withCredentials: true,
           }
         );
         console.log("Saved questions response:", response.data);
-        setSavedQuestions(response.data);
+        setSavedQuestions(response.data.questions || []);
         setIsLoading(false);
       } catch (err) {
-        setError(err.message || "Failed to load saved questions");
+        console.error("Error fetching saved questions:", err);
+        setError(err.response?.data?.error || "Failed to load saved questions");
         setIsLoading(false);
       }
     };
@@ -108,14 +112,18 @@ const SavedQuestions = () => {
   const removeSavedQuestion = async (questionId) => {
     try {
       await axios.delete(
-        `http://localhost:5000/api/questions/${questionId}/unsave`,
+        `http://localhost:5000/api/questions/saved-questions/${questionId}`,
         {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
           withCredentials: true,
         }
       );
       setSavedQuestions(savedQuestions.filter((q) => q.id !== questionId));
     } catch (err) {
       console.error("Error removing saved question:", err);
+      setError(err.response?.data?.error || "Failed to unsave question");
     }
   };
 
