@@ -214,6 +214,8 @@ import axios from "axios";
 import { AuthContext } from "../context/AuthContext"; // Adjust path as needed
 import { useNavigate } from "react-router-dom";
 
+axios.defaults.withCredentials = true;
+
 const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -227,18 +229,13 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
 
-  // Listen for postMessage from GoogleCallback
   useEffect(() => {
-    const handleMessage = (event) => {
-      if (event.origin !== "http://localhost:5000") return; // Match the backend origin
-      const { userId, token, email, name, error } = event.data;
-    const handleMessage = (event) => {
-      console.log("Received postMessage:", event.origin, event.data);
-      if (event.origin !== "http://localhost:5000") {
-        console.warn("Invalid origin for postMessage:", event.origin);
-        return;
-      }
-      const { userId, token, email, name, error } = event.data;
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+
     const handleMessage = (event) => {
       console.log("Received postMessage:", event.origin, event.data); // Debug log
       if (event.origin !== "http://localhost:5000") {
@@ -264,16 +261,17 @@ const Login = () => {
         setError("Invalid Google login data");
         setLoading(false);
       }
+    };
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
   }, [login, navigate]);
 
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, [login, navigate]);
   const handleEmailLogin = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
+
     try {
       const response = await axios.post(
         "http://localhost:5000/api/auth/login",
@@ -491,7 +489,7 @@ const Login = () => {
             </form>
           )}
         </div>
-      )}
+      </motion.div>
     </div>
   );
 };
