@@ -14,4 +14,6 @@ public interface ForumQuestionRepository extends MongoRepository<ForumQuestion, 
     List<ForumQuestion> findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String title, String description);
 
     List<ForumQuestion> findByIsFlaggedTrue();
+
+    List<ForumQuestion> findByUpvoteUserIdsContaining(String userId);
 }
