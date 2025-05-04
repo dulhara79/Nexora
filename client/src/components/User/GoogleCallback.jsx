@@ -38,6 +38,7 @@ const GoogleCallback = () => {
 
     window.addEventListener("message", handleMessage);
 
+    window.addEventListener("message", handleMessage);
     // Open the Google OAuth popup
     const popup = window.open(
       "http://localhost:5000/api/auth/google-redirect",
