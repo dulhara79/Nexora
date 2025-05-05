@@ -30,24 +30,34 @@ public class NotificationController {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    // Extract userId from JWT token
+    private SecretKey getJwtSecretKey() {
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    }
+
     private String extractUserIdFromToken(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return null;
         }
-        String token = authHeader.substring(7); // Remove "Bearer " prefix
+        String token = authHeader.substring(7);
         try {
-            SecretKey jwtSecretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
             return Jwts.parserBuilder()
-                .setSigningKey(jwtSecretKey)
+                .setSigningKey(getJwtSecretKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
-                .getSubject(); // Assumes userId is stored as the subject in the JWT
+                .getSubject();
         } catch (Exception e) {
             System.err.println("Error parsing JWT: " + e.getMessage());
             return null;
         }
+    }
+
+    private List<Map<String, String>> buildNotificationLinks(String notificationId) {
+        return Arrays.asList(
+            Map.of("rel", "self", "href", "/api/notifications/" + notificationId),
+            Map.of("rel", "mark-as-read", "href", "/api/notifications/" + notificationId + "/read"),
+            Map.of("rel", "all-notifications", "href", "/api/notifications")
+        );
     }
 
     @GetMapping
@@ -56,37 +66,40 @@ public class NotificationController {
             HttpServletResponse response) {
         String userId = extractUserIdFromToken(authHeader);
         if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(List.of(Map.of("error", "User not authenticated")));
         }
         try {
             List<Notification> notifications = notificationService.getNotifications(userId);
             List<Map<String, Object>> responseBody = notifications.stream().map(notification -> {
                 Map<String, Object> notificationWithLinks = new HashMap<>();
                 notificationWithLinks.put("notification", notification);
-                notificationWithLinks.put("_links", Arrays.asList(
-                    Map.of("rel", "self", "href", "/api/notifications/" + notification.getId()),
-                    Map.of("rel", "mark-as-read", "href", "/api/notifications/" + notification.getId() + "/read")
-                ));
+                notificationWithLinks.put("_links", buildNotificationLinks(notification.getId()));
                 return notificationWithLinks;
             }).collect(Collectors.toList());
 
-            response.setHeader("Cache-Control", "max-age=3600"); // Cache for 1 hour
+            // Use no-cache to ensure fresh notifications
+            response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+            response.setHeader("ETag", "\"" + System.currentTimeMillis() + "\"");
+
             return ResponseEntity.ok(responseBody);
         } catch (Exception e) {
             System.err.println("Error fetching notifications for userId " + userId + ": " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(List.of(Map.of("error", "Error fetching notifications: " + e.getMessage())));
         }
     }
 
     @PutMapping("/{notificationId}/read")
-    public ResponseEntity<?> markAsRead(
+    public ResponseEntity<Map<String, Object>> markAsRead(
             @PathVariable String notificationId,
             @RequestHeader("Authorization") String authHeader,
             HttpServletResponse response) {
         String userId = extractUserIdFromToken(authHeader);
         if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error", "User not authenticated"));
         }
         try {
             Notification notification = notificationService.getNotifications(userId).stream()
@@ -94,50 +107,53 @@ public class NotificationController {
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Notification not found"));
             if (!notification.getUserId().equals(userId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not authorized to mark this notification as read");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Not authorized to mark this notification as read"));
             }
             notificationService.markAsRead(notificationId);
-            response.setHeader("Cache-Control", "no-cache"); // Prevent caching for PUT
+            response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("message", "Notification marked as read");
-            responseBody.put("_links", Arrays.asList(
-                Map.of("rel", "notifications", "href", "/api/notifications")
-            ));
+            responseBody.put("_links", buildNotificationLinks(notificationId));
 
             return ResponseEntity.ok(responseBody);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             System.err.println("Error marking notification as read: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error marking notification as read");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Error marking notification as read: " + e.getMessage()));
         }
     }
 
     @PutMapping("/read-all")
-    public ResponseEntity<?> markAllAsRead(
+    public ResponseEntity<Map<String, Object>> markAllAsRead(
             @RequestHeader("Authorization") String authHeader,
             HttpServletResponse response) {
         String userId = extractUserIdFromToken(authHeader);
         if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error", "User not authenticated"));
         }
         try {
             notificationService.markAllAsRead(userId);
-            response.setHeader("Cache-Control", "no-cache"); // Prevent caching for PUT
+            response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("message", "All notifications marked as read");
             responseBody.put("_links", Arrays.asList(
-                Map.of("rel", "notifications", "href", "/api/notifications")
+                Map.of("rel", "all-notifications", "href", "/api/notifications")
             ));
 
             return ResponseEntity.ok(responseBody);
         } catch (Exception e) {
             System.err.println("Error marking all notifications as read: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error marking all notifications as read");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Error marking all notifications as read: " + e.getMessage()));
         }
     }
 }
