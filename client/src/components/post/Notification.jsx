@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { parseISO, format } from "date-fns";
 
 const Notification = ({ message, type, createdAt, onClose }) => {
   const [isVisible, setIsVisible] = useState(true);
@@ -7,6 +8,20 @@ const Notification = ({ message, type, createdAt, onClose }) => {
   const handleClose = () => {
     setIsVisible(false);
     if (onClose) onClose();
+  };
+
+  // Helper function to safely format date
+  const formatNotificationTime = (createdAt) => {
+    try {
+      const date = parseISO(createdAt);
+      if (isNaN(date.getTime())) {
+        return "Unknown time";
+      }
+      return format(date, "PPp"); // e.g., "May 4, 2025, 12:34 PM"
+    } catch (error) {
+      console.error("Error parsing date:", createdAt, error);
+      return "Unknown time";
+    }
   };
 
   if (!isVisible) return null;
@@ -24,7 +39,7 @@ const Notification = ({ message, type, createdAt, onClose }) => {
       <div>
         <p>{message}</p>
         <p className="text-sm text-gray-500">
-          {new Date(createdAt).toLocaleString()}
+          {formatNotificationTime(createdAt)}
         </p>
       </div>
       <button
