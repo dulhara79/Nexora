@@ -13,7 +13,8 @@ import {
   HiOutlineTag,
 } from 'react-icons/hi';
 import axios from 'axios';
-import Header from '../../components/Forum/Header';
+// import Header from '../../components/Forum/Header';
+import Header from "../../components/common/NewPageHeader";
 import { AuthContext } from '../../context/AuthContext';
 
 // Configure Axios instance
