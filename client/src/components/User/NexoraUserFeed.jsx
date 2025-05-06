@@ -287,9 +287,9 @@ import PostCard from "../post/PostCard"; // Adjust path as needed
 import SuggestedUsers from "../User/Profile/SuggestedUsers"; // Adjust path as needed
 import LoadingSpinner from "../User/LoadingSpinner"; // Adjust path as needed
 import TabButton from "../User/TabButton"; // Adjust path as needed
-import Navbar from "../User/Navbar"; // Adjust path as needed
 import { LogIn, UserPlus } from "lucide-react";
 import { throttle } from "lodash";
+import Navbar from "../common/Navbar";
 
 const API_URL = "http://localhost:5000/api";
 
@@ -438,12 +438,7 @@ const UserFeedPage = () => {
         isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
       }`}
     >
-      <Navbar
-        currentUser={user}
-        onSignOut={logout}
-        isDarkMode={isDarkMode}
-        setIsDarkMode={setIsDarkMode}
-      />
+      <Navbar/>
       <div className="flex flex-col gap-6 px-4 pt-20 pb-10 mx-auto max-w-7xl lg:flex-row">
         {isAuthenticated ? (
           <div className="lg:w-3/4">

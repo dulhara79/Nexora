@@ -71,6 +71,16 @@ const Header = () => {
     window.location.href = "/login";
   };
 
+  // const handleLogout = async () => {
+  //   try {
+  //     await logout();
+  //     // Force a full reload to ensure all state is cleared
+  //     window.location.href = '/login';
+  //   } catch (error) {
+  //     console.error('Failed to log out', error);
+  //   }
+  // };
+
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
     document.documentElement.classList.toggle("dark");
@@ -81,7 +91,7 @@ const Header = () => {
     { name: "Home", path: "/forum/home", icon: "🏠" },
     { name: "Forums", path: "/forum", icon: "📰" },
     { name: "Saved", path: "/forum/saved", icon: "📌" },
-    { name: "Community", path: "/community", icon: "👥" },
+    { name: "Community", path: "/forum/community", icon: "👥" },
   ];
 
   // Animation variants
@@ -263,6 +273,7 @@ const Header = () => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
+              <Link to={"/forum/notifications"}>
               <button className="p-2 transition-colors bg-gray-100 rounded-full text-slate-500 hover:text-blue-500 dark:bg-slate-700/50 dark:text-slate-300 dark:hover:text-blue-300">
                 <div className="relative">
                   <HiOutlineBell className="w-5 h-5" />
@@ -271,11 +282,12 @@ const Header = () => {
                       className="absolute inline-flex w-full h-full bg-red-500 rounded-full opacity-75"
                       animate={{ scale: [1, 1.5, 1] }}
                       transition={{ duration: 2, repeat: Infinity }}
-                    ></motion.span>
+                      ></motion.span>
                     <span className="relative inline-flex w-2 h-2 bg-red-500 rounded-full"></span>
                   </span>
                 </div>
               </button>
+                      </Link>
             </motion.div>
 
             <motion.button
