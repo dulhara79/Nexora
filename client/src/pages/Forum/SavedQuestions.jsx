@@ -3,15 +3,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
-import "../../index.css";
-import Header from "../../components/Forum/Header";
+import Header from "../../components/common/NewPageHeader";
 import {
   BookmarkIcon,
   ClockIcon,
   UserIcon,
   TagIcon,
   MessageSquareIcon,
+  SearchIcon,
+  GridIcon,
+  ListIcon,
 } from "lucide-react";
+import ToastNotification from "../../components/common/ToastNotification";
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -30,7 +33,7 @@ class ErrorBoundary extends React.Component {
       return (
         <div className="p-6 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/20 dark:border-red-800">
           <p className="font-medium text-red-600 dark:text-red-400">
-            Something went wrong while rendering questions.
+            Something went wrong while rendering your saved questions.
           </p>
           <Link
             to="/forum"
@@ -57,80 +60,130 @@ class ErrorBoundary extends React.Component {
 }
 
 const SavedQuestions = () => {
-  const { user } = useContext(AuthContext);
+  const { user, isAuthenticated, loading: authLoading, token } = useContext(AuthContext);
   const [savedQuestions, setSavedQuestions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [displayMode, setDisplayMode] = useState("grid"); // grid or list
+  const [displayMode, setDisplayMode] = useState("grid");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchSavedQuestions = async () => {
-      if (!user) {
-        setError("Please log in to view saved questions");
-        setIsLoading(false);
-        return;
-      }
+     
+      console.log("Auth Loading:", authLoading);  
+      console.log("Is Authenticated:", isAuthenticated);
+      console.log("User:", user);
+      console.log("User Token:", user?.token);
+      console.log("Is Loading:", isLoading);
+      console.log("Error:", error);
+      console.log("Display Mode:", displayMode); 
+      console.log("Search Term:", searchTerm);
+      console.log("Toast:", toast);
+      console.log("Saved Questions:", savedQuestions);
+      console.log("Display token:", token);
+      
+        if (!token) {
+          setError("Please log in to view saved questions");
+        }
+        if (isMounted) {
+          setIsLoading(false);
+        }
 
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/questions/saved",
+          "http://localhost:5000/api/questions/saved-questions",
           {
             withCredentials: true,
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
         );
-        console.log("Saved questions response:", response.data);
-        setSavedQuestions(response.data);
-        setIsLoading(false);
+        if (isMounted) {
+          setSavedQuestions(response.data.questions || []);
+          setIsLoading(false);
+        }
       } catch (err) {
-        setError(err.message || "Failed to load saved questions");
-        setIsLoading(false);
+        console.error("Error fetching saved questions:", err);
+        if (isMounted) {
+          if (err.response?.status === 401) {
+            setError("Session expired. Please log in again.");
+          } else {
+            setError(
+              err.response?.data?.message ||
+                "Failed to load saved questions. Please try again later."
+            );
+          }
+          setIsLoading(false);
+        }
       }
     };
 
     fetchSavedQuestions();
-  }, [user]);
 
-  // Format date and time
+    return () => {
+      isMounted = false;
+    };
+  }, [user, isAuthenticated, authLoading]);
+
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
-    const formattedDate = date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-    const formattedTime = date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    return { date: formattedDate, time: formattedTime };
+    return {
+      date: date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      time: date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
   };
 
+  
   const removeSavedQuestion = async (questionId) => {
+    console.log("Saved questionId:", questionId);
     try {
       await axios.delete(
-        `http://localhost:5000/api/questions/${questionId}/unsave`,
+        `http://localhost:5000/api/questions/saved-questions/${questionId}`,
         {
           withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
       setSavedQuestions(savedQuestions.filter((q) => q.id !== questionId));
+      showToast("Removed from saved questions", "info");
     } catch (err) {
       console.error("Error removing saved question:", err);
+      showToast("Failed to remove question", "error");
     }
   };
 
-  // Card container variants
+  const showToast = (message, type) => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ ...toast, show: false }), 3000);
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
+        staggerChildren: 0.15,
       },
     },
   };
 
-  // Card item variants
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
@@ -138,28 +191,42 @@ const SavedQuestions = () => {
       opacity: 1,
       transition: {
         type: "spring",
-        stiffness: 260,
-        damping: 20,
+        stiffness: 300,
+        damping: 25,
       },
     },
     hover: {
       y: -5,
       boxShadow:
-        "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+        "0 12px 20px -4px rgba(0, 0, 0, 0.15), 0 6px 10px -3px rgba(0, 0, 0, 0.1)",
       transition: {
         type: "spring",
-        stiffness: 300,
-        damping: 15,
+        stiffness: 350,
+        damping: 18,
       },
     },
   };
 
+  const filteredQuestions = savedQuestions.filter(
+    (q) =>
+      q.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      q.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      q.tags?.some((tag) =>
+        tag.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+  );
+
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-        <Header />
+      <Header />
+      <ToastNotification
+        show={toast.show}
+        message={toast.message}
+        type={toast.type}
+      />
+      <div className="min-h-screen mt-16 bg-gradient-to-br from-amber-50 via-white to-slate-100 dark:from-amber-950 dark:via-slate-900 dark:to-slate-950">
         <AnimatePresence>
-          {isLoading ? (
+          {authLoading || isLoading ? (
             <motion.div
               key="loader"
               className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm dark:bg-slate-900/80"
@@ -169,10 +236,13 @@ const SavedQuestions = () => {
               transition={{ duration: 0.5 }}
             >
               <motion.div
-                className="w-20 h-20 border-4 border-blue-500 rounded-full border-t-transparent"
+                className="relative w-24 h-24"
                 animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              />
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
+                <div className="absolute inset-0 border-4 rounded-full border-amber-300 border-t-amber-500"></div>
+                <div className="absolute inset-0 border-2 rounded-full border-amber-200 border-t-amber-400 animate-spin-slow"></div>
+              </motion.div>
             </motion.div>
           ) : (
             <motion.div
@@ -182,76 +252,53 @@ const SavedQuestions = () => {
               transition={{ duration: 0.5 }}
               className="max-w-6xl p-4 mx-auto md:p-6"
             >
-              <div className="flex flex-col justify-between mb-8 md:flex-row md:items-center">
+              <div className="flex flex-col gap-4 mb-10">
                 <motion.h1
-                  className="text-3xl font-bold text-gray-800 dark:text-white"
+                  className="text-4xl font-bold text-transparent bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text"
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <span className="relative">
-                    Saved Questions
-                    <motion.span
-                      className="absolute bottom-0 left-0 h-1 bg-blue-500 rounded-full"
-                      initial={{ width: "0%" }}
-                      animate={{ width: "100%" }}
-                      transition={{ delay: 0.5, duration: 0.5 }}
-                    />
-                  </span>
+                  Your Culinary Collection
                 </motion.h1>
+                <p className="text-lg text-slate-600 dark:text-slate-300">
+                  All the cooking questions you've saved for later inspiration
+                </p>
+              </div>
 
-                <div className="flex items-center mt-4 space-x-3 md:mt-0">
+              <div className="flex flex-col gap-4 mb-8 md:flex-row md:items-center md:justify-between">
+                <div className="relative flex-1 max-w-md">
+                  <SearchIcon className="absolute w-4 h-4 transform -translate-y-1/2 left-3 top-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search saved questions..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full py-2 pr-4 border rounded-lg pl-9 border-slate-300 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm focus:ring-2 focus:ring-amber-500 dark:border-slate-700 dark:text-slate-200"
+                  />
+                </div>
+                <div className="flex items-center space-x-3">
                   <button
                     onClick={() => setDisplayMode("grid")}
-                    className={`p-2 rounded-lg transition-colors ${
+                    className={`p-2 rounded-lg transition-all ${
                       displayMode === "grid"
-                        ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-                        : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                        ? "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 scale-105"
+                        : "bg-white/70 text-slate-600 dark:bg-slate-800/70 dark:text-slate-400 hover:bg-amber-50 dark:hover:bg-slate-700"
                     }`}
+                    title="Grid View"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect x="3" y="3" width="7" height="7" />
-                      <rect x="14" y="3" width="7" height="7" />
-                      <rect x="14" y="14" width="7" height="7" />
-                      <rect x="3" y="14" width="7" height="7" />
-                    </svg>
+                    <GridIcon className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => setDisplayMode("list")}
-                    className={`p-2 rounded-lg transition-colors ${
+                    className={`p-2 rounded-lg transition-all ${
                       displayMode === "list"
-                        ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-                        : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                        ? "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 scale-105"
+                        : "bg-white/70 text-slate-600 dark:bg-slate-800/70 dark:text-slate-400 hover:bg-amber-50 dark:hover:bg-slate-700"
                     }`}
+                    title="List View"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <line x1="8" y1="6" x2="21" y2="6" />
-                      <line x1="8" y1="12" x2="21" y2="12" />
-                      <line x1="8" y1="18" x2="21" y2="18" />
-                      <line x1="3" y1="6" x2="3.01" y2="6" />
-                      <line x1="3" y1="12" x2="3.01" y2="12" />
-                      <line x1="3" y1="18" x2="3.01" y2="18" />
-                    </svg>
+                    <ListIcon className="w-5 h-5" />
                   </button>
                 </div>
               </div>
@@ -265,7 +312,7 @@ const SavedQuestions = () => {
                 >
                   <p className="text-red-600 dark:text-red-400">{error}</p>
                   <Link
-                    to="/forum"
+                    to="/login"
                     className="inline-flex items-center mt-4 font-medium text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                   >
                     <motion.span
@@ -279,26 +326,26 @@ const SavedQuestions = () => {
                     >
                       ←
                     </motion.span>
-                    <span className="ml-1">Back to Forum</span>
+                    <span className="ml-1">Go to Login</span>
                   </Link>
                 </motion.div>
-              ) : savedQuestions.length === 0 ? (
+              ) : filteredQuestions.length === 0 ? (
                 <motion.div
-                  className="p-10 text-center bg-white rounded-lg shadow-lg dark:bg-slate-800 backdrop-blur-sm bg-opacity-70 dark:bg-opacity-70"
+                  className="p-10 text-center bg-white shadow-lg rounded-xl dark:bg-slate-800 backdrop-blur-sm bg-opacity-70 dark:bg-opacity-70"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <BookmarkIcon className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
-                  <p className="text-xl text-gray-600 dark:text-gray-300">
+                  <BookmarkIcon className="w-16 h-16 mx-auto mb-4 text-slate-400 dark:text-slate-500" />
+                  <p className="text-xl text-slate-600 dark:text-slate-300">
                     No saved questions yet.
                   </p>
-                  <p className="mb-6 text-gray-500 dark:text-gray-400">
-                    Save questions from the forum to see them here!
+                  <p className="mb-6 text-slate-500 dark:text-slate-400">
+                    Save cooking questions from the forum to see them here!
                   </p>
                   <Link
                     to="/forum"
-                    className="inline-flex items-center px-5 py-3 font-medium text-white transition-colors bg-blue-600 rounded-full shadow-md hover:bg-blue-700 hover:shadow-lg"
+                    className="inline-flex items-center px-5 py-3 font-medium text-white transition-all rounded-full shadow-lg bg-gradient-to-r from-amber-600 to-orange-500 hover:shadow-xl hover:from-amber-700 hover:to-orange-600"
                   >
                     Browse Forum
                     <motion.svg
@@ -336,15 +383,14 @@ const SavedQuestions = () => {
                       : "space-y-4"
                   }
                 >
-                  {savedQuestions.map((question) => {
+                  {filteredQuestions.map((question) => {
                     const { date, time } = formatDateTime(question.createdAt);
-
                     return (
                       <motion.div
                         key={question.id}
                         variants={itemVariants}
                         whileHover="hover"
-                        className={`overflow-hidden bg-white rounded-xl shadow-md dark:bg-slate-800 border border-gray-100 dark:border-slate-700 ${
+                        className={`overflow-hidden bg-white/90 rounded-xl shadow-md dark:bg-slate-800/90 border border-slate-100 dark:border-slate-700 backdrop-blur-sm ${
                           displayMode === "list"
                             ? "p-5"
                             : "p-5 flex flex-col h-full"
@@ -355,7 +401,7 @@ const SavedQuestions = () => {
                             to={`/forum/question/${question.id}`}
                             className="flex-1"
                           >
-                            <h3 className="text-xl font-bold text-gray-800 transition-colors hover:text-blue-600 dark:text-white dark:hover:text-blue-400">
+                            <h3 className="text-xl font-bold transition-colors text-slate-800 hover:text-amber-600 dark:text-slate-100 dark:hover:text-amber-400">
                               {question.title}
                             </h3>
                           </Link>
@@ -364,37 +410,34 @@ const SavedQuestions = () => {
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
                               onClick={() => removeSavedQuestion(question.id)}
-                              className="p-2 text-yellow-500 transition-colors hover:text-yellow-600 dark:text-yellow-400 dark:hover:text-yellow-300"
+                              className="p-2 transition-colors text-amber-500 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-300"
                               title="Remove from saved"
                             >
                               <BookmarkIcon className="w-5 h-5 fill-current" />
                             </motion.button>
                           </div>
                         </div>
-
-                        <p className="flex-grow mb-4 text-gray-600 dark:text-gray-300">
+                        <p className="flex-grow mb-4 text-slate-600 dark:text-slate-300">
                           {(question.description || "").length > 120
                             ? `${question.description.substring(0, 120)}...`
                             : question.description ||
                               "No description available"}
                         </p>
-
                         {(question.tags || []).length > 0 && (
                           <div className="flex flex-wrap gap-2 mb-4">
-                            <TagIcon className="w-4 h-4 mr-1 text-gray-400" />
+                            <TagIcon className="w-4 h-4 mr-1 text-slate-400" />
                             {(question.tags || []).map((tag) => (
                               <motion.span
                                 key={tag}
                                 whileHover={{ scale: 1.05 }}
-                                className="px-3 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-400"
+                                className="px-3 py-1 text-xs font-medium rounded-full text-amber-700 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400"
                               >
                                 {tag}
                               </motion.span>
                             ))}
                           </div>
                         )}
-
-                        <div className="flex flex-wrap items-center justify-between pt-3 mt-auto text-sm text-gray-500 border-t border-gray-100 gap-y-3 dark:text-gray-400 dark:border-slate-700">
+                        <div className="flex flex-wrap items-center justify-between pt-3 mt-auto text-sm border-t text-slate-500 border-slate-100 gap-y-3 dark:text-slate-400 dark:border-slate-700">
                           <div className="flex items-center">
                             <div className="relative">
                               <img
@@ -406,7 +449,7 @@ const SavedQuestions = () => {
                                 className="w-8 h-8 border-2 border-white rounded-full dark:border-slate-700"
                               />
                               <motion.div
-                                className="absolute inset-0 border-2 border-blue-400 rounded-full"
+                                className="absolute inset-0 border-2 rounded-full border-amber-400"
                                 initial={{ opacity: 0, scale: 1.5 }}
                                 animate={{ opacity: 0, scale: 1.5 }}
                                 transition={{
@@ -420,7 +463,6 @@ const SavedQuestions = () => {
                               {question.author?.username || "Anonymous"}
                             </span>
                           </div>
-
                           <div className="flex items-center space-x-4">
                             <div
                               className="flex items-center"
@@ -428,10 +470,9 @@ const SavedQuestions = () => {
                             >
                               <ClockIcon className="w-4 h-4 mr-1" />
                               <span>{date}</span>
-                              <span className="mx-1 text-gray-400">·</span>
+                              <span className="mx-1 text-slate-400">·</span>
                               <span>{time}</span>
                             </div>
-
                             {question.answerCount && (
                               <div className="flex items-center">
                                 <MessageSquareIcon className="w-4 h-4 mr-1" />
@@ -445,6 +486,37 @@ const SavedQuestions = () => {
                   })}
                 </motion.div>
               )}
+
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="p-6 mt-16 border shadow-lg bg-white/80 rounded-xl dark:bg-slate-800/80 backdrop-blur-sm border-slate-100 dark:border-slate-700"
+              >
+                <h2 className="mb-4 text-xl font-semibold text-slate-800 dark:text-slate-200">
+                  Explore Popular Tags
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    "baking",
+                    "knife-skills",
+                    "sauces",
+                    "grilling",
+                    "pastry",
+                    "knife-sharpening",
+                    "presentation",
+                  ].map((tag) => (
+                    <motion.button
+                      key={tag}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="px-3 py-1 text-sm transition-colors rounded-full text-amber-700 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50"
+                    >
+                      #{tag}
+                    </motion.button>
+                  ))}
+                </div>
+              </motion.section>
             </motion.div>
           )}
         </AnimatePresence>
