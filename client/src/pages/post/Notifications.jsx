@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../../context/AuthContext";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, parseISO } from "date-fns";
 import Navbar from "../../components/post/Navbar";
 
 const Notifications = ({ onNewNotification }) => {
@@ -17,11 +17,11 @@ const Notifications = ({ onNewNotification }) => {
       const response = await axios.get("http://localhost:5000/api/notifications", {
         withCredentials: true,
       });
-      console.log("Fetched notifications:", response.data);
-      setNotifications(response.data);
+      console.log("Fetched notifications:", response.data); // Debug log
+      const notificationData = response.data.map(item => item.notification);
+      setNotifications(notificationData);
       
-      // Count unread notifications
-      const unread = response.data.filter(notification => !notification.read).length;
+      const unread = notificationData.filter(notification => !notification.read).length;
       setUnreadCount(unread);
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -36,14 +36,12 @@ const Notifications = ({ onNewNotification }) => {
         withCredentials: true,
       });
       
-      // Update the notifications list locally
       setNotifications(prev => 
         prev.map(notif => 
           notif.id === notificationId ? { ...notif, read: true } : notif
         )
       );
       
-      // Update unread count
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error("Error marking notification as read:", error);
@@ -56,12 +54,10 @@ const Notifications = ({ onNewNotification }) => {
         withCredentials: true,
       });
       
-      // Update all notifications as read locally
       setNotifications(prev => 
         prev.map(notif => ({ ...notif, read: true }))
       );
       
-      // Reset unread count
       setUnreadCount(0);
     } catch (error) {
       console.error("Error marking all notifications as read:", error);
@@ -111,25 +107,42 @@ const Notifications = ({ onNewNotification }) => {
     }
   };
 
+  const formatNotificationTime = (createdAt) => {
+    if (!createdAt) {
+      console.warn("createdAt is undefined or null:", createdAt);
+      return "Just now";
+    }
+    try {
+      const date = typeof createdAt === 'number' ? new Date(createdAt) : parseISO(createdAt);
+      if (isNaN(date.getTime())) {
+        console.warn("Invalid date parsed:", createdAt);
+        return "Just now";
+      }
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (error) {
+      console.error("Error parsing date:", createdAt, error);
+      return "Just now";
+    }
+  };
+
   useEffect(() => {
     fetchNotifications();
 
-    // Polling every 5 seconds for live updates
-    const interval = setInterval(fetchNotifications, 5000);
+    const interval = setInterval(fetchNotifications, 3000); // Reduced to 3 seconds
 
-    // Listen for new notifications triggered by likes/comments
     if (onNewNotification) {
-      onNewNotification(fetchNotifications);
+      onNewNotification(() => {
+        console.log("onNewNotification triggered, fetching notifications");
+        fetchNotifications();
+      });
     }
 
-    return () => clearInterval(interval); // Cleanup on unmount
+    return () => clearInterval(interval);
   }, [onNewNotification]);
 
   return (
     <div className="min-h-screen text-gray-900 bg-amber-50">
-      {/* Add Navbar */}
       <Navbar />
-      
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -137,7 +150,6 @@ const Notifications = ({ onNewNotification }) => {
         className="max-w-4xl p-4 mx-auto mt-6"
       >
         <div className="overflow-hidden bg-white shadow-lg rounded-xl">
-          {/* Header with badge count */}
           <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-amber-500 to-amber-400">
             <div className="flex items-center">
               <h2 className="text-2xl font-bold text-white">Notifications</h2>
@@ -161,10 +173,9 @@ const Notifications = ({ onNewNotification }) => {
             )}
           </div>
           
-          {/* Filter tabs with pill style */}
           <div className="px-4 py-3 border-b border-gray-200">
             <div className="flex flex-wrap gap-2">
-              {["all", "unread", "likes", "comments"].map((filterType) => ( // Removed "follows"
+              {["all", "unread", "likes", "comments"].map((filterType) => (
                 <button
                   key={filterType}
                   onClick={() => setFilter(filterType)}
@@ -189,7 +200,6 @@ const Notifications = ({ onNewNotification }) => {
             </div>
           </div>
 
-          {/* Notifications list */}
           <div className="p-4 bg-white">
             {loading ? (
               <div className="flex items-center justify-center py-8">
@@ -230,27 +240,21 @@ const Notifications = ({ onNewNotification }) => {
                           : "bg-amber-50"
                       }`}
                     >
-                      {/* Icon based on notification type */}
                       {getNotificationIcon(notification.type)}
-                      
-                      {/* Notification content */}
                       <div className="flex-1 ml-4">
                         <div className="flex justify-between">
                           <p className="font-medium text-gray-800">
                             {notification.message}
                           </p>
                           <span className="text-xs text-gray-500">
-                            {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                            {formatNotificationTime(notification.createdAt)}
                           </span>
                         </div>
-                        
                         {notification.recipeName && (
                           <p className="mt-1 text-sm text-gray-500">
                             on post: <span className="font-medium text-amber-600">{notification.recipeName}</span>
                           </p>
                         )}
-                        
-                        {/* Mark as Read Button */}
                         {!notification.read && (
                           <div className="flex justify-end mt-3">
                             <button 
