@@ -12,6 +12,8 @@ import SocialMediaSection from '../../components/User/Edit/SocialMediaSection';
 import ChangePasswordSection from '../../components/User/Edit/ChangePasswordSection';
 import FormActions from '../../components/User/Edit/FormActions';
 
+import Header from "../../components/common/NewPageHeader";
+
 const EditProfile = () => {
   const navigate = useNavigate();
   const { userId } = useParams(); // Get userId from URL params

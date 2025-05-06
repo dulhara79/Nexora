@@ -1,12 +1,10 @@
 // HomePage.jsx
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate, useLocation } from 'react-router-dom';
 import axios from "axios";
-import FallbackAvatar from '../../components/common/FallbackAvatar';
-import Header from "../../components/common/NewPageHeader"
+import FallbackAvatar from '../components/common/FallbackAvatar';
 
-export default function UserFeedPage() {
+export default function HomePage() {
   const [posts, setPosts] = useState([]);
   const [cuisines, setCuisines] = useState([]);
   const [challenges, setChallenges] = useState([]);
@@ -16,36 +14,27 @@ export default function UserFeedPage() {
   const BASE_URL = "http://localhost:5000/api"; // Adjust this to your Spring Boot API URL
 
   useEffect(() => {
+    // Fetch data from your Spring Boot APIs
     Promise.all([
       axios.get(`${BASE_URL}/posts`),
       axios.get(`${BASE_URL}/cuisines?level=beginner`),
       axios.get(`${BASE_URL}/challenges`),
-      axios.get(`${BASE_URL}/questions`)
+      axios.get(`${BASE_URL}/questions`),
     ]).then(([postsRes, cuisinesRes, challengesRes, questionsRes]) => {
-      // Process posts to handle nested structure
-      const processedPosts = postsRes.data.map(item => item.post || item);
-      
-      // Process challenges to handle nested structure
-      const processedChallenges = challengesRes.data.map(item => item.challenge || item);
       console.log("Posts API Response:", postsRes.data);
       console.log("Cuisines API Response:", cuisinesRes.data);
       console.log("Challenges API Response:", challengesRes.data);
       console.log("Questions API Response:", questionsRes.data.questions);
 
-      setPosts(processedPosts);
-    setCuisines(cuisinesRes.data);
-    setChallenges(processedChallenges);
-    setQuestions(questionsRes.data.questions);
-  });
-}, []);
-
-function getSafe(obj, path, defaultValue = '') {
-  return path.split('.').reduce((acc, part) => acc && acc[part], obj) || defaultValue;
-}
+      setPosts(postsRes.data.map(item => item.post || item));
+      setCuisines(cuisinesRes.data);
+      setChallenges(challengesRes.data);
+      setQuestions(questionsRes.data.questions);
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <Header />
       {/* Hero Section */}
       <HeroSection />
 
@@ -93,71 +82,33 @@ function getSafe(obj, path, defaultValue = '') {
 }
 
 // Hero Section Component
-// function HeroSection() {
-//   return (
-//     <div className="relative py-16 overflow-hidden text-white bg-gradient-to-r from-orange-500 to-pink-500 md:py-24">
-//       {/* Animated Background Elements */}
-//       <div className="absolute inset-0 overflow-hidden">
-//         <div className="absolute bg-white rounded-full -top-10 -right-10 w-72 h-72 opacity-10 animate-pulse"></div>
-//         <div className="absolute w-64 h-64 delay-1000 bg-white rounded-full top-1/2 left-10 opacity-5 animate-pulse"></div>
-//       </div>
-
-//       <div className="container relative z-10 px-4 mx-auto">
-//         <motion.div
-//           initial={{ y: 50, opacity: 0 }}
-//           animate={{ y: 0, opacity: 1 }}
-//           transition={{ duration: 0.8 }}
-//           className="max-w-2xl"
-//         >
-//           <h1 className="mb-6 text-4xl font-bold md:text-6xl">
-//             Master Culinary Arts with Nexora
-//           </h1>
-//           <p className="mb-8 text-xl">
-//             Connect, Learn, and Share Your Cooking Journey with the World
-//           </p>
-//           <div className="flex flex-wrap gap-4">
-//             <button className="px-8 py-3 font-semibold text-orange-600 transition-all transform bg-white rounded-full hover:bg-opacity-90 hover:scale-105">
-//               Start Learning
-//             </button>
-//             <button className="px-8 py-3 font-semibold text-white transition-all border-2 border-white rounded-full hover:bg-white hover:text-orange-600">
-//               Explore Recipes
-//             </button>
-//           </div>
-//         </motion.div>
-//       </div>
-//     </div>
-//   );
-// }
-
 function HeroSection() {
-  const navigate = useNavigate();
-
   return (
-    <div className="relative py-16 text-white bg-gradient-to-r from-orange-500 to-pink-500">
-      {/* Background Elements */}
+    <div className="relative py-16 overflow-hidden text-white bg-gradient-to-r from-orange-500 to-pink-500 md:py-24">
+      {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute bg-white rounded-full -top-10 -right-10 w-72 h-72 opacity-10 animate-pulse"></div>
         <div className="absolute w-64 h-64 delay-1000 bg-white rounded-full top-1/2 left-10 opacity-5 animate-pulse"></div>
       </div>
+
       <div className="container relative z-10 px-4 mx-auto">
-        <motion.div 
+        <motion.div
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8 }}
+          className="max-w-2xl"
         >
-          <h1 className="mb-6 text-4xl font-bold md:text-6xl">Master Culinary Arts with Nexora</h1>
-          <p className="mb-8 text-xl">Connect, Learn, and Share Your Cooking Journey with the World</p>
+          <h1 className="mb-6 text-4xl font-bold md:text-6xl">
+            Master Culinary Arts with Nexora
+          </h1>
+          <p className="mb-8 text-xl">
+            Connect, Learn, and Share Your Cooking Journey with the World
+          </p>
           <div className="flex flex-wrap gap-4">
-            <button
-              onClick={() => navigate('/learninghome')}
-              className="px-8 py-3 font-semibold text-orange-600 transition-all transform bg-white rounded-full hover:bg-opacity-90 hover:scale-105"
-            >
+            <button className="px-8 py-3 font-semibold text-orange-600 transition-all transform bg-white rounded-full hover:bg-opacity-90 hover:scale-105">
               Start Learning
             </button>
-            <button
-              onClick={() => navigate('/post')}
-              className="px-8 py-3 font-semibold text-white transition-all border-2 border-white rounded-full hover:bg-white hover:text-orange-600"
-            >
+            <button className="px-8 py-3 font-semibold text-white transition-all border-2 border-white rounded-full hover:bg-white hover:text-orange-600">
               Explore Recipes
             </button>
           </div>
@@ -168,34 +119,23 @@ function HeroSection() {
 }
 
 // Tab Navigation Component
-function TabNavigation() {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const tabRoutes = [
-    { name: 'all', path: '/feed' },
-    { name: 'posts', path: '/post' },
-    { name: 'learning', path: '/learninghome' },
-    { name: 'challenges', path: '/challenges' },
-    { name: 'forum', path: '/forum/home' },
-  ];
-
-  const isActive = (path) => location.pathname === path;
+function TabNavigation({ activeTab, setActiveTab }) {
+  const tabs = ["all", "posts", "learning", "challenges", "forum"];
 
   return (
     <div className="container px-4 mx-auto mt-8">
       <div className="flex pb-2 space-x-2 overflow-x-auto scrollbar-hide">
-        {tabRoutes.map(({ name, path }) => (
+        {tabs.map((tab) => (
           <button
-            key={name}
-            onClick={() => navigate(path)}
+            key={tab}
+            onClick={() => setActiveTab(tab)}
             className={`px-6 py-3 rounded-full whitespace-nowrap transition-all ${
-              isActive(path)
-                ? 'bg-orange-500 text-white shadow-lg'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              activeTab === tab
+                ? "bg-orange-500 text-white shadow-lg"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
             }`}
           >
-            {name.charAt(0).toUpperCase() + name.slice(1)}
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
           </button>
         ))}
       </div>
@@ -273,9 +213,6 @@ function AllContent({ posts, cuisines, challenges, questions }) {
 
 // Post Card Component
 function PostCard({ post, delay }) {
-  const media = post.post?.media || post.media || [];
-  const imageUrl = media[0]?.fileUrl || 'https://via.placeholder.com/400x300?text=No+Image';
-  
   return (
     <motion.div
       initial={{ y: 20, opacity: 0 }}
@@ -283,9 +220,9 @@ function PostCard({ post, delay }) {
       transition={{ delay }}
       className="overflow-hidden transition-shadow duration-300 bg-white shadow-md rounded-xl hover:shadow-lg"
     >
-      <img 
-        src={imageUrl} 
-        alt={(post.post?.description || post.description) || "User post"} 
+      <img
+        src={post.imageUrl}
+        alt={post.description}
         className="object-cover w-full h-48"
       />
       <div className="p-5">
@@ -359,26 +296,19 @@ function ChallengeCarousel({ challenges }) {
       <h2 className="mb-6 text-3xl font-bold">Ongoing Cooking Challenges</h2>
       <div className="relative">
         <div className="flex pb-4 space-x-4 overflow-x-auto scrollbar-hide">
-          {challenges.map((challenge, index) => {
-            // Handle both direct challenge objects and API response format
-            const challengeData =  challenge;
-            const imageUrl = challengeData.photoUrl;
-
-            console.log("Challenge Data:", challengeData); // Debugging line
-            
-            return (
-              <motion.div
-                key={challengeData.challengeId || index}
-                initial={{ x: 50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: index * 0.1 }}
-                className="min-w-[300px] bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300"
-              >
-                <img 
-                  src={imageUrl} 
-                  alt={challengeData.title || "Challenge"} 
-                  className="object-cover w-full h-48"
-                />
+          {challenges.map((challenge, index) => (
+            <motion.div
+              key={challenge.id}
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: index * 0.1 }}
+              className="min-w-[300px] bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300"
+            >
+              <img
+                src={challenge.image}
+                alt={challenge.title}
+                className="object-cover w-full h-48"
+              />
               <div className="p-5">
                 <h3 className="mb-2 text-xl font-bold">{challenge.title}</h3>
                 <p className="mb-4 text-gray-600">{challenge.description}</p>
@@ -391,9 +321,8 @@ function ChallengeCarousel({ challenges }) {
                   </button>
                 </div>
               </div>
-              </motion.div>
-            );
-          })}
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
@@ -466,14 +395,14 @@ function ForumCard({ question, delay }) {
           <p className="text-sm text-gray-500">{authorName}</p>
         </div>
       </div>
-      <p className="mb-4 text-gray-700">{question.description}</p>
+      <p className="mb-4 text-gray-700">{question.content}</p>
       <div className="flex items-center justify-between text-sm text-gray-500">
         <span>{question.tags?.join(', ') || 'Uncategorized'}</span>
         <div className="flex items-center">
           <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
           </svg>
-          {question.upvoteUserIds?.length || 0} Likes
+          {question.comments?.length || 0} Comments
         </div>
       </div>
     </motion.div>
