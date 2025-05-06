@@ -870,10 +870,10 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className={`mb-8 overflow-hidden transition-all duration-300 border shadow-sm rounded-2xl ${theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} hover:shadow-md`}
+      className="mb-8 overflow-hidden transition-all duration-300 bg-white border border-gray-100 shadow-sm rounded-2xl hover:shadow-md"
     >
       {/* Post Header */}
-      <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700">
+      <div className="flex items-center justify-between p-5 border-b border-gray-100">
         <div className="flex items-center space-x-3">
           <motion.div
             className="flex items-center justify-center w-12 h-12 text-lg font-semibold text-white rounded-full bg-gradient-to-br from-orange-400 to-red-500"
@@ -882,8 +882,8 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
             {post.userName?.charAt(0) || "U"}
           </motion.div>
           <div>
-            <p className="text-lg font-semibold text-gray-800 dark:text-gray-200">{post.userName || "Unknown User"}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{formattedDate}</p>
+            <p className="text-lg font-semibold text-gray-800">{post.userName || "Unknown User"}</p>
+            <p className="text-sm text-gray-500">{formattedDate}</p>
           </div>
         </div>
         {isOwner && !isEditingPost && (
@@ -892,7 +892,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsEditingPost(true)}
-              className="p-2 text-orange-500 rounded-full bg-orange-50 dark:bg-orange-900 hover:bg-orange-100 dark:hover:bg-orange-800"
+              className="p-2 text-orange-500 rounded-full bg-orange-50 hover:bg-orange-100"
               aria-label="Edit Post"
             >
               <FaEdit />
@@ -902,7 +902,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
               whileTap={{ scale: 0.9 }}
               onClick={handleDeletePost}
               disabled={loading.delete}
-              className="p-2 text-red-500 rounded-full bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800"
+              className="p-2 text-red-500 rounded-full bg-red-50 hover:bg-red-100"
               aria-label="Delete Post"
             >
               {loading.delete ? <FaSpinner className="animate-spin" /> : <FaTrash />}
@@ -913,63 +913,65 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
 
       {/* Edit Post Form */}
       {isEditingPost ? (
-        <form onSubmit={handleEditPostSubmit} className="p-5">
-          <div className="mb-4">
-            <label htmlFor="post-description" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Post Description</label>
-            <textarea
-              id="post-description"
-              value={editDescription}
-              onChange={(e) => setEditDescription(e.target.value)}
-              placeholder="Share your recipe or cooking skill..."
-              className="w-full p-4 text-gray-700 transition-all duration-200 border border-gray-200 rounded-lg dark:text-gray-200 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              rows="4"
-              required
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Add Photos/Videos</label>
-            <div className="relative">
-              <input
-                type="file"
-                multiple
-                accept="image/*,video/*"
-                onChange={(e) => setEditFiles(Array.from(e.target.files))}
-                className="w-full p-3 text-sm transition-colors duration-200 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-orange-50 dark:file:bg-orange-900 file:text-orange-600 dark:file:text-orange-400 hover:file:bg-orange-100 dark:hover:file:bg-orange-800"
+        <div className="p-5">
+          <form onSubmit={handleEditPostSubmit}>
+            <div className="mb-4">
+              <label htmlFor="post-description" className="block mb-2 text-sm font-medium text-gray-700">Post Description</label>
+              <textarea
+                id="post-description"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Share your recipe or cooking skill..."
+                className="w-full p-4 text-gray-700 transition-all duration-200 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                rows="4"
+                required
               />
             </div>
-            {editFiles.length > 0 && (
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{editFiles.length} file(s) selected</p>
-            )}
-          </div>
-          
-          <div className="flex space-x-3">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={loading.edit}
-              className="flex items-center justify-center w-1/2 px-5 py-3 font-medium text-white transition-colors rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 disabled:opacity-50 hover:from-orange-600 hover:to-orange-700"
-            >
-              {loading.edit ? (
-                <>
-                  <FaSpinner className="mr-2 animate-spin" /> Saving...
-                </>
-              ) : (
-                "Save Changes"
+            
+            <div className="mb-4">
+              <label className="block mb-2 text-sm font-medium text-gray-700">Add Photos/Videos</label>
+              <div className="relative">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*,video/*"
+                  onChange={(e) => setEditFiles(Array.from(e.target.files))}
+                  className="w-full p-3 text-sm transition-colors duration-200 bg-white border border-gray-200 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100"
+                />
+              </div>
+              {editFiles.length > 0 && (
+                <p className="mt-2 text-sm text-gray-500">{editFiles.length} file(s) selected</p>
               )}
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="button"
-              onClick={() => setIsEditingPost(false)}
-              className="w-1/2 px-5 py-3 font-medium text-gray-700 transition-colors bg-gray-100 rounded-lg dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
-            >
-              Cancel
-            </motion.button>
-          </div>
-        </form>
+            </div>
+            
+            <div className="flex space-x-3">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                disabled={loading.edit}
+                className="flex items-center justify-center w-1/2 px-5 py-3 font-medium text-white transition-colors rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 disabled:opacity-50 hover:from-orange-600 hover:to-orange-700"
+              >
+                {loading.edit ? (
+                  <>
+                    <FaSpinner className="mr-2 animate-spin" /> Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={() => setIsEditingPost(false)}
+                className="w-1/2 px-5 py-3 font-medium text-gray-700 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200"
+              >
+                Cancel
+              </motion.button>
+            </div>
+          </form>
+        </div>
       ) : (
         <>
           {/* Post Description */}
@@ -978,7 +980,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.3 }}
-              className="text-base leading-relaxed text-gray-700 dark:text-gray-300"
+              className="text-base leading-relaxed text-gray-700"
             >
               {post.description || "No description provided"}
             </motion.p>
@@ -991,11 +993,11 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                 <motion.div
                   key={media.id || `media-${index}`} // Use media.id if available, fallback to index
                   whileHover={{ scale: 1.02 }}
-                  className="relative overflow-hidden transition-transform duration-200 bg-gray-100 rounded-lg cursor-pointer dark:bg-gray-700"
+                  className="relative overflow-hidden transition-transform duration-200 bg-gray-100 rounded-lg cursor-pointer"
                   onClick={() => handleMediaClick(media, index)}
                 >
                   {mediaError[index] ? (
-                    <div className="flex items-center justify-center w-full h-56 text-gray-500 bg-gray-200 dark:text-gray-400 dark:bg-gray-600">
+                    <div className="flex items-center justify-center w-full h-56 text-gray-500 bg-gray-200">
                       Failed to load media
                     </div>
                   ) : media.fileType.startsWith("image") ? (
@@ -1023,7 +1025,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
           )}
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-between p-5 pt-2 border-t border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between p-5 pt-2 border-t border-gray-100">
             <div className="flex items-center space-x-6">
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -1031,7 +1033,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                 onClick={handleLike}
                 disabled={loading.like}
                 className={`flex items-center space-x-2 ${
-                  (post.likes || []).includes(user) ? "text-red-500" : "text-gray-500 dark:text-gray-400 hover:text-red-500"
+                  (post.likes || []).includes(user) ? "text-red-500" : "text-gray-500 hover:text-red-500"
                 } transition-colors duration-200`}
                 aria-label={(post.likes || []).includes(user) ? "Unlike" : "Like"}
               >
@@ -1047,7 +1049,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleCommentToggle}
-                className="flex items-center space-x-2 text-gray-500 transition-colors duration-200 dark:text-gray-400 hover:text-blue-500"
+                className="flex items-center space-x-2 text-gray-500 transition-colors duration-200 hover:text-blue-500"
                 aria-label="Comment"
               >
                 <FaComment className="text-lg" />
@@ -1058,7 +1060,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleShare}
-                className="flex items-center space-x-2 text-gray-500 transition-colors duration-200 dark:text-gray-400 hover:text-green-500"
+                className="flex items-center space-x-2 text-gray-500 transition-colors duration-200 hover:text-green-500"
                 aria-label="Share"
               >
                 <FaShare className="text-lg" />
@@ -1066,7 +1068,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
               </motion.button>
             </div>
             
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-sm text-gray-500">
               {(post.likes || []).length} {(post.likes || []).length === 1 ? "like" : "likes"} • {(post.comments || []).length} {(post.comments || []).length === 1 ? "comment" : "comments"}
             </div>
           </div>
@@ -1079,9 +1081,9 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="overflow-hidden border-t border-gray-100 dark:border-gray-700"
+                className="overflow-hidden border-t border-gray-100"
               >
-                <div className="p-5 bg-gray-50 dark:bg-gray-800">
+                <div className="p-5 bg-gray-50">
                   {/* Add Comment Form */}
                   <form onSubmit={handleCommentSubmit} className="flex items-center mb-4 space-x-3">
                     <input
@@ -1090,7 +1092,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
                       placeholder="Add a comment..."
-                      className="flex-1 p-3 transition-all duration-200 bg-white border border-gray-200 rounded-full dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="flex-1 p-3 transition-all duration-200 bg-white border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       required
                     />
                     <motion.button
@@ -1117,7 +1119,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                         exit={{ opacity: 0 }}
                         className="flex flex-col items-center justify-center py-6"
                       >
-                        <p className="text-gray-500 dark:text-gray-400">Be the first to comment on this post!</p>
+                        <p className="text-gray-500">Be the first to comment on this post!</p>
                       </motion.div>
                     ) : (
                       <motion.ul className="space-y-3">
@@ -1128,7 +1130,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.3 }}
-                            className="p-4 bg-white shadow-sm dark:bg-gray-700 rounded-xl"
+                            className="p-4 bg-white shadow-sm rounded-xl"
                           >
                             {editingCommentId === comment.id ? (
                               <div className="flex items-center space-x-3">
@@ -1136,7 +1138,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                                   type="text"
                                   value={editedCommentText}
                                   onChange={(e) => setEditedCommentText(e.target.value)}
-                                  className="flex-1 p-2 transition-all duration-200 border border-gray-300 rounded-lg dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                  className="flex-1 p-2 transition-all duration-200 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                                   autoFocus
                                 />
                                 <motion.button
@@ -1152,7 +1154,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
                                   onClick={() => setEditingCommentId(null)}
-                                  className="px-3 py-1 text-gray-700 bg-gray-200 rounded-md dark:text-gray-300 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500"
+                                  className="px-3 py-1 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
                                 >
                                   Cancel
                                 </motion.button>
@@ -1165,14 +1167,14 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                                       <div className="flex items-center justify-center w-8 h-8 text-sm font-semibold text-white rounded-full bg-gradient-to-br from-gray-700 to-gray-900">
                                         {comment.name?.charAt(0) || "U"}
                                       </div>
-                                      <p className="font-medium text-gray-800 dark:text-gray-200">
+                                      <p className="font-medium text-gray-800">
                                         {comment.name || "Unknown User"}
                                       </p>
-                                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                                      <span className="text-xs text-gray-500">
                                         {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
                                       </span>
                                     </div>
-                                    <p className="text-gray-700 dark:text-gray-300">{comment.text}</p>
+                                    <p className="text-gray-700">{comment.text}</p>
                                   </div>
                                   
                                   {(comment.userId === user || post.userId === user) && (
@@ -1182,7 +1184,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                                           whileHover={{ scale: 1.1 }}
                                           whileTap={{ scale: 0.9 }}
                                           onClick={() => handleEditComment(comment)}
-                                          className="p-1 text-sm text-gray-500 dark:text-gray-400 hover:text-orange-500"
+                                          className="p-1 text-sm text-gray-500 hover:text-orange-500"
                                           aria-label="Edit comment"
                                         >
                                           <FaEdit />
@@ -1193,7 +1195,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                                         whileTap={{ scale: 0.9 }}
                                         onClick={() => handleDeleteComment(comment.id)}
                                         disabled={loading.comment}
-                                        className="p-1 text-sm text-gray-500 dark:text-gray-400 hover:text-red-500"
+                                        className="p-1 text-sm text-gray-500 hover:text-red-500"
                                         aria-label="Delete comment"
                                       >
                                         {loading.comment ? <FaSpinner className="animate-spin" /> : <FaTrash />}
