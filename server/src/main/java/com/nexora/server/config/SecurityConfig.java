@@ -161,7 +161,7 @@ public class SecurityConfig {
                                         "/api/questions/**", "/api/forum/comments/**", 
                                         "/api/forum/notifications/**", "/api/tags/**", 
                                         "/api/communities/**", "/api/posts/**", 
-                                        "/api/feedposts/**", "/api/challenges/**").permitAll()
+                                        "/api/feedposts/**", "/api/challenges/**", "/api/forum/**").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
@@ -196,7 +196,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT","PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

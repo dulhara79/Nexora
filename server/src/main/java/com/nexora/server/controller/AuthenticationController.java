@@ -147,37 +147,48 @@ public class AuthenticationController {
     }
 
     @GetMapping("/check-session")
-    public ResponseEntity<?> checkSession(@RequestHeader(value = "Authorization", required = false) String authHeader) {
-        LOGGER.info("Checking session with auth header: " + authHeader);
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                    .body(Map.of("error", "No valid token provided"));
-        }
-        String token = authHeader.substring(7);
-        try {
-            User user = authenticationService.validateJwtToken(token);
-            Map<String, String> links = new HashMap<>();
-            links.put("self", "/api/auth/check-session");
-            links.put("logout", "/api/auth/logout");
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
-                    .header(HttpHeaders.ETAG, "\"" + user.getId() + "\"")
-                    .body(new UserResponse(user.getId(), user.getEmail(), user.getName(), token, links));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                    .body(Map.of("error", "Invalid or expired token: " + e.getMessage()));
-        }
+public ResponseEntity<?> checkSession(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(Map.of("error", "No valid token provided"));
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        LOGGER.info("Handling logout");
+    String token = authHeader.substring(7);
+
+    try {
+        User user = authenticationService.validateJwtToken(token);
         Map<String, String> links = new HashMap<>();
-        links.put("login", "/api/auth/login");
+        links.put("self", "/api/auth/check-session");
+        links.put("logout", "/api/auth/logout");
+
         return ResponseEntity.ok()
+                .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate") // 🔥 Prevent caching
+                .header(HttpHeaders.VARY, "Authorization") // 🔥 Differentiate by token
+                .header(HttpHeaders.ETAG, "\"" + user.getId() + "\"")
+                .body(new UserResponse(user.getId(), user.getEmail(), user.getName(), token, links));
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                .body(Map.of("message", "Logged out successfully. Please clear the token on client side.", "_links", links));
+                .body(Map.of("error", "Invalid or expired token: " + e.getMessage()));
     }
+}
+    // @PostMapping("/logout")
+    // public ResponseEntity<?> logout() {
+    //     LOGGER.info("Handling logout");
+    //     Map<String, String> links = new HashMap<>();
+    //     links.put("login", "/api/auth/login");
+    //     return ResponseEntity.ok()
+    //             .header(HttpHeaders.CACHE_CONTROL, "no-store")
+    //             .body(Map.of("message", "Logged out successfully. Please clear the token on client side.", "_links", links));
+    // }
+
+    @PostMapping("/logout")
+public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
+    String token = authHeader.substring(7); // Remove "Bearer " prefix
+    authenticationService.revokeToken(token);
+    return ResponseEntity.ok()
+            .header(HttpHeaders.CACHE_CONTROL, "no-store")
+            .body(Map.of("message", "Logged out successfully."));
+}
 }
