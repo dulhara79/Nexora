@@ -89,7 +89,7 @@ const Header = () => {
   // Define navigation links with icons
   const navLinks = [
     { name: "Home", path: "/forum/home", icon: "🏠" },
-    { name: "Forums", path: "/forum", icon: "📰" },
+    { name: "Forums", path: "/forum/questions", icon: "📰" },
     { name: "Saved", path: "/forum/saved", icon: "📌" },
     { name: "Community", path: "/forum/community", icon: "👥" },
   ];
