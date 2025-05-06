@@ -157,7 +157,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/cuisines/**", "/api/learningplan/**", "/api/completedplans/**", 
-                                        "/api/progress/**", "/api/users/**", "/api/auth/**", 
+                                        "/api/progress/**", "/api/userplan/**", "/api/users/**", "/api/auth/**", 
                                         "/api/questions/**", "/api/forum/comments/**", 
                                         "/api/forum/notifications/**", "/api/tags/**", 
                                         "/api/communities/**", "/api/posts/**", 
