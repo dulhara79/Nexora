@@ -13,7 +13,9 @@ import {
   HiOutlineTag,
 } from "react-icons/hi";
 import axios from "axios";
-import Header from "../../components/Forum/Header";
+// import Header from "../../components/Forum/Header";
+// import Header from "../../pages/TestPage";
+import Header from "../../components/common/NewPageHeader";
 import { AuthContext } from "../../context/AuthContext";
 
 // Error Boundary Component
@@ -81,16 +83,18 @@ const HomePage = () => {
         axios.get(`${API_BASE_URL}/tags`, { withCredentials: true }),
         axios.get(`${API_BASE_URL}/communities`, { withCredentials: true }),
       ]);
-      setTrendingTags(tagsResponse.data.map((tag) => tag.name));
+      setTrendingTags(tagsResponse.data.tags?.map((tag) => tag.name) || []);
       setCommunitySpotlight(
-        communitiesResponse.data.map((community) => ({
-          id: community.id || "unknown",
-          name: community.name || "Unnamed Community",
-          members: community.members || 0,
-          description: community.description || "No description available",
-          color: getRandomGradient(),
-          icon: community.icon || "🌟",
-        }))
+        Array.isArray(communitiesResponse.data.communities)
+          ? communitiesResponse.data.communities.map((community) => ({
+              id: community.id || "unknown",
+              name: community.name || "Unnamed Community",
+              members: community.members || 0,
+              description: community.description || "No description available",
+              color: getRandomGradient(),
+              icon: community.icon || "🌟",
+            }))
+          : []
       );
     } catch (err) {
       console.error("Failed to fetch initial data:", err);
@@ -117,21 +121,22 @@ const HomePage = () => {
         withCredentials: true,
       });
 
-      const transformedPosts = response.data.map((post) => ({
-        id: post.id || "unknown",
-        title: post.title || "Untitled",
-        author: post.authorUsername || "Anonymous",
-        authorAvatar: post.authorUsername?.[0]?.toUpperCase() || "A",
-        authorColor: getRandomGradient(),
-        content: post.description || "",
-        tags: Array.isArray(post.tags) ? post.tags : [],
-        likes: post.upvoteUserIds?.length || 0,
-        comments: post.commentIds?.length || 0,
-        views: post.views || 0,
-        timeAgo: calculateTimeAgo(post.createdAt || new Date()),
-        isPinned: post.isPinned || false,
-        isHot: (post.commentIds?.length || 0) > 10,
-      }));
+      const transformedPosts =
+        response.data.questions?.map((post) => ({
+          id: post.id || "unknown",
+          title: post.title || "Untitled",
+          author: post.authorUsername || "Anonymous",
+          authorAvatar: post.authorUsername?.[0]?.toUpperCase() || "A",
+          authorColor: getRandomGradient(),
+          content: post.description || "",
+          tags: Array.isArray(post.tags) ? post.tags : [],
+          likes: post.upvoteUserIds?.length || 0,
+          comments: post.commentIds?.length || 0,
+          views: post.views || 0,
+          timeAgo: calculateTimeAgo(post.createdAt || new Date()),
+          isPinned: post.isPinned || false,
+          isHot: (post.commentIds?.length || 0) > 10,
+        })) || [];
 
       setPosts(transformedPosts);
     } catch (err) {
@@ -145,25 +150,29 @@ const HomePage = () => {
   const fetchSavedPosts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/questions/saved`, {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        `${API_BASE_URL}/questions/saved-questions`,
+        {
+          withCredentials: true,
+        }
+      );
 
-      const transformedPosts = response.data.map((post) => ({
-        id: post.id || "unknown",
-        title: post.title || "Untitled",
-        author: post.authorUsername || "Anonymous",
-        authorAvatar: post.authorUsername?.[0]?.toUpperCase() || "A",
-        authorColor: getRandomGradient(),
-        content: post.description || "",
-        tags: Array.isArray(post.tags) ? post.tags : [],
-        likes: post.upvoteUserIds?.length || 0,
-        comments: post.commentIds?.length || 0,
-        views: post.views || 0,
-        timeAgo: calculateTimeAgo(post.createdAt || new Date()),
-        isPinned: post.isPinned || false,
-        isHot: (post.commentIds?.length || 0) > 10,
-      }));
+      const transformedPosts =
+        response.data.questions?.map((post) => ({
+          id: post.id || "unknown",
+          title: post.title || "Untitled",
+          author: post.authorUsername || "Anonymous",
+          authorAvatar: post.authorUsername?.[0]?.toUpperCase() || "A",
+          authorColor: getRandomGradient(),
+          content: post.description || "",
+          tags: Array.isArray(post.tags) ? post.tags : [],
+          likes: post.upvoteUserIds?.length || 0,
+          comments: post.commentIds?.length || 0,
+          views: post.views || 0,
+          timeAgo: calculateTimeAgo(post.createdAt || new Date()),
+          isPinned: post.isPinned || false,
+          isHot: (post.commentIds?.length || 0) > 10,
+        })) || [];
 
       setPosts(transformedPosts);
     } catch (err) {
@@ -176,10 +185,15 @@ const HomePage = () => {
 
   const fetchSavedStatus = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/questions/saved`, {
-        withCredentials: true,
-      });
-      setSavedPosts(new Set(response.data.map((post) => post.id)));
+      const response = await axios.get(
+        `${API_BASE_URL}/questions/saved-questions`,
+        {
+          withCredentials: true,
+        }
+      );
+      setSavedPosts(
+        new Set(response.data.questions?.map((post) => post.id) || [])
+      );
     } catch (err) {
       console.error("Failed to fetch saved status:", err);
     }
@@ -190,7 +204,9 @@ const HomePage = () => {
       const response = await axios.get(`${API_BASE_URL}/questions/liked`, {
         withCredentials: true,
       });
-      setLikedPosts(new Set(response.data.map((post) => post.id)));
+      setLikedPosts(
+        new Set(response.data.questions?.map((post) => post.id) || [])
+      );
     } catch (err) {
       console.error("Failed to fetch liked status:", err);
     }
@@ -323,16 +339,16 @@ const HomePage = () => {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-gray-100 dark:from-slate-900 dark:to-slate-800">
-        <Header />
+            <Header />
         <main className="px-4 pt-8 pb-16 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <AnimatePresence>
             {showWelcomeCard && (
               <motion.div
-                className="relative mb-8 overflow-hidden shadow-xl rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600"
-                initial={{ opacity: 0, y: -30, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -30, scale: 0.95 }}
-                transition={{ duration: 0.6, type: "spring", bounce: 0.3 }}
+              className="relative mb-8 overflow-hidden shadow-xl rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600"
+              initial={{ opacity: 0, y: -30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -30, scale: 0.95 }}
+              transition={{ duration: 0.6, type: "spring", bounce: 0.3 }}
               >
                 <div className="relative z-10 flex flex-col items-start justify-between p-8 md:flex-row md:items-center">
                   <div className="mb-6 md:mb-0">
@@ -346,14 +362,20 @@ const HomePage = () => {
                   <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
                     <motion.button
                       className="px-6 py-3 font-semibold text-indigo-700 transition-colors bg-white shadow-lg rounded-xl hover:bg-blue-50"
-                      whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(0,0,0,0.2)" }}
+                      whileHover={{
+                        scale: 1.05,
+                        boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
+                      }}
                       whileTap={{ scale: 0.95 }}
                     >
                       Join the Community
                     </motion.button>
                     <motion.button
                       className="px-6 py-3 font-semibold text-white transition-colors bg-transparent border-2 border-white rounded-xl hover:bg-white/10"
-                      whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(0,0,0,0.2)" }}
+                      whileHover={{
+                        scale: 1.05,
+                        boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
+                      }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setShowWelcomeCard(false)}
                     >
@@ -418,7 +440,11 @@ const HomePage = () => {
                   <motion.div
                     className="w-16 h-16 border-4 border-indigo-600 rounded-full border-t-transparent"
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
                   />
                 </div>
               ) : error ? (
@@ -441,7 +467,10 @@ const HomePage = () => {
                       key={post.id}
                       className="overflow-hidden transition-all duration-300 bg-white border shadow-lg dark:bg-slate-800 rounded-2xl hover:shadow-xl border-slate-100 dark:border-slate-700"
                       variants={cardItemVariants}
-                      whileHover={{ y: -5, boxShadow: "0 12px 40px rgba(0,0,0,0.1)" }}
+                      whileHover={{
+                        y: -5,
+                        boxShadow: "0 12px 40px rgba(0,0,0,0.1)",
+                      }}
                     >
                       <div className="relative p-6">
                         <div className="flex items-center justify-between mb-4">
@@ -576,7 +605,10 @@ const HomePage = () => {
               <div className="flex justify-center mt-8">
                 <motion.button
                   className="px-8 py-4 font-semibold text-white transition-all shadow-lg bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl hover:from-indigo-500 hover:to-blue-500"
-                  whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(0,0,0,0.2)" }}
+                  whileHover={{
+                    scale: 1.05,
+                    boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
+                  }}
                   whileTap={{ scale: 0.95 }}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1, transition: { delay: 0.8 } }}
@@ -603,7 +635,10 @@ const HomePage = () => {
                 <Link to="/forum/ask">
                   <motion.button
                     className="w-full px-6 py-3 font-semibold text-white transition-all shadow-md bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl hover:from-indigo-500 hover:to-blue-500"
-                    whileHover={{ scale: 1.03, boxShadow: "0 8px 25px rgba(0,0,0,0.2)" }}
+                    whileHover={{
+                      scale: 1.03,
+                      boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
+                    }}
                     whileTap={{ scale: 0.97 }}
                   >
                     Create New Post
@@ -639,7 +674,10 @@ const HomePage = () => {
                       <motion.div
                         key={community.id}
                         className="p-4 transition-all bg-white border dark:bg-slate-900 rounded-xl border-slate-100 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-900"
-                        whileHover={{ y: -3, boxShadow: "0 8px 20px rgba(0,0,0,0.1)" }}
+                        whileHover={{
+                          y: -3,
+                          boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
+                        }}
                       >
                         <div className="flex items-center space-x-4">
                           <motion.div
@@ -723,7 +761,10 @@ const HomePage = () => {
                 <div className="space-y-4">
                   <motion.div
                     className="p-5 rounded-xl bg-gradient-to-r from-indigo-100 to-blue-100 dark:from-indigo-900/40 dark:to-blue-900/40"
-                    whileHover={{ y: -3, boxShadow: "0 8px 20px rgba(0,0,0,0.1)" }}
+                    whileHover={{
+                      y: -3,
+                      boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
+                    }}
                   >
                     <div className="flex items-center justify-between mb-3">
                       <span className="px-3 py-1 text-xs font-semibold text-purple-700 bg-purple-100 rounded-full dark:text-purple-400 dark:bg-purple-900/40">
@@ -755,7 +796,10 @@ const HomePage = () => {
 
                   <motion.div
                     className="p-5 rounded-xl bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40"
-                    whileHover={{ y: -3, boxShadow: "0 8px 20px rgba(0,0,0,0.1)" }}
+                    whileHover={{
+                      y: -3,
+                      boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
+                    }}
                   >
                     <div className="flex items-center justify-between mb-3">
                       <span className="px-3 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full dark:text-orange-400 dark:bg-orange-900/40">
