@@ -44,7 +44,6 @@ import ChallengeList from "./pages/Challenge/ChallengeList";
 import CreateChallenge from "./pages/Challenge/CreateChallenge";
 import StartChallenge from "./pages/Challenge/StartChallenge";
 
-
 function App() {
   
   return (
