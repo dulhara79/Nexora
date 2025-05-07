@@ -1,37 +1,63 @@
-import { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+// src/components/User/GoogleCallback.jsx
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 const GoogleCallback = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const { login } = useContext(AuthContext);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        // Fetch user data from the success endpoint
-        const response = await axios.get('http://localhost:5000/api/users/google-success', {
-          withCredentials: true
-        });
-        const { userId } = response.data;
+    const handleMessage = (event) => {
+      // Ensure the message is from the expected origin
+      if (event.origin !== "http://localhost:5173") return;
 
-        if (userId) {
-          // Post message to parent window
-          window.opener.postMessage({ userId }, 'http://localhost:5173');
-          navigate(`/edit/${userId}`);
-        }
-      } catch (error) {
-        console.error('Error fetching Google login data:', error);
-        window.opener.postMessage({ error: 'Google login failed' }, 'http://localhost:5173');
-      } finally {
-        window.close();
+      const { userId, token, email, name, error } = event.data;
+
+      if (error) {
+        console.error("Google login error:", error);
+        navigate("/login", { replace: true });
+        return;
       }
+
+      // Call the login function from AuthContext
+      login(
+        {
+          id: userId,
+          email,
+          name,
+          profilePhotoUrl: "", // Will be updated by backend
+        },
+        token
+      );
+
+      // Navigate to the desired page (e.g., /feed)
+      navigate("/feed", { replace: true });
     };
 
-    fetchUserData();
-  }, [navigate]);
+    window.addEventListener("message", handleMessage);
 
-  return <div>Authenticating...</div>;
+    window.addEventListener("message", handleMessage);
+    // Open the Google OAuth popup
+    const popup = window.open(
+      "http://localhost:5000/api/auth/google-redirect",
+      "GoogleLogin",
+      "width=600,height=600"
+    );
+
+    // Check if popup was blocked
+    if (!popup) {
+      console.error("Popup blocked");
+      navigate("/login", { replace: true });
+    }
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, [navigate, login]);
+
+  return null; // No UI, just handles the callback
 };
 
 export default GoogleCallback;

@@ -29,7 +29,6 @@ const ChallengeList = () => {
     fetchChallenges();
   }, []);
 
-  
   const handleDelete = async (challengeId) => {
     if (!window.confirm('Are you sure you want to delete this challenge?')) return;
 

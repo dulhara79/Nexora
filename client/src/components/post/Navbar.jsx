@@ -105,6 +105,9 @@ const Navbar = () => {
               <NavLink to="/create-post" active={isActive("/create-post")} darkMode={darkMode}>
                 Create a post
               </NavLink>
+              <NavLink to="/learninghome" active={isActive("/learninghome")} darkMode={darkMode}>
+                Learning Plans
+              </NavLink>
             </div>
           </div>
 
@@ -224,6 +227,9 @@ const Navbar = () => {
               </button>
               <MobileNavLink to="/create-post" active={isActive("/create-post")} darkMode={darkMode} onClick={() => setMobileMenuOpen(false)}>
                 Create a post
+              </MobileNavLink>
+              <MobileNavLink to="/learninghome" active={isActive("/learninghome")} darkMode={darkMode} onClick={() => setMobileMenuOpen(false)}>
+                Learning Plans
               </MobileNavLink>
               <MobileNavLink to="/post-notifications" active={isActive("/post-notifications")} darkMode={darkMode} onClick={() => setMobileMenuOpen(false)}>
                 Notifications

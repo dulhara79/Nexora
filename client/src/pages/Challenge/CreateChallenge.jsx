@@ -87,6 +87,7 @@ const CreateChallenge = () => {
       setError('Please log in to create or update a challenge');
       return;
     }
+
     if (!validateForm()) {
       setError('Please fix the errors in the form');
       return;
@@ -119,6 +120,7 @@ const CreateChallenge = () => {
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5, when: 'beforeChildren', staggerChildren: 0.1 } },
+
   };
 
   const itemVariants = {
@@ -312,6 +314,5 @@ const CreateChallenge = () => {
     </motion.div>
   );
 };
-
 
 export default CreateChallenge;

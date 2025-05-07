@@ -3,7 +3,8 @@ import { AuthContext } from '../../context/AuthContext';
 import axios from "axios";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
-import Navbar from '../../components/User/Navbar';
+// import Navbar from '../../components/common/Navbar';
+import Navbar from "../../components/common/NewPageHeader";
 import ProfileHeader from '../../components/User/Profile/ProfileHeader';
 import ProfileInfo from '../../components/User/Profile/ProfileInfo';
 import ProfileStats from '../../components/User/Profile/ProfileStats';
@@ -67,7 +68,7 @@ function UserProfilePage() {
   }
 
   return (
-    <div className="w-full min-h-screen overflow-x-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200">
+    <div className="w-full min-h-screen overflow-x-hidden bg-gradient-to-br from-orange-100 to-amber-100">
       <Navbar 
         currentUser={user} 
         onSignOut={handleSignOut} 

@@ -36,4 +36,8 @@ public class NotificationService {
             }
         }
     }
+
+    public void createNotification(Notification notification) {
+        notificationRepository.save(notification);
+    }
 }
