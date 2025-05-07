@@ -42,7 +42,7 @@ import Notifications from "./pages/post/Notifications";
 import ChallengeDetail from "./pages/Challenge/ChallengeDetail";
 import ChallengeList from "./pages/Challenge/ChallengeList";
 import CreateChallenge from "./pages/Challenge/CreateChallenge";
-import StartChallenge from "./pages/Challenge/SatartChallenge";
+import StartChallenge from "./pages/Challenge/StartChallenge";
 
 
 function App() {
