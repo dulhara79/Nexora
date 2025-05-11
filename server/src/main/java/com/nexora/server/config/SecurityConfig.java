@@ -156,13 +156,19 @@ public class SecurityConfig {
                 // Use IF_REQUIRED to support OAuth2 login, which needs a session temporarily
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
+/*                .requestMatchers("/api/cuisines/**").permitAll() // Allow all cuisine endpoints
+                .requestMatchers("/api/learningplan/**").permitAll() // Allow all learning plan endpoints
+                
+                        .requestMatchers("/api/users/**", "/api/auth/**", "/api/questions/**", "/api/forum/comments/**", "/api/forum/notifications/**", "/api/tags/**", "/api/communities/**", "/api/posts/**", "/api/feedposts/**", "/api/challenges/**").permitAll() // Ensure all auth and user
+ */                                                                                     // endpoints are public
                         .requestMatchers("/api/cuisines/**", "/api/learningplan/**", "/api/completedplans/**", 
-                                        "/api/progress/**", "/api/users/**", "/api/auth/**", 
+                                        "/api/progress/**", "/api/userplan/**", "/api/users/**", "/api/auth/**", 
                                         "/api/questions/**", "/api/forum/comments/**", 
                                         "/api/forum/notifications/**", "/api/tags/**", 
                                         "/api/communities/**", "/api/posts/**", 
-                                        "/api/feedposts/**", "/api/challenges/**").permitAll()
+                                        "/api/feedposts/**", "/api/challenges/**", "/api/forum/**").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
+                                       
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .oauth2Login(oauth2 -> oauth2
@@ -196,7 +202,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT","PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

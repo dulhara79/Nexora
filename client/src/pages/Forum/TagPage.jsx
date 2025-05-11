@@ -8,7 +8,8 @@ import {
   HiOutlineEye,
   HiOutlineBookmark,
 } from "react-icons/hi";
-import Header from "../../components/Forum/Header";
+// import Header from "../../components/Forum/Header";import Header from "../../components/common/NewPageHeader";
+
 
 const TagPage = () => {
   const { tag } = useParams();

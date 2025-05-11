@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import Header from '../../components/Forum/Header';
+// import Header from '../../components/Forum/Header';
+import Header from "../../components/common/NewPageHeader";
 
 // Configure Axios instance
 const API_BASE_URL = 'http://localhost:5000/api';

@@ -384,6 +384,9 @@ public class RegistrationService {
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             throw new Exception("Email is required");
         }
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            throw new Exception("Username already exists");
+        }
 
         Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
         if (existingUser.isPresent()) {
