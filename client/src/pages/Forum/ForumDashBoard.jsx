@@ -13,7 +13,9 @@ import {
   HiOutlineTag,
 } from "react-icons/hi";
 import axios from "axios";
-import Header from "../../components/Forum/Header";
+// import Header from "../../components/Forum/Header";
+// import Header from "../../pages/TestPage";
+import Header from "../../components/common/NewPageHeader";
 import { AuthContext } from "../../context/AuthContext";
 
 // Error Boundary Component
@@ -119,21 +121,22 @@ const HomePage = () => {
         withCredentials: true,
       });
 
-      const transformedPosts = response.data.questions?.map((post) => ({
-        id: post.id || "unknown",
-        title: post.title || "Untitled",
-        author: post.authorUsername || "Anonymous",
-        authorAvatar: post.authorUsername?.[0]?.toUpperCase() || "A",
-        authorColor: getRandomGradient(),
-        content: post.description || "",
-        tags: Array.isArray(post.tags) ? post.tags : [],
-        likes: post.upvoteUserIds?.length || 0,
-        comments: post.commentIds?.length || 0,
-        views: post.views || 0,
-        timeAgo: calculateTimeAgo(post.createdAt || new Date()),
-        isPinned: post.isPinned || false,
-        isHot: (post.commentIds?.length || 0) > 10,
-      })) || [];
+      const transformedPosts =
+        response.data.questions?.map((post) => ({
+          id: post.id || "unknown",
+          title: post.title || "Untitled",
+          author: post.authorUsername || "Anonymous",
+          authorAvatar: post.authorUsername?.[0]?.toUpperCase() || "A",
+          authorColor: getRandomGradient(),
+          content: post.description || "",
+          tags: Array.isArray(post.tags) ? post.tags : [],
+          likes: post.upvoteUserIds?.length || 0,
+          comments: post.commentIds?.length || 0,
+          views: post.views || 0,
+          timeAgo: calculateTimeAgo(post.createdAt || new Date()),
+          isPinned: post.isPinned || false,
+          isHot: (post.commentIds?.length || 0) > 10,
+        })) || [];
 
       setPosts(transformedPosts);
     } catch (err) {
@@ -147,25 +150,29 @@ const HomePage = () => {
   const fetchSavedPosts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/questions/saved-questions`, {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        `${API_BASE_URL}/questions/saved-questions`,
+        {
+          withCredentials: true,
+        }
+      );
 
-      const transformedPosts = response.data.questions?.map((post) => ({
-        id: post.id || "unknown",
-        title: post.title || "Untitled",
-        author: post.authorUsername || "Anonymous",
-        authorAvatar: post.authorUsername?.[0]?.toUpperCase() || "A",
-        authorColor: getRandomGradient(),
-        content: post.description || "",
-        tags: Array.isArray(post.tags) ? post.tags : [],
-        likes: post.upvoteUserIds?.length || 0,
-        comments: post.commentIds?.length || 0,
-        views: post.views || 0,
-        timeAgo: calculateTimeAgo(post.createdAt || new Date()),
-        isPinned: post.isPinned || false,
-        isHot: (post.commentIds?.length || 0) > 10,
-      })) || [];
+      const transformedPosts =
+        response.data.questions?.map((post) => ({
+          id: post.id || "unknown",
+          title: post.title || "Untitled",
+          author: post.authorUsername || "Anonymous",
+          authorAvatar: post.authorUsername?.[0]?.toUpperCase() || "A",
+          authorColor: getRandomGradient(),
+          content: post.description || "",
+          tags: Array.isArray(post.tags) ? post.tags : [],
+          likes: post.upvoteUserIds?.length || 0,
+          comments: post.commentIds?.length || 0,
+          views: post.views || 0,
+          timeAgo: calculateTimeAgo(post.createdAt || new Date()),
+          isPinned: post.isPinned || false,
+          isHot: (post.commentIds?.length || 0) > 10,
+        })) || [];
 
       setPosts(transformedPosts);
     } catch (err) {
@@ -178,10 +185,15 @@ const HomePage = () => {
 
   const fetchSavedStatus = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/questions/saved-questions`, {
-        withCredentials: true,
-      });
-      setSavedPosts(new Set(response.data.questions?.map((post) => post.id) || []));
+      const response = await axios.get(
+        `${API_BASE_URL}/questions/saved-questions`,
+        {
+          withCredentials: true,
+        }
+      );
+      setSavedPosts(
+        new Set(response.data.questions?.map((post) => post.id) || [])
+      );
     } catch (err) {
       console.error("Failed to fetch saved status:", err);
     }
@@ -192,7 +204,9 @@ const HomePage = () => {
       const response = await axios.get(`${API_BASE_URL}/questions/liked`, {
         withCredentials: true,
       });
-      setLikedPosts(new Set(response.data.questions?.map((post) => post.id) || []));
+      setLikedPosts(
+        new Set(response.data.questions?.map((post) => post.id) || [])
+      );
     } catch (err) {
       console.error("Failed to fetch liked status:", err);
     }
@@ -325,16 +339,16 @@ const HomePage = () => {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-gray-100 dark:from-slate-900 dark:to-slate-800">
-        <Header />
+            <Header />
         <main className="px-4 pt-8 pb-16 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <AnimatePresence>
             {showWelcomeCard && (
               <motion.div
-                className="relative mb-8 overflow-hidden shadow-xl rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600"
-                initial={{ opacity: 0, y: -30, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -30, scale: 0.95 }}
-                transition={{ duration: 0.6, type: "spring", bounce: 0.3 }}
+              className="relative mb-8 overflow-hidden shadow-xl rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600"
+              initial={{ opacity: 0, y: -30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -30, scale: 0.95 }}
+              transition={{ duration: 0.6, type: "spring", bounce: 0.3 }}
               >
                 <div className="relative z-10 flex flex-col items-start justify-between p-8 md:flex-row md:items-center">
                   <div className="mb-6 md:mb-0">
