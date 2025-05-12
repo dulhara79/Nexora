@@ -11,9 +11,8 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
   const [editedCommentText, setEditedCommentText] = useState("");
   const [isEditingPost, setIsEditingPost] = useState(false);
   const [editDescription, setEditDescription] = useState(post.description || "");
-  const [existingMedia, setExistingMedia] = useState(post.media || []);
-  const [newMedia, setNewMedia] = useState([]);
-  const [loading, setLoading] = useState({ like: false, comment: false, edit: false, delete: false, save: false });
+  const [editFiles, setEditFiles] = useState([]);
+  const [loading, setLoading] = useState({ like: false, comment: false, edit: false, delete: false });
   const [mediaError, setMediaError] = useState({});
   const [zoomedMedia, setZoomedMedia] = useState(null);
   const [showComments, setShowComments] = useState(false);
@@ -193,19 +192,6 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
     setNewMedia(prev => [...prev, ...files]);
   };
 
-  const handleRemoveExistingMedia = (mediaId) => {
-    setExistingMedia(prev => prev.filter(media => media.id !== mediaId));
-  };
-
-  const handleRemoveNewMedia = (index) => {
-    setNewMedia(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleNewMediaChange = (e) => {
-    const files = Array.from(e.target.files);
-    setNewMedia(prev => [...prev, ...files]);
-  };
-
   const handleEditPostSubmit = async (e) => {
     e.preventDefault();
     if (loading.edit) return;
@@ -213,8 +199,6 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
 
     const formData = new FormData();
     formData.append("description", editDescription);
-    existingMedia.forEach(media => formData.append("existingMediaIds", media.id));
-    newMedia.forEach(file => formData.append("files", file));
     existingMedia.forEach(media => formData.append("existingMediaIds", media.id));
     newMedia.forEach(file => formData.append("files", file));
 
@@ -226,7 +210,6 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
       );
       onUpdatePost(response.data.post);
       setIsEditingPost(false);
-      setNewMedia([]);
       setNewMedia([]);
       toast.success("Post updated successfully!", { position: "top-right" });
     } catch (error) {
@@ -402,51 +385,11 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
             {/* New Media Input and Preview */}
             <div className="mb-4">
               <label className="block mb-2 text-sm font-medium text-gray-700">Add New Photos/Videos</label>
-
-            {/* Existing Media Preview */}
-            {existingMedia.length > 0 && (
-              <div className="mb-4">
-                <label className="block mb-2 text-sm font-medium text-gray-700">Current Media</label>
-                <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
-                  {existingMedia.map((media, index) => (
-                    <div key={media.id} className="relative">
-                      {media.fileType.startsWith("image") ? (
-                        <img
-                          src={media.fileUrl}
-                          alt={media.fileName || `Existing media ${index + 1}`}
-                          className="object-cover w-full h-32 rounded-lg"
-                        />
-                      ) : (
-                        <video
-                          src={media.fileUrl}
-                          className="object-cover w-full h-32 rounded-lg"
-                          controls
-                        />
-                      )}
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => handleRemoveExistingMedia(media.id)}
-                        className="absolute p-1 text-white bg-red-500 rounded-full top-1 right-1 hover:bg-red-600"
-                        aria-label="Remove media"
-                      >
-                        <FaTimes />
-                      </motion.button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* New Media Input and Preview */}
-            <div className="mb-4">
-              <label className="block mb-2 text-sm font-medium text-gray-700">Add New Photos/Videos</label>
               <div className="relative">
                 <input
                   type="file"
                   multiple
                   accept="image/*,video/*"
-                  onChange={handleNewMediaChange}
                   onChange={handleNewMediaChange}
                   className="w-full p-3 text-sm transition-colors duration-200 bg-white border border-gray-200 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100"
                 />
@@ -480,38 +423,8 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                     </div>
                   ))}
                 </div>
-              {newMedia.length > 0 && (
-                <div className="grid grid-cols-2 gap-2 mt-2 md:grid-cols-3">
-                  {newMedia.map((file, index) => (
-                    <div key={`new-${index}`} className="relative">
-                      {file.type.startsWith("image") ? (
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={`New media ${index + 1}`}
-                          className="object-cover w-full h-32 rounded-lg"
-                        />
-                      ) : (
-                        <video
-                          src={URL.createObjectURL(file)}
-                          className="object-cover w-full h-32 rounded-lg"
-                          controls
-                        />
-                      )}
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => handleRemoveNewMedia(index)}
-                        className="absolute p-1 text-white bg-red-500 rounded-full top-1 right-1 hover:bg-red-600"
-                        aria-label="Remove new media"
-                      >
-                        <FaTimes />
-                      </motion.button>
-                    </div>
-                  ))}
-                </div>
               )}
             </div>
-
 
             <div className="flex space-x-3">
               <motion.button
@@ -533,12 +446,6 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="button"
-                onClick={() => {
-                  setIsEditingPost(false);
-                  setNewMedia([]);
-                  setExistingMedia(post.media || []);
-                  setEditDescription(post.description || "");
-                }}
                 onClick={() => {
                   setIsEditingPost(false);
                   setNewMedia([]);
@@ -571,7 +478,6 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
             <div className={`grid gap-2 p-5 pt-0 ${post.media.length === 1 ? 'grid-cols-1' : post.media.length === 2 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3'}`}>
               {post.media.map((media, index) => (
                 <motion.div
-                  key={media.id || `media-${index}`}
                   key={media.id || `media-${index}`}
                   whileHover={{ scale: 1.02 }}
                   className="relative overflow-hidden transition-transform duration-200 bg-gray-100 rounded-lg cursor-pointer"
