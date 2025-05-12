@@ -120,8 +120,9 @@ export default function EnhancedHeader() {
       theme: "post",
       submenu: [
         { path: "/post", label: "Discover" },
-        { path: "/post/create", label: "Create" },
-        { path: "/post/saved", label: "Saved" }
+        { path: "/create-post", label: "Create" },
+        { path: "/post-notifications", label: "Notifications" },
+        { path: "/saved-posts", label: "Saved" }
       ]
     },
     learn: {
