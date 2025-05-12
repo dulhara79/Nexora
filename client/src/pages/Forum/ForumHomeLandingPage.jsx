@@ -4,10 +4,9 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Filter, PlusCircle, ChevronDown, X, MessageSquare, Users } from "lucide-react";
-import QuestionCard from "../../components/newForum/QuestionCard";
-import CreateQuestionModal from "../../components/newForum/CreateQuestionModal";
-import SkeletonLoader from "../../components/newForum/SkeletonLoader";
-import CommunityCard from "../../components/newForum/CommunityCard";
+import QuestionCard from "../../components/Forum/QuestionCardS";
+import CreateQuestionModal from "../../components/Forum/CreateQuestionModal";
+import SkeletonLoader from "../../components/Forum/SkeletonLoader";
 import Header from "../../components/common/NewPageHeader";
 
 const BASE_URL = "http://localhost:5000";
@@ -37,10 +36,23 @@ export default function ForumHomePage() {
     fetchCommunities();
   }, [activeFilter, filterOptions]);
 
+  // const fetchQuestions = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const res = await axios.get(`${BASE_URL}/api/questions?sortBy=${activeFilter}`);
+  //     setQuestions(res.data.questions || []);
+  //   } catch (error) {
+  //     console.error("Error fetching questions:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchQuestions = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${BASE_URL}/api/questions?sortBy=${activeFilter}`);
+      const timestamp = Date.now(); // Cache-busting
+      const res = await axios.get(`${BASE_URL}/api/questions?sortBy=${activeFilter}&_=${timestamp}`);
       setQuestions(res.data.questions || []);
     } catch (error) {
       console.error("Error fetching questions:", error);
