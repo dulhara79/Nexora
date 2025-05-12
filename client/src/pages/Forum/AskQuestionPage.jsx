@@ -1,118 +1,140 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Plus,
+  X,
+  Tag as TagIcon,
+  Users,
+  Check,
+  AlertCircle,
+} from "lucide-react";
 import Header from "../../components/common/NewPageHeader";
 
-// Configure Axios instance
-const API_BASE_URL = 'http://localhost:5000/api';
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true,
-});
+const BASE_URL = "http://localhost:5000";
 
-// Request interceptor
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('jwtToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    const etag = localStorage.getItem(`etag-${config.url}`);
-    if (etag) {
-      config.headers['If-None-Match'] = etag;
-    }
-    console.log('Request Payload:', config.data); // Debug: Log request payload
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// Response interceptor
-api.interceptors.response.use(
-  (response) => {
-    if (response.headers.etag) {
-      localStorage.setItem(`etag-${response.config.url}`, response.headers.etag);
-    }
-    return response.data;
-  },
-  (error) => {
-    console.error('Response Error:', error.response); // Debug: Log error details
-    if (error.response?.status === 304) {
-      return Promise.resolve(null);
-    }
-    if (error.response?.status === 401) {
-      localStorage.removeItem('jwtToken');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error.response?.data?.error || 'An error occurred');
-  }
-);
-
-const AskQuestionPage = () => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [tags, setTags] = useState('');
-  const [error, setError] = useState(null);
+export default function AskQuestionPage() {
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    tags: [],
+    // communityId: "",
+  }); // Removed authorId
+  const [communities, setCommunities] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [tagInput, setTagInput] = useState("");
   const [success, setSuccess] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formErrors, setFormErrors] = useState({});
+  const [focusedField, setFocusedField] = useState(null);
+  const navigate = useNavigate();
 
-  // Validation function
-  const validateForm = () => {
-    const errors = {};
-    
-    if (!title.trim()) {
-      errors.title = 'Title is required';
-    } else if (title.length < 10) {
-      errors.title = 'Title must be at least 10 characters';
+  useEffect(() => {
+    // fetchCommunities();
+  }, []);
+
+  const fetchCommunities = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/api/communities`);
+      setCommunities(res.data || []);
+    } catch (error) {
+      console.error("Error fetching communities:", error);
+      setError("Failed to load communities. Please try again later.");
     }
-    
-    if (!description.trim()) {
-      errors.description = 'Description is required';
-    } else if (description.length < 30) {
-      errors.description = 'Description must be at least 30 characters';
+  };
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+    setError("");
+  };
+
+  const handleAddTag = () => {
+    if (formData.tags.length >= 5) {
+      setError("You can add up to 5 tags.");
+      return;
     }
-    
-    if (!tags.trim()) {
-      errors.tags = 'At least one tag is required';
+    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
+      setFormData({
+        ...formData,
+        tags: [...formData.tags, tagInput.trim()],
+      });
+      setTagInput("");
     }
-    
-    return errors;
+  };
+
+  const handleRemoveTag = (tagToRemove) => {
+    setFormData({
+      ...formData,
+      tags: formData.tags.filter((tag) => tag !== tagToRemove),
+    });
+  };
+
+  const handleTagInputKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      handleAddTag();
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate form
-    const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
+
+    if (!formData.title.trim()) {
+      setError("Please provide a title for your question");
       return;
     }
-    
-    setFormErrors({});
-    setIsSubmitting(true);
-    
+
+    if (!formData.description.trim()) {
+      setError("Please provide a description for your question");
+      return;
+    }
+
+    // if (!formData.communityId) {
+    //   setError("Please select a community for your question");
+    //   return;
+    // }
+
+    if (formData.tags.length > 5) { // Corrected validation
+      setError("You can add up to 5 tags.");
+      return;
+    }
+
     try {
-      const payload = {
-        title,
-        description,
-        tags: tags.split(',').map((tag) => tag.trim()).filter((tag) => tag),
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found. Please log in.");
+      }
+      
+      // Send properly structured data
+      const postData = {
+        title: formData.title,
+        description: formData.description,
+        tags: formData.tags,
+        // communityId: formData.communityId
       };
-      console.log('Submitting Payload:', payload); // Debug: Log payload
-      await api.post('/questions', payload);
+
+      const res = await axios.post(`${BASE_URL}/api/questions`, postData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      
       setSuccess(true);
-      setIsSubmitting(false);
       setTimeout(() => {
-        window.location.href = '/forum/questions';
-      }, 2000);
-    } catch (err) {
-      console.error('Submission Error:', err); // Debug: Log error
-      setError(err || 'Failed to create question. Please try again.');
-      setIsSubmitting(false);
-      setTimeout(() => {
-        setError(null);
-      }, 5000);
+        navigate(`/forum/question/${res.data.question.id}`);
+      }, 1500);
+    } catch (error) {
+      console.error("Error submitting question:", error);
+      setError(
+        error.response?.data?.error || // Match backend error key
+        "Failed to post your question. Please try again."
+      );
+      setLoading(false);
     }
   };
 
@@ -122,252 +144,335 @@ const AskQuestionPage = () => {
     visible: {
       opacity: 1,
       transition: {
-        duration: 0.6,
+        staggerChildren: 0.1,
         when: "beforeChildren",
-        staggerChildren: 0.2
-      }
-    }
+      },
+    },
   };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.5
-      }
-    }
-  };
-
-  const inputVariants = {
-    focus: {
-      scale: 1.02,
-      boxShadow: "0 0 8px rgba(79, 70, 229, 0.4)",
-      transition: { duration: 0.2 }
-    },
-    blur: {
-      scale: 1,
-      boxShadow: "none"
-    }
+    visible: { y: 0, opacity: 1, transition: { type: "spring", damping: 12 } },
   };
 
   return (
-    <motion.div
-      className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
+    <>
       <Header />
-      
-      <main className="max-w-4xl px-4 py-12 mx-auto mt-16">
-        <motion.div variants={itemVariants} className="mb-12 text-center">
-          <h1 className="mb-4 text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
-            Share Your Culinary Question
-          </h1>
-          <p className="max-w-2xl mx-auto text-lg text-slate-600 dark:text-slate-300">
-            Need help with a recipe or cooking technique? Our community of chefs and food enthusiasts is here to assist you.
-          </p>
-        </motion.div>
-
-        <motion.div 
-          variants={itemVariants}
-          className="relative overflow-hidden bg-white shadow-xl rounded-2xl dark:bg-slate-800"
+      <div className="min-h-screen py-8 bg-gradient-to-b from-orange-50 to-white">
+        <motion.div
+          className="container max-w-3xl px-4 mx-auto"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
         >
-          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 dark:from-indigo-500 dark:via-purple-500 dark:to-pink-400"></div>
-          
-          <div className="p-8 md:p-10">
+          <motion.div className="mb-12 text-center" variants={itemVariants}>
+            <h1 className="mb-3 text-4xl font-bold text-gray-800">
+              Ask a Question
+            </h1>
+            <p className="text-gray-600">
+              Share your cooking questions with our community of experts
+            </p>
+          </motion.div>
+
+          <motion.form
+            onSubmit={handleSubmit}
+            className="p-8 bg-white shadow-xl rounded-xl"
+            variants={containerVariants}
+          >
+            {/* Title Input */}
+            <motion.div className="mb-6" variants={itemVariants}>
+              <label className="block mb-2 text-lg font-medium text-gray-700">
+                Question Title
+              </label>
+              <motion.div
+                className={`relative border-2 rounded-lg transition-all duration-300 ${
+                  focusedField === "title"
+                    ? "border-orange-400 shadow-md shadow-orange-100"
+                    : "border-gray-200"
+                }`}
+                whileTap={{ scale: 0.995 }}
+              >
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedField("title")}
+                  onBlur={() => setFocusedField(null)}
+                  className="w-full px-4 py-3 bg-transparent rounded-lg focus:outline-none"
+                  placeholder="What's your cooking question?"
+                />
+              </motion.div>
+              <p className="mt-1 text-sm text-gray-500">
+                Be specific and imagine you're asking another person
+              </p>
+            </motion.div>
+
+            {/* Description Input */}
+            <motion.div className="mb-6" variants={itemVariants}>
+              <label className="block mb-2 text-lg font-medium text-gray-700">
+                Description
+              </label>
+              <motion.div
+                className={`relative border-2 rounded-lg transition-all duration-300 ${
+                  focusedField === "description"
+                    ? "border-orange-400 shadow-md shadow-orange-100"
+                    : "border-gray-200"
+                }`}
+                whileTap={{ scale: 0.995 }}
+              >
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedField("description")}
+                  onBlur={() => setFocusedField(null)}
+                  rows={8}
+                  className="w-full px-4 py-3 bg-transparent rounded-lg focus:outline-none"
+                  placeholder="Describe your question in detail... Include any steps you've already tried, ingredients you're using, and specific techniques you're asking about."
+                />
+              </motion.div>
+              <p className="mt-1 text-sm text-gray-500">
+                Include all the information someone would need to answer your
+                question
+              </p>
+            </motion.div>
+
+            {/* Tags Input */}
+            <motion.div className="mb-6" variants={itemVariants}>
+              <label className="block mb-2 text-lg font-medium text-gray-700">
+                Tags
+              </label>
+              <div className="mb-2">
+                <motion.div
+                  className={`flex items-center border-2 rounded-lg overflow-hidden transition-all duration-300 ${
+                    focusedField === "tags"
+                      ? "border-orange-400 shadow-md shadow-orange-100"
+                      : "border-gray-200"
+                  }`}
+                  whileTap={{ scale: 0.995 }}
+                >
+                  <div className="flex flex-wrap items-center gap-2 px-2 py-1">
+                    {formData.tags.map((tag, index) => (
+                      <motion.span
+                        key={index}
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.8, opacity: 0 }}
+                        className="flex items-center gap-1 px-3 py-1 text-sm text-orange-700 bg-orange-100 rounded-full group"
+                      >
+                        <TagIcon size={14} />
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTag(tag)}
+                          className="p-1 text-orange-500 rounded-full hover:bg-orange-200 hover:text-orange-800"
+                        >
+                          <X size={12} />
+                        </button>
+                      </motion.span>
+                    ))}
+                    <input
+                      type="text"
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={handleTagInputKeyDown}
+                      onFocus={() => setFocusedField("tags")}
+                      onBlur={() => {
+                        setFocusedField(null);
+                        if (tagInput.trim()) handleAddTag();
+                      }}
+                      className="flex-1 min-w-[150px] px-2 py-2 bg-transparent focus:outline-none"
+                      placeholder="Add tags (press Enter or comma)"
+                    />
+                  </div>
+                  <motion.button
+                    type="button"
+                    onClick={handleAddTag}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-4 py-2 text-orange-500 hover:bg-orange-50"
+                  >
+                    <Plus size={20} />
+                  </motion.button>
+                </motion.div>
+              </div>
+              <p className="text-sm text-gray-500">
+                Add up to 5 tags to describe what your question is about
+              </p>
+            </motion.div>
+
+            {/* Community Select */}
+          {/* <motion.div className="mb-8" variants={itemVariants}>
+            <label className="block mb-2 text-lg font-medium text-gray-700">
+              Community
+            </label>
+            <motion.div
+              className={`relative border-2 rounded-lg transition-all duration-300 ${
+                focusedField === "community"
+                  ? "border-orange-400 shadow-md shadow-orange-100"
+                  : "border-gray-200"
+              }`}
+              whileTap={{ scale: 0.995 }}
+            >
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <Users size={20} className="text-gray-400" />
+              </div>
+              <select
+                name="communityId"
+                value={formData.communityId}
+                onChange={handleChange}
+                onFocus={() => setFocusedField("community")}
+                onBlur={() => setFocusedField(null)}
+                className="w-full py-3 pl-10 pr-4 bg-transparent rounded-lg appearance-none focus:outline-none"
+              >
+                <option value="">Select a cooking community</option>
+                {communities.map(community => (
+                  <option key={community.id} value={community.id}>
+                    {community.name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg
+                  className="w-5 h-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </motion.div>
+            <p className="mt-1 text-sm text-gray-500">
+              Choose the most relevant community for your question
+            </p>
+          </motion.div> */}
+
+            {/* Error Message */}
             <AnimatePresence>
               {error && (
-                <motion.div 
-                  initial={{ opacity: 0, y: -20 }}
+                <motion.div
+                  className="p-4 mb-6 text-red-800 bg-red-100 rounded-lg"
+                  initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="p-4 mb-6 text-red-800 bg-red-100 rounded-lg dark:bg-red-900/30 dark:text-red-300"
+                  exit={{ opacity: 0 }}
                 >
-                  {error}
-                </motion.div>
-              )}
-              
-              {success && (
-                <motion.div 
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="p-4 mb-6 text-green-800 bg-green-100 rounded-lg dark:bg-green-900/30 dark:text-green-300"
-                >
-                  <div className="flex items-center">
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Question posted successfully! Redirecting...
+                  <div className="flex items-center gap-2">
+                    <AlertCircle size={20} />
+                    <p>{error}</p>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <form onSubmit={handleSubmit}>
-              <div className="mb-6">
-                <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Title
-                </label>
-                <motion.div 
-                  variants={inputVariants}
-                  whileFocus="focus"
-                  whileTap="focus"
-                  className="relative"
-                >
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className={`w-full p-3 border rounded-lg dark:bg-slate-700 dark:text-white dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 ${
-                      formErrors.title ? 'border-red-500 dark:border-red-400' : 'border-slate-300'
-                    }`}
-                    placeholder="What's your cooking challenge?"
-                  />
-                  {formErrors.title && (
-                    <motion.p 
+            {/* Submit Button */}
+            <motion.div variants={itemVariants}>
+              <motion.button
+                type="submit"
+                disabled={loading || success}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`relative w-full px-6 py-4 text-lg font-medium text-white transition-all rounded-lg shadow-lg 
+                ${
+                  loading || success
+                    ? "bg-orange-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-orange-200 hover:shadow-orange-300"
+                }`}
+              >
+                <AnimatePresence mode="wait">
+                  {loading && (
+                    <motion.div
+                      className="absolute inset-0 flex items-center justify-center"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="mt-1 text-sm text-red-500"
+                      exit={{ opacity: 0 }}
                     >
-                      {formErrors.title}
-                    </motion.p>
-                  )}
-                </motion.div>
-              </div>
-
-              <div className="mb-6">
-                <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Description
-                </label>
-                <motion.div 
-                  variants={inputVariants}
-                  whileFocus="focus"
-                  whileTap="focus"
-                  className="relative"
-                >
-                  <textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className={`w-full p-3 border rounded-lg dark:bg-slate-700 dark:text-white dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 ${
-                      formErrors.description ? 'border-red-500 dark:border-red-400' : 'border-slate-300'
-                    }`}
-                    rows="6"
-                    placeholder="Please describe your question in detail..."
-                  />
-                  {formErrors.description && (
-                    <motion.p 
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="mt-1 text-sm text-red-500"
-                    >
-                      {formErrors.description}
-                    </motion.p>
-                  )}
-                </motion.div>
-              </div>
-
-              <div className="mb-8">
-                <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Tags
-                </label>
-                <motion.div 
-                  variants={inputVariants}
-                  whileFocus="focus"
-                  whileTap="focus"
-                  className="relative"
-                >
-                  <input
-                    type="text"
-                    value={tags}
-                    onChange={(e) => setTags(e.target.value)}
-                    className={`w-full p-3 border rounded-lg dark:bg-slate-700 dark:text-white dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 ${
-                      formErrors.tags ? 'border-red-500 dark:border-red-400' : 'border-slate-300'
-                    }`}
-                    placeholder="Add relevant tags (e.g., baking, knife-skills, sauce)"
-                  />
-                  {formErrors.tags && (
-                    <motion.p 
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="mt-1 text-sm text-red-500"
-                    >
-                      {formErrors.tags}
-                    </motion.p>
-                  )}
-                </motion.div>
-                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                  Separate tags with commas (e.g., baking, knife-skills, sauce)
-                </p>
-              </div>
-
-              <div className="flex justify-end">
-                <motion.button
-                  type="submit"
-                  disabled={isSubmitting}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`px-6 py-3 text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 flex items-center ${
-                    isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
-                  }`}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <svg className="w-5 h-5 mr-2 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="w-6 h-6 text-white animate-spin"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
-                      Submitting...
-                    </>
-                  ) : (
-                    'Submit Question'
+                    </motion.div>
                   )}
-                </motion.button>
-              </div>
-            </form>
-          </div>
+
+                  {success && (
+                    <motion.div
+                      className="absolute inset-0 flex items-center justify-center"
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ type: "spring", damping: 12 }}
+                    >
+                      <Check size={24} className="text-white" />
+                    </motion.div>
+                  )}
+
+                  <span
+                    className={loading || success ? "opacity-0" : "opacity-100"}
+                  >
+                    Post Your Question
+                  </span>
+                </AnimatePresence>
+              </motion.button>
+            </motion.div>
+          </motion.form>
+
+          {/* Success Animation Overlay */}
+          <AnimatePresence>
+            {success && (
+              <motion.div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <motion.div
+                  className="flex flex-col items-center p-10 text-center bg-white rounded-xl"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", damping: 12 }}
+                >
+                  <motion.div
+                    className="flex items-center justify-center w-20 h-20 mb-6 bg-green-100 rounded-full"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, type: "spring", damping: 8 }}
+                  >
+                    <Check size={40} className="text-green-600" />
+                  </motion.div>
+                  <h2 className="mb-2 text-2xl font-bold text-gray-800">
+                    Question Posted!
+                  </h2>
+                  <p className="text-gray-600">
+                    Redirecting you to your question...
+                  </p>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
-
-        <motion.section 
-          variants={itemVariants}
-          className="grid grid-cols-1 gap-6 mt-16 md:grid-cols-3"
-        >
-          <div className="p-6 bg-white shadow-md rounded-xl dark:bg-slate-800">
-            <div className="p-2 mb-4 bg-indigo-100 rounded-full dark:bg-indigo-900/30 w-fit">
-              <svg className="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-              </svg>
-            </div>
-            <h3 className="mb-2 text-lg font-semibold text-slate-800 dark:text-white">Quick Responses</h3>
-            <p className="text-slate-600 dark:text-slate-300">Our active community ensures you get answers to your questions quickly.</p>
-          </div>
-          
-          <div className="p-6 bg-white shadow-md rounded-xl dark:bg-slate-800">
-            <div className="p-2 mb-4 bg-purple-100 rounded-full dark:bg-purple-900/30 w-fit">
-              <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-              </svg>
-            </div>
-            <h3 className="mb-2 text-lg font-semibold text-slate-800 dark:text-white">Expert Verified</h3>
-            <p className="text-slate-600 dark:text-slate-300">Get accurate answers from verified chefs and culinary professionals.</p>
-          </div>
-          
-          <div className="p-6 bg-white shadow-md rounded-xl dark:bg-slate-800">
-            <div className="p-2 mb-4 bg-pink-100 rounded-full dark:bg-pink-900/30 w-fit">
-              <svg className="w-6 h-6 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-            <h3 className="mb-2 text-lg font-semibold text-slate-800 dark:text-white">Video Support</h3>
-            <p className="text-slate-600 dark:text-slate-300">Enhance your questions with video demonstrations for better understanding.</p>
-          </div>
-        </motion.section>
-      </main>
-    </motion.div>
+      </div>
+    </>
   );
-};
-
-export default AskQuestionPage;
+}

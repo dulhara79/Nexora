@@ -5,8 +5,10 @@ import CreatePost from "../../pages/post/CreatePost";
 import { AuthContext } from "../../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "../../components/common/NewPageHeader";
+import Navbar from "../../components/common/NewPageHeader";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 
 // Create Theme Context
@@ -20,6 +22,7 @@ const Home = () => {
   const [zoomedMedia, setZoomedMedia] = useState(null);
   const { user, token } = useContext(AuthContext);
   const location = useLocation();
+  const navigate = useNavigate();
   const navigate = useNavigate();
 
   const toggleTheme = () => {
@@ -41,12 +44,14 @@ const Home = () => {
       setPosts(sortedPosts);
     } catch (error) {
       console.error("Error fetching posts:", error.response?.status, error.response?.data);
+      console.error("Error fetching posts:", error.response?.status, error.response?.data);
       toast.error("Failed to load posts.", { position: "top-right" });
     }
   };
 
   const fetchNotifications = async () => {
     try {
+      console.log("Token:", token); // Debug token
       console.log("Token:", token); // Debug token
       const response = await axios.get("http://localhost:5000/api/notifications", {
         headers: {
@@ -57,6 +62,8 @@ const Home = () => {
       const notificationsData = response.data.map((item) => item.notification);
       setNotifications(notificationsData);
     } catch (error) {
+      console.error("Error fetching notifications:", error.response?.status, error.response?.data);
+      toast.error("Failed to load notifications. Please try logging in again.", { position: "top-right" });
       console.error("Error fetching notifications:", error.response?.status, error.response?.data);
       toast.error("Failed to load notifications. Please try logging in again.", { position: "top-right" });
     }
@@ -76,6 +83,7 @@ const Home = () => {
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       );
     } catch (error) {
+      console.error("Error updating post after edit:", error.response?.status, error.response?.data);
       console.error("Error updating post after edit:", error.response?.status, error.response?.data);
       toast.error("Failed to update post.", { position: "top-right" });
     }
@@ -230,7 +238,7 @@ const Home = () => {
               <motion.div
                 className="space Numerical-y-8"
                 initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
+                animate={{ y: 0, opacity: 1 }} // Fixed Becker issue
                 transition={{ staggerChildren: 0.2 }}
               >
                 <AnimatePresence>

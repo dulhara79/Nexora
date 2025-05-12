@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Authentication
@@ -36,13 +36,6 @@ import TagPage from "./pages/Forum/TagPage";
 import ForumNotification from "./pages/Forum/ForumNotification";
 import ForumCommunityPage from "./pages/Forum/ForumCommunityPage";
 
-// import AskQuestionPage from "./pages/forumNew/AskQuestionPage";
-// import CommunitiesPage from "./pages/forumNew/CommunitiesPage";
-// import CommunityDetailPage from "./pages/forumNew/CommunityDetailPage";
-// import ForumHomePage from "./pages/Forum/ForumHomeLandingPage";
-// import NotificationsPage from "./pages/forumNew/NotificationsPage";
-// import QuestionDetailPage from "./pages/forumNew/QuestionDetailPage";
-
 // Post Pages
 import Home from "./pages/post/Home";
 import CreatePost from "./pages/post/CreatePost";
@@ -58,6 +51,7 @@ import StartChallenge from "./pages/Challenge/StartChallenge";
 // Test Page
 import TestPage from "./pages/TestPage";
 import EditQuestionPage from "./pages/Forum/EditQuestionPage";
+import UserQuestionsPage from "./pages/Forum/UserQuestionsPage";
 
 function App() {
   return (
@@ -74,7 +68,6 @@ function App() {
           <Route path="/profile/:userId" element={<Profile />} />
           <Route path="/edit/:userId" element={<EditProfile />} />
           <Route path="/feed" element={<UserFeedPage />} />
-          {/* <Route path="/register" element={<Register />} /> */}
 
           {/* Learning Plan Routes */}
           <Route path="/learninghome" element={<HomePage />} />
@@ -101,18 +94,7 @@ function App() {
             path="/forum/community/:communityId"
             element={<ForumCommunityPage />}
           />
-
-          {/* Forum Routes - NEWLY ADDED */}
-          {/* <Route path="/forum" element={<ForumDashBoard />} /> */}
-          {/* <Route path="/forum/questions" element={<ForumHomePage />} />
-          <Route path="/forum/question/:id" element={<QuestionDetailPage />} />
-          <Route path="/forum/ask" element={<AskQuestionPage />} />
-          <Route path="/forum/edit/:id" element={<EditQuestionPage />} />
-          {/* <Route path="/forum/saved" element={<SavedQuestions />} /> */}
-          {/* <Route path="/forum/tags/:tag" element={<TagPage />} /> */}
-          {/* <Route path="/forum/communities" element={<CommunitiesPage />} />
-          <Route path="/forum/communities/:communityId" element={<CommunityDetailPage />} />
-          <Route path="/forum/notifications" element={<NotificationsPage />} /> */}
+          <Route path="/forum/my-questions" element={<UserQuestionsPage />} />
 
           {/* Post Routes */}
           <Route path="/post" element={<Home />} />
