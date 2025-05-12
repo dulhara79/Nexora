@@ -1,55 +1,119 @@
-import { motion } from "framer-motion";
+import React from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import { motion } from "framer-motion";
+import { Clock, User, MessageCircle, Eye, Award, Bookmark, BookmarkCheck } from "lucide-react";
+import LikeDislikeButtons from "./LikeDislikeButtons";
+import { formatDistanceToNow } from "date-fns";
 
-const BASE_URL = "http://localhost:5000";
+export default function QuestionCard({
+  question,
+  delay = 0,
+  isSaved,
+  onSaveToggle,
+  isAuthenticated,
+  token,
+}) {
+  const handleUpvote = () => console.log("Upvoted", question.id);
+  const handleDownvote = () => console.log("Downvoted", question.id);
 
-const QuestionCard = ({ question, delay, setQuestions }) => {
-  const handleDelete = async () => {
-    try {
-      await axios.delete(`${BASE_URL}/api/questions/${question.id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, // Replace with your auth token
-      });
-      // Optimistically update state
-      setQuestions((prev) => prev.filter((q) => q.id !== question.id));
-      // Trigger refetch event
-      window.dispatchEvent(new Event("questionDeleted"));
-    } catch (error) {
-      console.error("Error deleting question:", error);
-    }
+  const handleSave = () => {
+    if (!isAuthenticated) return; // onSaveToggle handles the toast notification
+    console.log(`Toggling save for question ${question.id}, currently saved: ${isSaved}`);
+    onSaveToggle(question.id, isSaved);
   };
+
+  const commentCount = question.commentCount || 0;
+  const viewCount = question.viewCount || 0;
+
+  const timeAgo = question.createdAt
+    ? formatDistanceToNow(new Date(question.createdAt), { addSuffix: true })
+    : "";
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay }}
-      className="p-4 bg-white rounded-lg shadow"
+      initial={{ y: 20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ delay, duration: 0.3 }}
+      whileHover={{ y: -4, boxShadow: "0 10px 25px rgba(249, 115, 22, 0.1)" }}
+      className="relative p-6 mb-6 overflow-hidden transition-all duration-300 bg-white shadow-md rounded-xl"
     >
-      <Link to={`/forum/questions/${question.id}`}>
-        <h3 className="text-lg font-medium text-gray-800">{question.title}</h3>
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-24 h-24 translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-orange-100 to-amber-50 opacity-60"></div>
+
+      <Link to={`/forum/question/${question.id}`} className="block">
+        <h2 className="mb-2 text-xl font-semibold text-gray-800 transition-colors hover:text-orange-500">
+          {question.title}
+        </h2>
+
+        <div className="flex flex-wrap items-center gap-3 mb-3 text-xs text-gray-500">
+          <span className="flex items-center">
+            <User className="w-3 h-3 mr-1" />
+            {question.authorUsername || "Anonymous"}
+          </span>
+          <span className="flex items-center">
+            <Clock className="w-3 h-3 mr-1" />
+            {timeAgo}
+          </span>
+          <span className="flex items-center">
+            <MessageCircle className="w-3 h-3 mr-1" />
+            {commentCount} {commentCount === 1 ? "answer" : "answers"}
+          </span>
+          <span className="flex items-center">
+            <Eye className="w-3 h-3 mr-1" />
+            {viewCount} {viewCount === 1 ? "view" : "views"}
+          </span>
+        </div>
+
+        <p className="mb-4 text-gray-700 line-clamp-2">{question.description}</p>
       </Link>
-      <p className="text-sm text-gray-500">{question.content}</p>
-      <div className="flex flex-wrap gap-2 mt-2">
-        {question.tags?.map((tag) => (
-          <span
-            key={tag}
-            className="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full"
+
+      {/* Tags */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        {question.tags?.map((tag, i) => (
+          <motion.span
+            key={i}
+            whileHover={{ scale: 1.05 }}
+            className="px-3 py-1 text-xs font-medium text-orange-700 bg-orange-100 rounded-full"
           >
             #{tag}
-          </span>
+          </motion.span>
         ))}
       </div>
-      {question.isOwner && ( // Assuming isOwner is part of the question model
-        <button
-          onClick={handleDelete}
-          className="px-2 py-1 mt-2 text-sm text-red-500 hover:text-red-600"
-        >
-          Delete
-        </button>
-      )}
+
+      <div className="flex items-center justify-between">
+        <LikeDislikeButtons
+          upvotes={question.upvoteUserIds?.length || 0}
+          downvotes={question.downvoteUserIds?.length || 0}
+          onUpvote={handleUpvote}
+          onDownvote={handleDownvote}
+        />
+
+        <div className="flex items-center gap-3">
+          {question.isFeatured && (
+            <span className="flex items-center text-xs text-yellow-600">
+              <Award className="w-4 h-4 mr-1" />
+              Featured
+            </span>
+          )}
+
+          <motion.button
+            onClick={handleSave}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className={`flex items-center ${
+              isSaved ? "text-blue-500" : "text-gray-400 hover:text-blue-500"
+            } ${!isAuthenticated ? "cursor-not-allowed opacity-50" : ""}`}
+            disabled={!isAuthenticated}
+            title={isAuthenticated ? "" : "Please log in to save questions"}
+          >
+            {isSaved ? (
+              <BookmarkCheck className="w-5 h-5" />
+            ) : (
+              <Bookmark className="w-5 h-5" />
+            )}
+          </motion.button>
+        </div>
+      </div>
     </motion.div>
   );
-};
-
-export default QuestionCard;
+}
