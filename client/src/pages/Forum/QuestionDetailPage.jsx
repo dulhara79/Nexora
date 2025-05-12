@@ -83,10 +83,12 @@ const QuestionDetailPage = () => {
   const buildCommentTree = (flatComments) => {
     const commentMap = {};
     const rootComments = [];
+
     flatComments.forEach((comment) => {
       comment.replies = [];
       commentMap[comment.id] = comment;
     });
+
     flatComments.forEach((comment) => {
       if (comment.parentCommentId && commentMap[comment.parentCommentId]) {
         commentMap[comment.parentCommentId].replies.push(comment);
@@ -177,6 +179,7 @@ const QuestionDetailPage = () => {
         animate="visible"
         className="max-w-4xl px-4 py-8 mx-auto md:px-6"
       >
+
         <QuestionDetailCard
           question={question}
           user={user}

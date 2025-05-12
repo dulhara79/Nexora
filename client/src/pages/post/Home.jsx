@@ -4,10 +4,10 @@ import PostCard from "../../components/post/PostCard";
 import CreatePost from "../../pages/post/CreatePost";
 import { AuthContext } from "../../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
-import Navbar from "../../components/post/Navbar";
+import Navbar from "../../components/common/NewPageHeader";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // Create Theme Context
 export const ThemeContext = createContext();
@@ -20,6 +20,7 @@ const Home = () => {
   const [zoomedMedia, setZoomedMedia] = useState(null);
   const { user, token } = useContext(AuthContext);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
@@ -39,13 +40,14 @@ const Home = () => {
       const sortedPosts = postsData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setPosts(sortedPosts);
     } catch (error) {
-      console.error("Error fetching posts:", error);
+      console.error("Error fetching posts:", error.response?.status, error.response?.data);
       toast.error("Failed to load posts.", { position: "top-right" });
     }
   };
 
   const fetchNotifications = async () => {
     try {
+      console.log("Token:", token); // Debug token
       const response = await axios.get("http://localhost:5000/api/notifications", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -55,8 +57,8 @@ const Home = () => {
       const notificationsData = response.data.map((item) => item.notification);
       setNotifications(notificationsData);
     } catch (error) {
-      console.error("Error fetching notifications:", error);
-      toast.error("Failed to load notifications.", { position: "top-right" });
+      console.error("Error fetching notifications:", error.response?.status, error.response?.data);
+      toast.error("Failed to load notifications. Please try logging in again.", { position: "top-right" });
     }
   };
 
@@ -74,7 +76,7 @@ const Home = () => {
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       );
     } catch (error) {
-      console.error("Error updating post after edit:", error);
+      console.error("Error updating post after edit:", error.response?.status, error.response?.data);
       toast.error("Failed to update post.", { position: "top-right" });
     }
   };
@@ -139,7 +141,27 @@ const Home = () => {
         <Navbar />
         <ToastContainer theme={theme} />
         
-        <div className="fixed z-10 bottom-6 right-6">
+        <div className="fixed z-10 space-y-4 bottom-5 right-6">
+          <button 
+            onClick={() => navigate("/post-notifications")}
+            className={`p-3 rounded-full shadow-lg transition-all duration-300 ${
+              theme === "dark" 
+                ? "bg-gray-800 text-amber-300 hover:bg-gray-700" 
+                : "bg-white text-amber-600 hover:bg-amber-50"
+            }`}
+            aria-label="View notifications"
+          >
+            <div className="relative">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              {notifications.length > 0 && (
+                <span className="absolute flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full -top-1 -right-1">
+                  {notifications.length}
+                </span>
+              )}
+            </div>
+          </button>
           <button 
             onClick={toggleTheme}
             className={`p-3 rounded-full shadow-lg transition-all duration-300 ${
@@ -171,32 +193,6 @@ const Home = () => {
             <h2 className={`mb-4 text-2xl font-bold ${theme === "dark" ? "text-amber-300" : "text-amber-800"}`}>Share Your Post</h2>
             <CreatePost onPostCreated={handlePostCreated} />
           </div>
-
-          {notifications.length > 0 && (
-            <motion.div
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              className="fixed z-10 top-20 right-4"
-            >
-              <div 
-                className={`p-3 transition-all rounded-full shadow-lg cursor-pointer ${
-                  theme === "dark" ? "bg-gray-800 hover:bg-gray-700" : "bg-white hover:bg-amber-50"
-                }`}
-                onClick={() => {
-                  toast.info(`You have ${notifications.length} new notifications`, { position: "top-right" });
-                }}
-              >
-                <div className="relative">
-                  <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 ${theme === "dark" ? "text-amber-300" : "text-amber-600"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                  </svg>
-                  <span className="absolute flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full -top-1 -right-1">
-                    {notifications.length}
-                  </span>
-                </div>
-              </div>
-            </motion.div>
-          )}
 
           <div className={`p-6 shadow-md rounded-xl ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
             <div className="flex items-center justify-between mb-8">
@@ -231,7 +227,7 @@ const Home = () => {
               <motion.div
                 className="space-y-8"
                 initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
+                animate={{ y: 0, opacity: 1 }} // Fixed Becker issue
                 transition={{ staggerChildren: 0.2 }}
               >
                 <AnimatePresence>

@@ -49,6 +49,18 @@ export default function ForumHomePage() {
     fetchCommunities();
   }, [activeFilter, filterOptions, isAuthenticated, user]);
 
+  // const fetchQuestions = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const res = await axios.get(`${BASE_URL}/api/questions?sortBy=${activeFilter}`);
+  //     setQuestions(res.data.questions || []);
+  //   } catch (error) {
+  //     console.error("Error fetching questions:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchQuestions = async () => {
     try {
       setLoading(true);
