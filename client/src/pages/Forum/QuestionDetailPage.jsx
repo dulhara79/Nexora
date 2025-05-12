@@ -6,7 +6,6 @@ import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Header from "../../components/common/NewPageHeader";
-// import Breadcrumb from "../components/Breadcrumb";
 import QuestionDetailCard from "../../components/Forum/QuestionDetailCard";
 import CommentSection from "../../components/Forum/CommentSection";
 
@@ -24,7 +23,8 @@ const QuestionDetailPage = () => {
       if (authLoading) return;
       setIsLoading(true);
       try {
-        const timestamp = Date.now(); // Cache-busting
+        const timestamp = Date.now();
+        // Fetch question details
         const questionResponse = await axios.get(
           `http://localhost:5000/api/questions/${id}?_=${timestamp}`,
           { headers: { Authorization: `Bearer ${token}` } }
@@ -33,33 +33,60 @@ const QuestionDetailPage = () => {
           `http://localhost:5000/api/forum/comments/question/${id}?_=${timestamp}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-
         if (!questionResponse.data.question) {
           throw new Error("Question data is missing");
         }
-        setQuestion(questionResponse.data.question);
 
+        // Log the response to debug savedQuestionIds
+        console.log("Question Response:", questionResponse.data.question);
+
+        // Initialize question state
+        let updatedQuestion = {
+          ...questionResponse.data.question,
+          savedQuestionIds: questionResponse.data.question.savedQuestionIds || [],
+        };
+
+        // Fallback: Fetch user's saved questions to verify save state
+        if (isAuthenticated && user) {
+          try {
+            const savedQuestionsResponse = await axios.get(
+              `http://localhost:5000/api/questions/saved-questions?_=${timestamp}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            console.log("Saved Questions Response:", savedQuestionsResponse.data);
+            const savedQuestionIds = savedQuestionsResponse.data.questions.map((q) => q.id);
+            if (savedQuestionIds.includes(id) && !updatedQuestion.savedQuestionIds.includes(user.id)) {
+              updatedQuestion.savedQuestionIds.push(user.id);
+            } else if (!savedQuestionIds.includes(id) && updatedQuestion.savedQuestionIds.includes(user.id)) {
+              updatedQuestion.savedQuestionIds = updatedQuestion.savedQuestionIds.filter(
+                (uid) => uid !== user.id
+              );
+            }
+          } catch (savedError) {
+            console.error("Error fetching saved questions:", savedError);
+          }
+        }
+
+        setQuestion(updatedQuestion);
         const processedComments = buildCommentTree(commentsResponse.data.comments || []);
         setComments(processedComments);
       } catch (err) {
+        console.error("Error fetching question:", err);
         setError(err.response?.data?.error || err.message || "Failed to load question");
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchQuestionDetails();
-  }, [id, token, authLoading]);
+  }, [id, token, authLoading, isAuthenticated, user]);
 
   const buildCommentTree = (flatComments) => {
     const commentMap = {};
     const rootComments = [];
-
     flatComments.forEach((comment) => {
       comment.replies = [];
       commentMap[comment.id] = comment;
     });
-
     flatComments.forEach((comment) => {
       if (comment.parentCommentId && commentMap[comment.parentCommentId]) {
         commentMap[comment.parentCommentId].replies.push(comment);
@@ -67,13 +94,12 @@ const QuestionDetailPage = () => {
         rootComments.push(comment);
       }
     });
-
     return rootComments;
   };
 
   if (authLoading || isLoading) {
     return (
-      <div className="flex items-center justify-center h-64 max-w-4xl p-4 mx-auto md:p-6">
+      <div className="flex items-center justify-center min-h-[60vh] max-w-4xl p-4 mx-auto md:p-6">
         <div className="relative">
           <motion.div
             className="w-16 h-16 border-t-4 border-b-4 border-orange-500 rounded-full"
@@ -95,7 +121,7 @@ const QuestionDetailPage = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl p-6 mx-auto border border-red-200 shadow-lg rounded-xl md:p-8 bg-red-50 dark:bg-red-900/20 dark:border-red-800"
+        className="max-w-4xl p-6 mx-auto border border-red-200 shadow-lg rounded-xl md:p-8 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950 dark:to-red-900 dark:border-red-800"
       >
         <div className="flex items-center mb-4">
           <svg
@@ -119,7 +145,7 @@ const QuestionDetailPage = () => {
         <p className="mb-4 text-red-600 dark:text-red-300">{error}</p>
         <a
           href="/forum"
-          className="inline-flex items-center px-4 py-2 font-medium text-white transition-all rounded-lg shadow-md bg-gradient-to-r from-orange-500 to-amber-500 hover:shadow-lg"
+          className="inline-flex items-center px-4 py-2 font-medium text-white transition-all rounded-lg shadow-md bg-gradient-to-r from-orange-500 to-amber-500 hover:shadow-lg hover:translate-y-[-2px]"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -144,14 +170,13 @@ const QuestionDetailPage = () => {
   if (!question) return null;
 
   return (
-    <div className="">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Header />
       <motion.div
         initial="hidden"
         animate="visible"
-        className="w-full min-h-screen p-4 mx-auto md:p-6 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-gray-900 dark:to-gray-800"
+        className="max-w-4xl px-4 py-8 mx-auto md:px-6"
       >
-        {/* <Breadcrumb question={question} /> */}
         <QuestionDetailCard
           question={question}
           user={user}
