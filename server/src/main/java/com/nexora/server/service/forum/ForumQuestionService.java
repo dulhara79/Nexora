@@ -406,8 +406,10 @@ public class ForumQuestionService {
         LOGGER.info("Question deleted with ID: " + questionId);
     }
 
-    public List<ForumQuestion> getQuestions(String tag, String search, String sortBy) {
+    public List<ForumQuestion> getQuestions(String tag, String search, String sortBy, String authorId) {
         List<ForumQuestion> questions;
+
+        System.out.println("<> Author ID: " + authorId);
 
         if (tag != null && !tag.trim().isEmpty()) {
             questions = questionRepository.findByTagsIn(Collections.singletonList(tag.trim().toLowerCase()));
@@ -415,6 +417,14 @@ public class ForumQuestionService {
             questions = questionRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(search, search);
         } else {
             questions = questionRepository.findAll();
+        }
+
+        if (authorId != null && !authorId.isEmpty()) {
+            questions = questionRepository.findByAuthorId(authorId); // Filter by authorId
+            System.out.println("Found " + questions.size() + " questions for authorId: " + authorId);
+        } else {
+            questions = questionRepository.findAll(); // Default behavior
+            System.out.println("Returning all " + questions.size() + " questions for all authors.");
         }
 
         if ("newest".equalsIgnoreCase(sortBy)) {
