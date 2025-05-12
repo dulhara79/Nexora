@@ -2,7 +2,7 @@ import { useState, useCallback, memo, useRef } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
-import { FaHeart, FaComment, FaEdit, FaTrash, FaSpinner, FaTimes, FaShare } from "react-icons/fa";
+import { FaHeart, FaComment, FaEdit, FaTrash, FaSpinner, FaTimes, FaShare, FaBookmark } from "react-icons/fa";
 import { toast } from "react-toastify";
 
 const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotification, onMediaClick, theme }) => {
@@ -13,13 +13,14 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
   const [editDescription, setEditDescription] = useState(post.description || "");
   const [existingMedia, setExistingMedia] = useState(post.media || []);
   const [newMedia, setNewMedia] = useState([]);
-  const [loading, setLoading] = useState({ like: false, comment: false, edit: false, delete: false });
+  const [loading, setLoading] = useState({ like: false, comment: false, edit: false, delete: false, save: false });
   const [mediaError, setMediaError] = useState({});
   const [zoomedMedia, setZoomedMedia] = useState(null);
   const [showComments, setShowComments] = useState(false);
   const commentInputRef = useRef(null);
 
   const isOwner = user === post.userId;
+  const isSaved = (post.savedBy || []).includes(user);
   const formattedDate = post.createdAt
     ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })
     : "Unknown date";
@@ -44,10 +45,40 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
       if (onNewNotification) onNewNotification();
     } catch (error) {
       console.error("Error liking post:", error);
-      onUpdatePost(post); // Revert on error
+      onUpdatePost(post);
       toast.error("Failed to like the post.", { position: "top-right" });
     } finally {
       setLoading(prev => ({ ...prev, like: false }));
+    }
+  };
+
+  const handleSave = async () => {
+    if (loading.save) return;
+    setLoading(prev => ({ ...prev, save: true }));
+
+    const isCurrentlySaved = (post.savedBy || []).includes(user);
+    const optimisticPost = {
+      ...post,
+      savedBy: isCurrentlySaved
+        ? (post.savedBy || []).filter(id => id !== user)
+        : [...(post.savedBy || []), user]
+    };
+    onUpdatePost(optimisticPost);
+
+    try {
+      const response = await axios({
+        method: isCurrentlySaved ? 'delete' : 'post',
+        url: `http://localhost:5000/api/posts/${post.id}/save`,
+        withCredentials: true
+      });
+      onUpdatePost(response.data.post);
+      toast.success(isCurrentlySaved ? "Post unsaved!" : "Post saved!", { position: "top-right" });
+    } catch (error) {
+      console.error("Error saving/unsaving post:", error);
+      onUpdatePost(post);
+      toast.error(`Failed to ${isCurrentlySaved ? 'unsave' : 'save'} the post.`, { position: "top-right" });
+    } finally {
+      setLoading(prev => ({ ...prev, save: false }));
     }
   };
 
@@ -86,7 +117,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
       if (onNewNotification) onNewNotification();
     } catch (error) {
       console.error("Error adding comment:", error);
-      onUpdatePost(post); // Revert on error
+      onUpdatePost(post);
       toast.error("Failed to add comment.", { position: "top-right" });
     } finally {
       setLoading(prev => ({ ...prev, comment: false }));
@@ -119,7 +150,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
       setEditedCommentText("");
     } catch (error) {
       console.error("Error updating comment:", error);
-      onUpdatePost(post); // Revert on error
+      onUpdatePost(post);
       toast.error("Failed to update comment.", { position: "top-right" });
     } finally {
       setLoading(prev => ({ ...prev, comment: false }));
@@ -142,7 +173,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
       onUpdatePost(response.data.post);
     } catch (error) {
       console.error("Error deleting comment:", error);
-      onUpdatePost(post); // Revert on error
+      onUpdatePost(post);
       toast.error("Failed to delete comment.", { position: "top-right" });
     } finally {
       setLoading(prev => ({ ...prev, comment: false }));
@@ -208,7 +239,7 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
       console.error("Error deleting post:", error);
       if (error.response?.status === 404) {
         toast.error("Post not found.", { position: "top-right" });
-        onDeletePost(post.id); // Remove from UI anyway
+        onDeletePost(post.id);
       } else if (error.response?.status === 403) {
         toast.error("You are not authorized to delete this post.", { position: "top-right" });
       } else {
@@ -522,6 +553,24 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
               >
                 <FaShare className="text-lg" />
                 <span className="text-sm font-medium">Share</span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleSave}
+                disabled={loading.save}
+                className={`flex items-center space-x-2 ${
+                  isSaved ? "text-yellow-500" : "text-gray-500 hover:text-yellow-500"
+                } transition-colors duration-200`}
+                aria-label={isSaved ? "Unsave" : "Save"}
+              >
+                {loading.save ? (
+                  <FaSpinner className="text-lg animate-spin" />
+                ) : (
+                  <FaBookmark className={`text-lg ${isSaved ? "fill-current" : "stroke-current"}`} />
+                )}
+                <span className="text-sm font-medium">{(post.savedBy || []).length}</span>
               </motion.button>
             </div>
             
