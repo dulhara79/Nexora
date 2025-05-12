@@ -155,7 +155,7 @@ export default function EnhancedHeader() {
         { path: "/forum", label: "All Topics" },
         { path: "/forum/ask", label: "Q&A" },
         { path: "/forum/saved", label: "Saved" },
-        { path: "/forum/my-posts", label: "My Posts" }
+        { path: "/forum/my-questions", label: "My Questions" }
       ]
     }
   };
