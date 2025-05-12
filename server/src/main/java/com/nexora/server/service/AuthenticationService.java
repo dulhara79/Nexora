@@ -3,7 +3,7 @@ package com.nexora.server.service;
 import com.nexora.server.model.User;
 import com.nexora.server.repository.UserRepository;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -11,9 +11,13 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.Logger;
 
 @Service
@@ -38,6 +42,16 @@ public class AuthenticationService {
 
     @Value("${jwt.expiration}")
     private long jwtExpiration;
+
+    private Set<String> revokedTokens = new HashSet<>();
+
+    public void revokeToken(String token) {
+        revokedTokens.add(token);
+    }
+
+    public boolean isTokenRevoked(String token) {
+        return revokedTokens.contains(token);
+    }
 
     public String sendLoginOtp(String email, String password) throws Exception {
         Optional<User> userOptional = userRepository.findByEmail(email);
@@ -64,8 +78,7 @@ public class AuthenticationService {
     }
 
     public User verifyLoginOtp(String email, String otp) throws Exception {
-        LOGGER.info("Verifying login for email: " + email + " with OTP: " + otp);
-
+        LOGGER.info("Verifying login for email: " + email);
         Optional<User> userOptional = userRepository.findByEmail(email);
         if (!userOptional.isPresent()) {
             LOGGER.warning("User not found for email: " + email);
@@ -78,8 +91,7 @@ public class AuthenticationService {
         }
 
         if (user.getVerificationCode() == null || !user.getVerificationCode().equals(otp)) {
-            LOGGER.warning("OTP mismatch for email: " + email + ". Provided: " + otp + ", Stored: "
-                + user.getVerificationCode());
+            LOGGER.warning("OTP mismatch for email: " + email);
             throw new Exception("Invalid OTP");
         }
 
@@ -110,21 +122,25 @@ public class AuthenticationService {
     }
 
     public String generateJwtToken(User user) {
+        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
         return Jwts.builder()
-            .setSubject(user.getId())
-            .setIssuedAt(new Date())
-            .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-            .signWith(SignatureAlgorithm.HS512, jwtSecret)
-            .compact();
+                .setSubject(user.getId())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(key) // Updated to use SecretKey
+                .compact();
     }
 
     public User validateJwtToken(String token) throws Exception {
+        if (isTokenRevoked(token)) {
+            throw new Exception("Token revoked");
+        }
         try {
             String userId = Jwts.parser()
-                .setSigningKey(jwtSecret)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+                    .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject();
             User user = findById(userId);
             if (user == null) {
                 throw new Exception("User not found");

@@ -18,10 +18,9 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
   const [zoomedMedia, setZoomedMedia] = useState(null);
-  const { user } = useContext(AuthContext);
+  const { user, token } = useContext(AuthContext);
   const location = useLocation();
 
-  // Toggle theme function
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
@@ -29,46 +28,51 @@ const Home = () => {
   };
 
   const fetchPosts = async () => {
-    setLoading(true);
     try {
       const response = await axios.get("http://localhost:5000/api/posts", {
-        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Cache-Control": "no-cache",
+        },
       });
-      console.log("Fetched posts:", response.data);
-      const sortedPosts = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const postsData = response.data.map((item) => item.post);
+      const sortedPosts = postsData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setPosts(sortedPosts);
     } catch (error) {
       console.error("Error fetching posts:", error);
-      toast.error("Failed to load post.", { position: "top-right" });
-    } finally {
-      setLoading(false);
+      toast.error("Failed to load posts.", { position: "top-right" });
     }
   };
 
   const fetchNotifications = async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/notifications", {
-        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Cache-Control": "no-cache",
+        },
       });
-      console.log("Fetched notifications:", response.data);
-      setNotifications(response.data);
+      const notificationsData = response.data.map((item) => item.notification);
+      setNotifications(notificationsData);
     } catch (error) {
       console.error("Error fetching notifications:", error);
-      const errorMessage = error.response?.data || "Failed to load notifications.";
-      toast.error(errorMessage, { position: "top-right" });
+      toast.error("Failed to load notifications.", { position: "top-right" });
     }
   };
 
   const updatePostAfterEdit = async (postId) => {
     try {
       const response = await axios.get(`http://localhost:5000/api/posts/${postId}`, {
-        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Cache-Control": "no-cache",
+        },
       });
-      setPosts(prev =>
-        prev.map(p => (p.id === postId ? response.data : p))
+      setPosts((prev) =>
+        prev
+          .map((p) => (p.id === postId ? response.data.post : p))
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       );
-      console.log("Updated post after edit:", response.data);
     } catch (error) {
       console.error("Error updating post after edit:", error);
       toast.error("Failed to update post.", { position: "top-right" });
@@ -76,13 +80,20 @@ const Home = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchPosts();
-      fetchNotifications();
-      const interval = setInterval(fetchNotifications, 10000);
-      return () => clearInterval(interval);
+    if (user && token) {
+      setLoading(true);
+      Promise.all([fetchPosts(), fetchNotifications()]).finally(() => setLoading(false));
+
+      // Polling for updates every 15 seconds
+      const interval = setInterval(() => {
+        Promise.all([fetchPosts(), fetchNotifications()]).catch((error) =>
+          console.error("Polling error:", error)
+        );
+      }, 15000);
+
+      return () => clearInterval(interval); // Cleanup polling on unmount
     }
-  }, [user]);
+  }, [user, token]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -93,25 +104,25 @@ const Home = () => {
   }, [location]);
 
   useEffect(() => {
-    // Apply theme class to body
     document.body.className = theme === "dark" ? "dark bg-gray-900" : "bg-amber-50";
   }, [theme]);
 
   const handlePostCreated = (newPost) => {
-    setPosts(prev => [newPost, ...prev].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+    setPosts((prev) => [newPost.post, ...prev].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     toast.success("Your post has been shared with the community!", { position: "top-right" });
   };
 
   const handleUpdatePost = (updatedPost) => {
-    setPosts(prev =>
-      prev.map(p => (p.id === updatedPost.id ? updatedPost : p))
+    setPosts((prev) =>
+      prev
+        .map((p) => (p.id === updatedPost.id ? updatedPost : p))
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     );
   };
 
   const handleDeletePost = (postId) => {
-    setPosts(prev => prev.filter(p => p.id !== postId));
-    toast.info("post deleted successfully", { position: "top-right" });
+    setPosts((prev) => prev.filter((p) => p.id !== postId));
+    toast.info("Post deleted successfully", { position: "top-right" });
   };
 
   const handleMediaClick = (mediaUrl, mediaType) => {
@@ -128,7 +139,6 @@ const Home = () => {
         <Navbar />
         <ToastContainer theme={theme} />
         
-        {/* Theme Toggle Button */}
         <div className="fixed z-10 bottom-6 right-6">
           <button 
             onClick={toggleTheme}
@@ -151,41 +161,17 @@ const Home = () => {
           </button>
         </div>
         
-        {/* Hero Section */}
-        {/* <div className={`py-12 ${theme === "dark" ? "bg-gradient-to-r from-gray-800 to-gray-700 text-white" : "bg-gradient-to-r from-amber-500 to-amber-300 text-white"}`}>
-          <div className="max-w-4xl px-6 mx-auto text-center">
-            <motion.h1 
-              className="mb-4 text-4xl font-bold"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              Share Your Culinary Creations
-            </motion.h1>
-            <motion.p 
-              className="mb-6 text-xl"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              Join our community of passionate home chefs and food enthusiasts
-            </motion.p>
-          </div>
-        </div> */}
-        
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
           className="max-w-4xl p-6 mx-auto"
         >
-          {/* Create Post Section */}
           <div className={`p-6 mb-8 shadow-md rounded-xl ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
-            <h2 className={`mb-4 text-2xl font-bold ${theme === "dark" ? "text-amber-300" : "text-amber-800"}`}>Share Your post</h2>
+            <h2 className={`mb-4 text-2xl font-bold ${theme === "dark" ? "text-amber-300" : "text-amber-800"}`}>Share Your Post</h2>
             <CreatePost onPostCreated={handlePostCreated} />
           </div>
 
-          {/* Notification Bell with Counter */}
           {notifications.length > 0 && (
             <motion.div
               initial={{ y: -20, opacity: 0 }}
@@ -212,13 +198,12 @@ const Home = () => {
             </motion.div>
           )}
 
-          {/* Post Feed with Header */}
           <div className={`p-6 shadow-md rounded-xl ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
             <div className="flex items-center justify-between mb-8">
-              <h2 className={`text-3xl font-bold ${theme === "dark" ? "text-amber-300" : "text-amber-800"}`}>Community post</h2>
+              <h2 className={`text-3xl font-bold ${theme === "dark" ? "text-amber-300" : "text-amber-800"}`}>Community Posts</h2>
               {!loading && posts.length > 0 && (
                 <p className={theme === "dark" ? "text-gray-300" : "text-gray-500"}>
-                  {posts.length} post found
+                  {posts.length} {posts.length === 1 ? "post" : "posts"} found
                 </p>
               )}
             </div>
@@ -228,7 +213,7 @@ const Home = () => {
                 <div className="flex items-center justify-center">
                   <div className={`w-12 h-12 border-t-2 border-b-2 rounded-full animate-spin ${theme === "dark" ? "border-amber-300" : "border-amber-500"}`}></div>
                 </div>
-                <p className={`mt-4 text-center ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>Loading post...</p>
+                <p className={`mt-4 text-center ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>Loading posts...</p>
               </div>
             ) : posts.length === 0 ? (
               <motion.div
@@ -239,7 +224,7 @@ const Home = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" className={`w-16 h-16 mx-auto mb-4 ${theme === "dark" ? "text-amber-400" : "text-amber-300"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                <p className={`mb-2 text-xl ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>No post yet</p>
+                <p className={`mb-2 text-xl ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>No posts yet</p>
                 <p className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Be the first to share your culinary masterpiece!</p>
               </motion.div>
             ) : (
@@ -259,7 +244,6 @@ const Home = () => {
                       transition={{ duration: 0.5 }}
                       className={`p-6 rounded-lg shadow-md ${theme === "dark" ? "bg-gray-700" : "bg-amber-50"}`}
                     >
-                      {/* Modified PostCard to support media click handling */}
                       <PostCard
                         post={post}
                         user={user?.id}
@@ -277,7 +261,6 @@ const Home = () => {
           </div>
         </motion.div>
         
-        {/* Zoomed Media Modal */}
         <AnimatePresence>
           {zoomedMedia && (
             <motion.div 

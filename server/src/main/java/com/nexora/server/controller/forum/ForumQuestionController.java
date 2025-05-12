@@ -116,13 +116,14 @@ public class ForumQuestionController {
     public ResponseEntity<?> getQuestions(
             @RequestParam(required = false) String tag,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String authorId,
             @RequestParam(required = false, defaultValue = "newest") String sortBy,
             @RequestHeader(value = "If-None-Match", required = false) String ifNoneMatch) {
-        List<ForumQuestion> questions = questionService.getQuestions(tag, search, sortBy);
+        List<ForumQuestion> questions = questionService.getQuestions(tag, search, sortBy, authorId);
         String etag = "\"" + Integer.toHexString(questions.hashCode()) + "\"";
         if (ifNoneMatch != null && ifNoneMatch.equals(etag)) {
             return ResponseEntity.status(304)
-                    .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                    .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
                     .header(HttpHeaders.ETAG, etag)
                     .build();
         }
