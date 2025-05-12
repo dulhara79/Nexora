@@ -116,7 +116,7 @@ public class ForumCommentController {
         String etag = "\"" + Integer.toHexString(comments.hashCode()) + "\"";
         if (ifNoneMatch != null && ifNoneMatch.equals(etag)) {
             return ResponseEntity.status(304)
-                    .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                    .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
                     .header(HttpHeaders.ETAG, etag)
                     .build();
         }
@@ -127,7 +127,7 @@ public class ForumCommentController {
         response.put("comments", comments);
         response.put("_links", links);
         return ResponseEntity.ok()
-                .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
                 .header(HttpHeaders.ETAG, etag)
                 .body(response);
     }
