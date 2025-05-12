@@ -141,7 +141,7 @@ const Home = () => {
         <Navbar />
         <ToastContainer theme={theme} />
         
-        <div className="fixed z-10 space-y-4 bottom-5 right-6">
+        <div className="fixed z-10 top-20 right-6">
           <button 
             onClick={() => navigate("/post-notifications")}
             className={`p-3 rounded-full shadow-lg transition-all duration-300 ${
@@ -162,6 +162,9 @@ const Home = () => {
               )}
             </div>
           </button>
+        </div>
+
+        <div className="fixed z-10 bottom-6 right-6">
           <button 
             onClick={toggleTheme}
             className={`p-3 rounded-full shadow-lg transition-all duration-300 ${
@@ -225,9 +228,9 @@ const Home = () => {
               </motion.div>
             ) : (
               <motion.div
-                className="space-y-8"
+                className="space Numerical-y-8"
                 initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }} // Fixed Becker issue
+                animate={{ y: 0, opacity: 1 }}
                 transition={{ staggerChildren: 0.2 }}
               >
                 <AnimatePresence>
