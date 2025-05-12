@@ -47,6 +47,7 @@ import ForumCommunityPage from "./pages/Forum/ForumCommunityPage";
 import Home from "./pages/post/Home";
 import CreatePost from "./pages/post/CreatePost";
 import Notifications from "./pages/post/Notifications";
+import SavedPosts from "./pages/post/SavedPosts";
 
 // Challanges Pages
 import ChallengeDetail from "./pages/Challenge/ChallengeDetail";
@@ -117,6 +118,7 @@ function App() {
           <Route path="/post" element={<Home />} />
           <Route path="/create-post" element={<CreatePost />} />
           <Route path="/post-notifications" element={<Notifications />} />
+          <Route path="/saved-posts" element={<SavedPosts />} />
 
           {/* Challenges Routes */}
           <Route path="/challenges" element={<ChallengeList />} />
