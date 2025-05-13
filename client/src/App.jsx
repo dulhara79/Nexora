@@ -56,6 +56,7 @@ import StartChallenge from "./pages/Challenge/StartChallenge";
 import CollaborationHub from "./pages/Challenge/CollabHub";
 import Leaderboard from "./pages/Challenge/Leaderboard";
 import RemixGallery from "./pages/Challenge/ChallenfeRemix";
+import RecipeGenerator from "./pages/Challenge/RecipeGenerator";
 
 // Test Page
 import TestPage from "./pages/TestPage";
@@ -142,6 +143,7 @@ function App() {
           <Route path="/collaboration-hub" element={<CollaborationHub />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/remix-gallery" element={<RemixGallery />} />
+          <Route path="/recipe-generator" element={<RecipeGenerator />} />
 
 
 
