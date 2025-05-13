@@ -289,7 +289,8 @@ import LoadingSpinner from "../User/LoadingSpinner"; // Adjust path as needed
 import TabButton from "../User/TabButton"; // Adjust path as needed
 import { LogIn, UserPlus } from "lucide-react";
 import { throttle } from "lodash";
-import Navbar from "../common/Navbar";
+// import Navbar from "../common/Navbar";
+import Navbar from "../../components/common/NewPageHeader";
 
 const API_URL = "http://localhost:5000/api";
 

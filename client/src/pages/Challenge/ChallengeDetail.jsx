@@ -10,6 +10,7 @@ const ChallengeDetail = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch challenge details
   useEffect(() => {
     const fetchChallenge = async () => {
       try {
@@ -48,14 +49,19 @@ const ChallengeDetail = () => {
 
   return (
     <motion.div
-      className="container mx-auto px-4 py-8 max-w-4xl"
+      className="container mx-auto px-4 py-8 max-w-4xl min-h-screen bg-gradient-to-b from-white to-gray-100 relative overflow-hidden"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
+      {/* Background Particles */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="w-full h-full bg-[url('https://www.transparenttextures.com/patterns/light-wool.png')] opacity-10 animate-pulse"></div>
+      </div>
+
       <motion.button
         onClick={() => navigate('/challenges')}
-        className="mb-6 text-blue-600 hover:text-blue-800 font-semibold flex items-center transition-colors duration-300"
+        className="mb-6 text-blue-500 hover:text-blue-600 font-semibold flex items-center transition-colors duration-300 relative z-10"
         variants={itemVariants}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -69,7 +75,7 @@ const ChallengeDetail = () => {
       <AnimatePresence>
         {error && (
           <motion.p
-            className="text-red-500 mb-4 text-center"
+            className="text-red-500 mb-6 text-center font-medium bg-red-100/50 py-3 px-4 rounded-lg border border-red-300 relative z-10"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -82,16 +88,20 @@ const ChallengeDetail = () => {
 
       {isLoading ? (
         <motion.div
-          className="text-center text-gray-600"
+          className="text-center text-gray-600 flex items-center justify-center relative z-10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
+          <svg className="animate-spin h-8 w-8 text-blue-500 mr-3" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+          </svg>
           Loading challenge details...
         </motion.div>
       ) : !challenge ? (
         <motion.div
-          className="text-center text-gray-600"
+          className="text-center text-gray-600 font-medium bg-white py-6 px-4 rounded-lg border border-gray-200 relative z-10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
@@ -99,12 +109,15 @@ const ChallengeDetail = () => {
           Challenge not found
         </motion.div>
       ) : (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 relative z-10">
           {challenge.photoUrl && (
             <motion.img
-              src={`http://localhost:5000/${challenge.photoUrl}`}
+              src={challenge.photoUrl}
               alt={challenge.title}
               className="w-full h-64 object-cover"
+              onError={(e) => {
+                e.target.src = 'https://via.placeholder.com/150?text=No+Image';
+              }}
               variants={itemVariants}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -139,9 +152,9 @@ const ChallengeDetail = () => {
             </motion.div>
             <motion.button
               onClick={() => navigate(`/edit-challenge/${challenge.challengeId}`)}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300"
+              className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:from-blue-600 hover:to-cyan-500 transition-all duration-300"
               variants={itemVariants}
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.05, boxShadow: '0 0 10px rgba(0, 0, 255, 0.2)' }}
               whileTap={{ scale: 0.95 }}
             >
               Start Challenge

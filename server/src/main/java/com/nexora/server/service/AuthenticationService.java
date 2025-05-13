@@ -14,8 +14,10 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.Logger;
 
 @Service
@@ -40,6 +42,16 @@ public class AuthenticationService {
 
     @Value("${jwt.expiration}")
     private long jwtExpiration;
+
+    private Set<String> revokedTokens = new HashSet<>();
+
+    public void revokeToken(String token) {
+        revokedTokens.add(token);
+    }
+
+    public boolean isTokenRevoked(String token) {
+        return revokedTokens.contains(token);
+    }
 
     public String sendLoginOtp(String email, String password) throws Exception {
         Optional<User> userOptional = userRepository.findByEmail(email);
@@ -120,6 +132,9 @@ public class AuthenticationService {
     }
 
     public User validateJwtToken(String token) throws Exception {
+        if (isTokenRevoked(token)) {
+            throw new Exception("Token revoked");
+        }
         try {
             String userId = Jwts.parser()
                     .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
