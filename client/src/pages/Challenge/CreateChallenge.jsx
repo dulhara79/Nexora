@@ -99,6 +99,8 @@ const CreateChallenge = () => {
     });
     try {
       if (isEditMode) {
+        console.log('Updating challenge with ID:', challengeId);
+        console.log('Form data:', data);
         await axios.put(`http://localhost:5000/api/challenges/${challengeId}`, data, {
           headers: { 'Content-Type': 'multipart/form-data' },
           withCredentials: true,
