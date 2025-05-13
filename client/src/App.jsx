@@ -52,6 +52,7 @@ import StartChallenge from "./pages/Challenge/StartChallenge";
 // Test Page
 import TestPage from "./pages/TestPage";
 import EditQuestionPage from "./pages/Forum/EditQuestionPage";
+import SearchResultsPage from "./pages/User/SearchResultsPage";
 
 function App() {
   return (
@@ -68,6 +69,7 @@ function App() {
           <Route path="/profile/:userId" element={<Profile />} />
           <Route path="/edit/:userId" element={<EditProfile />} />
           <Route path="/feed" element={<UserFeedPage />} />
+          <Route path="/search" element={<SearchResultsPage />} />
 
           {/* Learning Plan Routes */}
           <Route path="/learninghome" element={<HomePage />} />
