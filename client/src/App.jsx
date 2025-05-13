@@ -33,8 +33,9 @@ import QuestionDetailPage from "./pages/Forum/QuestionDetailPage";
 import AskQuestionPage from "./pages/Forum/AskQuestionPage";
 import SavedQuestions from "./pages/Forum/SavedQuestions";
 import TagPage from "./pages/Forum/TagPage";
-import ForumNotification from "./pages/Forum/ForumNotification";
+import ForumNotification from "./pages/Forum/ForumNotificationPage";
 import ForumCommunityPage from "./pages/Forum/ForumCommunityPage";
+import UserQuestionsPage from "./pages/Forum/UserQuestionsPage";
 
 // Post Pages
 import Home from "./pages/post/Home";
@@ -50,7 +51,6 @@ import StartChallenge from "./pages/Challenge/StartChallenge";
 // Test Page
 import TestPage from "./pages/TestPage";
 import EditQuestionPage from "./pages/Forum/EditQuestionPage";
-import UserQuestionsPage from "./pages/Forum/UserQuestionsPage";
 
 function App() {
   return (
