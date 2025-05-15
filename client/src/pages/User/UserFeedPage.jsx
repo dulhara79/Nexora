@@ -26,7 +26,7 @@ export default function UserFeedPage() {
       const processedPosts = postsRes.data.map(item => item.post || item);
       
       // Process challenges to handle nested structure
-      const processedChallenges = challengesRes.data.map(item => item.challenge || item);
+      const processedChallenges = challengesRes.data.challenges.map(item => item.challenge || item);
       console.log("Posts API Response:", postsRes.data);
       console.log("Cuisines API Response:", cuisinesRes.data);
       console.log("Challenges API Response:", challengesRes.data);
