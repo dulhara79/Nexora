@@ -3,9 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AuthContext } from '../../context/AuthContext';
+import Header from '../../components/common/NewPageHeader'
 
 const CreateChallenge = () => {
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, token } = useContext(AuthContext);
   const { challengeId } = useParams();
   const navigate = useNavigate();
   const isEditMode = !!challengeId;
@@ -31,27 +32,33 @@ const CreateChallenge = () => {
         try {
           setIsLoading(true);
           const response = await axios.get(`http://localhost:5000/api/challenges/${challengeId}`, {
+            headers: { Authorization: `Bearer ${token}` },
             withCredentials: true,
           });
-          const { title, description, theme, startDate, endDate, photoUrl } = response.data;
+          const { title, description, theme, startDate, endDate, photoUrl } = response.data.challenge;
           setFormData({
             title,
             description,
             theme,
-            startDate: startDate.split('T')[0],
-            endDate: endDate.split('T')[0],
+            startDate: new Date(startDate).toISOString().split('T')[0],
+            endDate: new Date(endDate).toISOString().split('T')[0],
             photo: null,
           });
           setCurrentPhotoUrl(photoUrl);
         } catch (err) {
-          setError(err.response?.data || 'Failed to load challenge data');
+          setError(err.response?.data?.error || 'Failed to load challenge data');
         } finally {
           setIsLoading(false);
         }
       };
-      fetchChallenge();
+      if (token) {
+        fetchChallenge();
+      } else {
+        setError('Please log in to edit a challenge');
+        setIsLoading(false);
+      }
     }
-  }, [challengeId, isEditMode]);
+  }, [challengeId, isEditMode, token]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -92,28 +99,34 @@ const CreateChallenge = () => {
       setError('Please fix the errors in the form');
       return;
     }
+
     setIsSubmitting(true);
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
       if (formData[key]) data.append(key, formData[key]);
     });
+
     try {
       if (isEditMode) {
-        console.log('Updating challenge with ID:', challengeId);
-        console.log('Form data:', data);
         await axios.put(`http://localhost:5000/api/challenges/${challengeId}`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' },
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
           withCredentials: true,
         });
       } else {
         await axios.post('http://localhost:5000/api/challenges', data, {
-          headers: { 'Content-Type': 'multipart/form-data' },
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
           withCredentials: true,
         });
       }
       navigate('/challenges');
     } catch (err) {
-      setError(err.response?.data || `Failed to ${isEditMode ? 'update' : 'create'} challenge`);
+      setError(err.response?.data?.error || `Failed to ${isEditMode ? 'update' : 'create'} challenge`);
     } finally {
       setIsSubmitting(false);
     }
@@ -122,7 +135,6 @@ const CreateChallenge = () => {
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5, when: 'beforeChildren', staggerChildren: 0.1 } },
-
   };
 
   const itemVariants = {
@@ -131,20 +143,21 @@ const CreateChallenge = () => {
   };
 
   return (
+    <>
+      <Header />
     <motion.div
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-gray-100 p-6 overflow-hidden relative"
+      className="relative flex items-center justify-center min-h-screen p-6 overflow-hidden bg-gradient-to-br from-white to-gray-100"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* Background Particles */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="w-full h-full bg-[url('https://www.transparenttextures.com/patterns/light-wool.png')] opacity-10 animate-pulse"></div>
       </div>
 
-      <div className="bg-white bg-opacity-90 backdrop-filter backdrop-blur-xl p-8 rounded-3xl shadow-2xl w-full max-w-2xl border border-gray-200 relative z-10">
+      <div className="relative z-10 w-full max-w-2xl p-8 bg-white border border-gray-200 shadow-2xl bg-opacity-90 backdrop-filter backdrop-blur-xl rounded-3xl">
         <motion.h1
-          className="text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 mb-8"
+          className="mb-8 text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400"
           style={{ textShadow: '0 0 10px rgba(0, 0, 255, 0.2)' }}
           variants={itemVariants}
         >
@@ -154,7 +167,7 @@ const CreateChallenge = () => {
         <AnimatePresence>
           {error && (
             <motion.p
-              className="text-red-500 text-center mb-6 bg-red-100/50 p-3 rounded-lg border border-red-300 shadow-md"
+              className="p-3 mb-6 text-center text-red-500 border border-red-300 rounded-lg shadow-md bg-red-100/50"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -167,12 +180,12 @@ const CreateChallenge = () => {
 
         {isLoading ? (
           <motion.div
-            className="text-center text-gray-600 flex items-center justify-center"
+            className="flex items-center justify-center text-center text-gray-600"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <svg className="animate-spin h-8 w-8 text-blue-500 mr-3" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 mr-3 text-blue-500 animate-spin" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
             </svg>
@@ -181,102 +194,102 @@ const CreateChallenge = () => {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             <motion.div variants={itemVariants} className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-1 transition-all duration-300">Title</label>
+              <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">Title</label>
               <input
                 type="text"
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 text-gray-800 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-300 placeholder-gray-400 hover:border-blue-400"
+                className="w-full p-3 text-gray-800 placeholder-gray-400 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white hover:border-blue-400"
                 required
                 placeholder="Enter challenge title"
               />
               {formErrors.title && (
-                <motion.p className="text-red-500 text-sm mt-1 absolute" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+                <motion.p className="absolute mt-1 text-sm text-red-500" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
                   {formErrors.title}
                 </motion.p>
               )}
             </motion.div>
 
             <motion.div variants={itemVariants} className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-1 transition-all duration-300">Description</label>
+              <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">Description</label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 text-gray-800 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-300 placeholder-gray-400 hover:border-blue-400"
+                className="w-full p-3 text-gray-800 placeholder-gray-400 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white hover:border-blue-400"
                 required
                 rows="4"
                 placeholder="Describe your challenge"
               />
               {formErrors.description && (
-                <motion.p className="text-red-500 text-sm mt-1 absolute" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+                <motion.p className="absolute mt-1 text-sm text-red-500" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
                   {formErrors.description}
                 </motion.p>
               )}
             </motion.div>
 
             <motion.div variants={itemVariants} className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-1 transition-all duration-300">Theme</label>
+              <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">Theme</label>
               <input
                 type="text"
                 name="theme"
                 value={formData.theme}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 text-gray-800 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-300 placeholder-gray-400 hover:border-blue-400"
+                className="w-full p-3 text-gray-800 placeholder-gray-400 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white hover:border-blue-400"
                 required
                 placeholder="E.g., Italian Cuisine"
               />
               {formErrors.theme && (
-                <motion.p className="text-red-500 text-sm mt-1 absolute" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+                <motion.p className="absolute mt-1 text-sm text-red-500" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
                   {formErrors.theme}
                 </motion.p>
               )}
             </motion.div>
 
             <motion.div variants={itemVariants} className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-1 transition-all duration-300">Start Date</label>
+              <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">Start Date</label>
               <input
                 type="date"
                 name="startDate"
                 value={formData.startDate}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 text-gray-800 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-300 hover:border-blue-400"
+                className="w-full p-3 text-gray-800 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white hover:border-blue-400"
                 required
               />
               {formErrors.startDate && (
-                <motion.p className="text-red-500 text-sm mt-1 absolute" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+                <motion.p className="absolute mt-1 text-sm text-red-500" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
                   {formErrors.startDate}
                 </motion.p>
               )}
             </motion.div>
 
             <motion.div variants={itemVariants} className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-1 transition-all duration-300">End Date</label>
+              <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">End Date</label>
               <input
                 type="date"
                 name="endDate"
                 value={formData.endDate}
                 onChange={handleChange}
-                className="w-full p-3 bg-gray-50 text-gray-800 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-300 hover:border-blue-400"
+                className="w-full p-3 text-gray-800 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white hover:border-blue-400"
                 required
               />
               {formErrors.endDate && (
-                <motion.p className="text-red-500 text-sm mt-1 absolute" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+                <motion.p className="absolute mt-1 text-sm text-red-500" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
                   {formErrors.endDate}
                 </motion.p>
               )}
             </motion.div>
 
             <motion.div variants={itemVariants} className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-1 transition-all duration-300">Photo</label>
+              <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">Photo</label>
               {isEditMode && currentPhotoUrl && !previewUrl && (
                 <div className="mb-4">
                   <p className="text-sm text-gray-600">Current Image:</p>
                   <img
                     src={currentPhotoUrl}
                     alt="Current challenge"
-                    className="w-40 h-40 object-cover rounded-lg mt-2 border border-gray-300 hover:border-blue-500 transition-all duration-300 shadow-lg"
+                    className="object-cover w-40 h-40 mt-2 transition-all duration-300 border border-gray-300 rounded-lg shadow-lg hover:border-blue-500"
                   />
                 </div>
               )}
@@ -286,7 +299,7 @@ const CreateChallenge = () => {
                   <img
                     src={previewUrl}
                     alt="Image preview"
-                    className="w-40 h-40 object-cover rounded-lg mt-2 border border-gray-300 hover:border-blue-500 transition-all duration-300 shadow-lg"
+                    className="object-cover w-40 h-40 mt-2 transition-all duration-300 border border-gray-300 rounded-lg shadow-lg hover:border-blue-500"
                   />
                 </div>
               )}
@@ -294,7 +307,7 @@ const CreateChallenge = () => {
                 type="file"
                 name="photo"
                 onChange={handleChange}
-                className="mt-1 w-full text-gray-800 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-blue-500 file:to-cyan-400 file:text-white hover:file:from-blue-600 hover:file:to-cyan-500 transition-all duration-300"
+                className="w-full mt-1 text-gray-800 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-blue-500 file:to-cyan-400 file:text-white hover:file:from-blue-600 hover:file:to-cyan-500"
                 accept="image/*"
               />
             </motion.div>
@@ -302,7 +315,7 @@ const CreateChallenge = () => {
             <motion.div variants={itemVariants}>
               <motion.button
                 type="submit"
-                className="w-full py-3 px-6 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-bold rounded-lg shadow-lg hover:from-blue-600 hover:to-cyan-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-100 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-6 py-3 font-bold text-white transition-all duration-300 rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isSubmitting}
                 whileHover={{ scale: 1.05, boxShadow: '0 0 10px rgba(0, 0, 255, 0.2)' }}
                 whileTap={{ scale: 0.95 }}
@@ -314,6 +327,7 @@ const CreateChallenge = () => {
         )}
       </div>
     </motion.div>
+    </>
   );
 };
 
