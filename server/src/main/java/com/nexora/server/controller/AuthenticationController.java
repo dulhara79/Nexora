@@ -68,7 +68,7 @@ public class AuthenticationController {
             LOGGER.info("Login successful for userId: " + user.getId());
             return ResponseEntity.ok()
                     .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                    .body(new UserResponse(user.getId(), user.getEmail(), user.getName(), token, links));
+                    .body(new UserResponse(user.getId(), user.getEmail(), user.getName(), user.getProfilePhotoUrl(), token, links));
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
@@ -166,7 +166,7 @@ public ResponseEntity<?> checkSession(@RequestHeader(value = "Authorization", re
                 .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate") // 🔥 Prevent caching
                 .header(HttpHeaders.VARY, "Authorization") // 🔥 Differentiate by token
                 .header(HttpHeaders.ETAG, "\"" + user.getId() + "\"")
-                .body(new UserResponse(user.getId(), user.getEmail(), user.getName(), token, links));
+                .body(new UserResponse(user.getId(), user.getEmail(), user.getName(), user.getProfilePhotoUrl(), token, links));
     } catch (Exception e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
