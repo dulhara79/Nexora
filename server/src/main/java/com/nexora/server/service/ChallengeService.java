@@ -24,9 +24,13 @@ public class ChallengeService {
     @Autowired
     private Cloudinary cloudinary;
 
-    public Challenge createChallenge(String title, String description, String theme, 
-                                    LocalDate startDate, LocalDate endDate, String createdBy, 
+    public Challenge createChallenge(String title, String description, String theme,
+                                    LocalDate startDate, LocalDate endDate, String createdBy,
                                     MultipartFile photo) throws IOException {
+        // Validate inputs
+        if (title == null || description == null || theme == null || startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Required fields are missing");
+        }
         // Generate unique challenge ID
         String challengeId = UUID.randomUUID().toString();
 
@@ -34,8 +38,8 @@ public class ChallengeService {
         String photoUrl = savePhoto(photo, challengeId);
 
         // Create and save challenge
-        Challenge challenge = new Challenge(challengeId, title, description, theme, 
-                                          startDate, endDate, createdBy, photoUrl);
+        Challenge challenge = new Challenge(challengeId, title, description, theme,
+                startDate, endDate, createdBy, photoUrl);
         return challengeRepository.save(challenge);
     }
 
@@ -47,13 +51,17 @@ public class ChallengeService {
         return challengeRepository.findById(challengeId);
     }
 
-    public Challenge updateChallenge(String challengeId, String title, String description, 
-                                   String theme, LocalDate startDate, LocalDate endDate, 
-                                   String createdBy, MultipartFile photo) throws IOException {
+    public Challenge updateChallenge(String challengeId, String title, String description,
+                                    String theme, LocalDate startDate, LocalDate endDate,
+                                    String createdBy, MultipartFile photo) throws IOException {
         Optional<Challenge> existingChallenge = challengeRepository.findById(challengeId);
         if (existingChallenge.isPresent()) {
             Challenge challenge = existingChallenge.get();
-            // Only update fields if provided
+            // Verify ownership
+            if (!challenge.getCreatedBy().equals(createdBy)) {
+                throw new RuntimeException("Unauthorized: User does not own this challenge");
+            }
+            // Update fields only if provided
             if (title != null) challenge.setTitle(title);
             if (description != null) challenge.setDescription(description);
             if (theme != null) challenge.setTheme(theme);
@@ -74,18 +82,14 @@ public class ChallengeService {
         throw new RuntimeException("Challenge not found");
     }
 
-    public void deleteChallenge(String challengeId, String createdBy) {
+    public void deleteChallenge(String challengeId, String createdBy) throws IOException {
         Optional<Challenge> challenge = challengeRepository.findById(challengeId);
         if (challenge.isPresent() && challenge.get().getCreatedBy().equals(createdBy)) {
             // Delete photo from Cloudinary if exists
             String photoUrl = challenge.get().getPhotoUrl();
             if (photoUrl != null) {
                 String publicId = extractPublicId(photoUrl);
-                try {
-                    cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to delete photo from Cloudinary", e);
-                }
+                cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
             }
             challengeRepository.deleteById(challengeId);
         } else {
