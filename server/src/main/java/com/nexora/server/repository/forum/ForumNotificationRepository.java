@@ -21,11 +21,12 @@ public interface ForumNotificationRepository extends MongoRepository<ForumNotifi
     List<ForumNotification> findByUserId(String userId, Pageable pageable);
     
     // Find notifications for deduplication (same user, type, question/comment, within time range)
-    List<ForumNotification> findByUserIdAndTypeAndRelatedQuestionIdAndRelatedCommentIdAndCreatedAtAfter(
+    List<ForumNotification> findByUserIdAndTypeAndRelatedQuestionIdAndRelatedCommentIdAndRelatedQuizIdAndCreatedAtAfter(
         String userId, 
         String type, 
         String relatedQuestionId, 
-        String relatedCommentId, 
+        String relatedCommentId,
+        String relatedQuizId,
         LocalDateTime createdAtAfter
     );
 }
