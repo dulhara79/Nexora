@@ -104,7 +104,7 @@ export default function EnhancedHeader() {
     backdrop: "",
   });
 
-  console.log("User:", user);
+  // console.log("User:", user);
 
   const headerRef = useRef(null);
   const submenuRef = useRef(null);
