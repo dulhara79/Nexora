@@ -17,6 +17,7 @@ public class ForumNotification {
     private String message; // e.g., "John upvoted your comment"
     private String relatedQuestionId;
     private String relatedCommentId;
+    private String relatedQuizId;
     private String type; // e.g., "COMMENT_VOTE", "QUESTION_VOTE", "COMMENT"
     private boolean isRead = false;
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -59,6 +60,14 @@ public class ForumNotification {
 
     public void setRelatedCommentId(String relatedCommentId) {
         this.relatedCommentId = relatedCommentId;
+    }
+
+    public String getRelatedQuizId() {
+        return relatedQuizId;
+    }
+
+    public void setRelatedQuizId(String relatedQuizId) {
+        this.relatedQuizId = relatedQuizId;
     }
 
     public boolean isRead() {

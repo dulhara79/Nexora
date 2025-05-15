@@ -36,6 +36,11 @@ import TagPage from "./pages/Forum/TagPage";
 import ForumNotification from "./pages/Forum/ForumNotificationPage";
 import ForumCommunityPage from "./pages/Forum/ForumCommunityPage";
 import UserQuestionsPage from "./pages/Forum/UserQuestionsPage";
+import QuizList from "./components/Forum/Quiz/QuizList";
+import QuizCreate from "./components/Forum/Quiz/QuizCreate";
+import QuizDetail from "./components/Forum/Quiz/QuizDetail";
+import QuizStats from "./components/Forum/Quiz/QuizStats";
+import QuizTake from "./components/Forum/Quiz/QuizTake";
 
 // Post Pages
 import Home from "./pages/post/Home";
@@ -101,6 +106,16 @@ function App() {
             element={<ForumCommunityPage />}
           />
           <Route path="/forum/my-questions" element={<UserQuestionsPage />} />
+          {/* <Route path="/forum/quizzes" element={<QuizList />} />
+          <Route path="/forum/quizzes/create" element={<QuizCreate />} />
+          <Route path="/forum/quizzes/:id" element={<QuizDetail />} />
+          <Route path="/forum/quizzes/:id/stats" element={<QuizStats />} />
+          <Route path="/forum/quizzes/:id/take" element={<QuizTake />} /> */}
+
+          <Route path="/forum/quizzes" element={<QuizList />} />
+          <Route path="/forum/quizzes/create" element={<QuizCreate />} />
+          <Route path="/forum/quizzes/:id" element={<QuizDetail />} />
+          <Route path="/forum/quizzes/:id/stats" element={<QuizStats />} />
 
           {/* Post Routes */}
           <Route path="/post" element={<Home />} />
@@ -130,7 +145,6 @@ function App() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/remix-gallery" element={<RemixGallery />} />
           <Route path="/recipe-generator" element={<RecipeGenerator />} />
-
 
 
           {/* 404 Page */}
