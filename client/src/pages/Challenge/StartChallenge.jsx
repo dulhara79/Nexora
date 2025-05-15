@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AuthContext } from '../../context/AuthContext';
+import Header from '../../components/common/NewPageHeader'
 
 const StartChallenge = () => {
   const { challengeId } = useParams();
   const navigate = useNavigate();
+  const { token } = useContext(AuthContext);
   const [challenge, setChallenge] = useState(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -16,18 +19,24 @@ const StartChallenge = () => {
       try {
         setIsLoading(true);
         const response = await axios.get(`http://localhost:5000/api/challenges/${challengeId}`, {
+          headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         });
-        setChallenge(response.data);
+        setChallenge(response.data.challenge);
       } catch (err) {
-        setError(err.response?.data || 'Failed to load challenge details');
+        setError(err.response?.data?.error || 'Failed to load challenge details');
         console.error(err.response?.data || err.message);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchChallenge();
-  }, [challengeId]);
+    if (token) {
+      fetchChallenge();
+    } else {
+      setError('Please log in to view challenge details');
+      setIsLoading(false);
+    }
+  }, [challengeId, token]);
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -48,21 +57,21 @@ const StartChallenge = () => {
   };
 
   return (
+    <>
+    <Header />
     <motion.div
-      className="container mx-auto px-4 py-8 max-w-4xl min-h-screen bg-gradient-to-b from-white to-gray-100 relative overflow-hidden"
+      className="container relative max-w-4xl min-h-screen px-4 py-8 mx-auto overflow-hidden bg-gradient-to-b from-white to-gray-100"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* Background Texture */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="w-full h-full bg-[url('https://www.transparenttextures.com/patterns/light-wool.png')] opacity-10 animate-pulse"></div>
       </div>
 
-      {/* Back Button */}
       <motion.button
         onClick={() => navigate('/challenges')}
-        className="mb-6 text-blue-500 hover:text-blue-600 font-semibold flex items-center transition-colors duration-300 relative z-10"
+        className="relative z-10 flex items-center mb-6 font-semibold text-blue-500 transition-colors duration-300 hover:text-blue-600"
         variants={itemVariants}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -73,11 +82,10 @@ const StartChallenge = () => {
         Back to Challenges
       </motion.button>
 
-      {/* Error Message */}
       <AnimatePresence>
         {error && (
           <motion.p
-            className="text-red-500 mb-6 text-center font-medium bg-red-100/50 py-3 px-4 rounded-lg border border-red-300 relative z-10"
+            className="relative z-10 px-4 py-3 mb-6 font-medium text-center text-red-500 border border-red-300 rounded-lg bg-red-100/50"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -90,12 +98,12 @@ const StartChallenge = () => {
 
       {isLoading ? (
         <motion.div
-          className="text-center text-gray-600 flex items-center justify-center relative z-10"
+          className="relative z-10 flex items-center justify-center text-center text-gray-600"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <svg className="animate-spin h-8 w-8 text-blue-500 mr-3" viewBox="0 0 24 24">
+          <svg className="w-8 h-8 mr-3 text-blue-500 animate-spin" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
           </svg>
@@ -103,7 +111,7 @@ const StartChallenge = () => {
         </motion.div>
       ) : !challenge ? (
         <motion.div
-          className="text-center text-gray-600 font-medium bg-white py-6 px-4 rounded-lg border border-gray-200 relative z-10"
+          className="relative z-10 px-4 py-6 font-medium text-center text-gray-600 bg-white border border-gray-200 rounded-lg"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
@@ -111,14 +119,13 @@ const StartChallenge = () => {
           Challenge not found
         </motion.div>
       ) : (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 relative z-10">
-          {/* Hero Section with Photo */}
+        <div className="relative z-10 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-md">
           {challenge.photoUrl && (
             <div className="relative h-64">
               <motion.img
                 src={challenge.photoUrl}
                 alt={challenge.title}
-                className="w-full h-full object-cover"
+                className="object-cover w-full h-full"
                 onError={(e) => {
                   e.target.src = 'https://via.placeholder.com/150?text=No+Image';
                 }}
@@ -127,40 +134,41 @@ const StartChallenge = () => {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-center justify-center">
-                <motion.h1
-                  className="text-4xl font-bold text-white text-center"
-                  variants={itemVariants}
-                >
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/70 to-transparent">
+                <motion.h1 className="text-4xl font-bold text-center text-white" variants={itemVariants}>
                   {challenge.title}
                 </motion.h1>
               </div>
             </div>
           )}
 
-          {/* Challenge Details Section */}
           <div className="p-6">
             <motion.div className="mb-6" variants={itemVariants}>
-              <h2 className="text-2xl font-semibold text-gray-800 mb-2">Challenge Theme</h2>
-              <p className="text-gray-600">Healthy Eats</p>
+              <h2 className="mb-2 text-2xl font-semibold text-gray-800">Challenge Theme</h2>
+              <p className="text-gray-600">{challenge.theme}</p>
             </motion.div>
             <motion.div className="mb-6" variants={itemVariants}>
-              <h2 className="text-2xl font-semibold text-gray-800 mb-2">Description</h2>
-              <p className="text-gray-700">
-                Take “just lettuce and dressing” to the next level by adding grains (quinoa, farro), proteins (chickpeas, grilled chicken), seasonal fruits or roasted vegetables, and a homemade vinaigrette. Build texture and color for a salad that’s hearty enough to be the star of the meal.
+              <h2 className="mb-2 text-2xl font-semibold text-gray-800">Description</h2>
+              <p className="text-gray-700">{challenge.description}</p>
+            </motion.div>
+            <motion.div className="mb-6" variants={itemVariants}>
+              <h2 className="mb-2 text-2xl font-semibold text-gray-800">Dates</h2>
+              <p className="text-gray-600">
+                Start: {new Date(challenge.startDate).toLocaleDateString()} <br />
+                End: {new Date(challenge.endDate).toLocaleDateString()}
               </p>
             </motion.div>
             <motion.div className="mb-6" variants={itemVariants}>
-              <h2 className="text-2xl font-semibold text-gray-800 mb-2">Venue</h2>
+              <h2 className="mb-2 text-2xl font-semibold text-gray-800">Venue</h2>
               <p className="text-gray-600">Online Event</p>
             </motion.div>
             <motion.div className="mb-6" variants={itemVariants}>
-              <h2 className="text-2xl font-semibold text-gray-800 mb-2">Participant Limit</h2>
+              <h2 className="mb-2 text-2xl font-semibold text-gray-800">Participant Limit</h2>
               <p className="text-gray-600">Unlimited</p>
             </motion.div>
             <motion.div className="mb-6" variants={itemVariants}>
-              <h2 className="text-2xl font-semibold text-gray-800 mb-2">Guidelines</h2>
-              <ul className="list-disc list-inside text-gray-700 space-y-2">
+              <h2 className="mb-2 text-2xl font-semibold text-gray-800">Guidelines</h2>
+              <ul className="space-y-2 text-gray-700 list-disc list-inside">
                 <li>Use at least one grain and one protein.</li>
                 <li>Include a homemade dressing.</li>
                 <li>Submit a photo of your salad with a brief description.</li>
@@ -169,15 +177,15 @@ const StartChallenge = () => {
             <motion.div className="flex gap-4" variants={itemVariants}>
               <motion.button
                 onClick={() => navigate(`/submit/${challenge.challengeId}`)}
-                className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-400 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:from-blue-600 hover:to-cyan-500 transition-all duration-300"
-                whileHover={{ scale: 1.05, boxShadow: '0 0 10px rgba(0, 0, 255, 0.2)' }}
+                className="flex-1 px-6 py-3 font-semibold text-white transition-all duration-300 rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500"
+                whileHover={{ scale: 1.05, boxShadow: '0 0 10px rgba(0, 255, 0, 0.2)' }}
                 whileTap={{ scale: 0.95 }}
               >
                 Join Challenge
               </motion.button>
               <motion.button
                 onClick={() => navigate(`/challenge/${challenge.challengeId}/submissions`)}
-                className="flex-1 bg-gradient-to-r from-green-400 to-teal-400 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:from-green-500 hover:to-teal-500 transition-all duration-300"
+                className="flex-1 px-6 py-3 font-semibold text-white transition-all duration-300 rounded-lg shadow-lg bg-gradient-to-r from-green-400 to-teal-400 hover:from-green-500 hover:to-teal-500"
                 whileHover={{ scale: 1.05, boxShadow: '0 0 10px rgba(0, 255, 0, 0.2)' }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -188,8 +196,8 @@ const StartChallenge = () => {
         </div>
       )}
     </motion.div>
+    </>
   );
 };
-
 
 export default StartChallenge;
