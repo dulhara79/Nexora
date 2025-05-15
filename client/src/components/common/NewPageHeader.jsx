@@ -104,6 +104,8 @@ export default function EnhancedHeader() {
     backdrop: "",
   });
 
+  console.log("User:", user);
+
   const headerRef = useRef(null);
   const submenuRef = useRef(null);
   const lastClickedTabRef = useRef(null);
@@ -165,6 +167,7 @@ export default function EnhancedHeader() {
         { path: "/forum/ask", label: "Q&A" },
         { path: "/forum/saved", label: "Saved" },
         { path: "/forum/my-questions", label: "My Questions" },
+        { path: "/forum/quizzes", label: "Quizzes" },
         { path: "/forum/notifications", label: "Notifications" },
       ],
     },
