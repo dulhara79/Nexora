@@ -1,7 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Clock, User, MessageCircle, Eye, Award, Bookmark, BookmarkCheck } from "lucide-react";
+import {
+  Clock,
+  User,
+  MessageCircle,
+  Eye,
+  Award,
+  Bookmark,
+  BookmarkCheck,
+} from "lucide-react";
 import LikeDislikeButtons from "./LikeDislikeButtons";
 import { formatDistanceToNow } from "date-fns";
 
@@ -18,7 +26,9 @@ export default function QuestionCard({
 
   const handleSave = () => {
     if (!isAuthenticated) return; // onSaveToggle handles the toast notification
-    console.log(`Toggling save for question ${question.id}, currently saved: ${isSaved}`);
+    console.log(
+      `Toggling save for question ${question.id}, currently saved: ${isSaved}`
+    );
     onSaveToggle(question.id, isSaved);
   };
 
@@ -66,7 +76,9 @@ export default function QuestionCard({
           </span>
         </div>
 
-        <p className="mb-4 text-gray-700 line-clamp-2">{question.description}</p>
+        <p className="mb-4 text-gray-700 line-clamp-2">
+          {question.description}
+        </p>
       </Link>
 
       {/* Tags */}
