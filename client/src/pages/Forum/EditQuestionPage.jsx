@@ -8,14 +8,14 @@ import { toast as toastify, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // Add these icons to your imports
-import { 
+import {
   Edit3Icon,
   SaveIcon,
   XIcon,
   AlertCircleIcon,
   Loader2Icon,
   TagIcon,
-  FileTextIcon
+  FileTextIcon,
 } from "lucide-react";
 
 const EditQuestionPage = () => {
@@ -28,14 +28,16 @@ const EditQuestionPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
   useEffect(() => {
     const fetchQuestion = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get(`http://localhost:5000/api/questions/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          `http://localhost:5000/api/questions/${id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         const question = response.data.question;
         if (!question) {
           throw new Error("Question not found");
@@ -44,7 +46,9 @@ const EditQuestionPage = () => {
         setDescription(question.description);
         setTags(question.tags?.join(", ") || "");
       } catch (err) {
-        setError(err.response?.data?.error || err.message || "Failed to load question");
+        setError(
+          err.response?.data?.error || err.message || "Failed to load question"
+        );
       } finally {
         setIsLoading(false);
       }
@@ -124,7 +128,8 @@ const EditQuestionPage = () => {
         headers: error.response?.headers,
       });
       toastify.error(
-        error.response?.data?.error || "Failed to update question. Please check your input and try again.",
+        error.response?.data?.error ||
+          "Failed to update question. Please check your input and try again.",
         {
           position: "top-right",
           autoClose: 3000,
@@ -136,7 +141,7 @@ const EditQuestionPage = () => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gradient-to-br from-amber-50 to-orange-100">
-        <motion.div 
+        <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
           className="relative w-24 h-24"
@@ -147,7 +152,7 @@ const EditQuestionPage = () => {
             <Loader2Icon className="w-10 h-10 text-orange-500 animate-pulse" />
           </div>
         </motion.div>
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, repeat: Infinity, duration: 1.5 }}
@@ -185,20 +190,22 @@ const EditQuestionPage = () => {
     <>
       <Header title="Edit Question" />
       <div className="min-h-screen p-4 bg-gradient-to-br from-amber-50 to-orange-100 md:p-8">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="max-w-4xl mx-auto"
         >
           <div className="flex items-center mb-8">
-            <motion.div 
+            <motion.div
               whileHover={{ scale: 1.05 }}
               className="p-3 mr-4 rounded-full bg-gradient-to-r from-orange-500 to-amber-500"
             >
               <Edit3Icon className="w-6 h-6 text-white" />
             </motion.div>
-            <h1 className="text-3xl font-bold text-gray-800">Edit Your Question</h1>
+            <h1 className="text-3xl font-bold text-gray-800">
+              Edit Your Question
+            </h1>
           </div>
 
           <motion.form
@@ -265,8 +272,8 @@ const EditQuestionPage = () => {
                   const cleanTag = tag.trim();
                   if (!cleanTag) return null;
                   return (
-                    <span 
-                      key={index} 
+                    <span
+                      key={index}
                       className="px-2 py-1 text-xs text-orange-800 bg-orange-100 rounded-full"
                     >
                       #{cleanTag}
@@ -301,7 +308,7 @@ const EditQuestionPage = () => {
           </motion.form>
 
           {/* Info Card */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
@@ -321,8 +328,8 @@ const EditQuestionPage = () => {
           </motion.div>
         </motion.div>
       </div>
-      <ToastContainer 
-        position="top-right" 
+      <ToastContainer
+        position="top-right"
         autoClose={3000}
         className="text-sm"
         toastClassName="bg-white shadow-lg rounded-xl border border-gray-100"
