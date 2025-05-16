@@ -81,6 +81,22 @@ const HomePage = () => {
             </div>
           </div> */}
 
+          <div className="flex justify-center mt-4 mb-6">
+  <svg
+    className="animate-bounce w-8 h-8 text-red-700 drop-shadow-md"
+    fill="currentColor"
+    viewBox="0 0 20 20"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fillRule="evenodd"
+      d="M10 18a1 1 0 01-.707-.293l-6-6a1 1 0 111.414-1.414L9 14.586V2a1 1 0 112 0v12.586l4.293-4.293a1 1 0 111.414 1.414l-6 6A1 1 0 0110 18z"
+      clipRule="evenodd"
+    />
+  </svg>
+</div>
+
+
           <div className="flex flex-col space-y-8 mt-10">
             {levels.map((level, idx) => (
               <div
