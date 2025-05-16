@@ -26,6 +26,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for user-related operations.
+ */
 @Service
 public class UserService {
 
@@ -44,22 +47,40 @@ public class UserService {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
+    /**
+     * Find a user by their ID.
+     */
     public User findById(String id) {
         return userRepository.findById(id).orElse(null);
     }
 
+    /**
+     * Find a user by their email.
+     */
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
+    /**
+     * Find a user by their username.
+     */
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
+    /**
+     * Get all users with pagination.
+     */
     public Page<User> getAllUsers(PageRequest pageRequest) {
         return userRepository.findAll(pageRequest);
     }
 
+    /**
+     * Follow another user.
+     * @param userId The ID of the user who wants to follow.
+     * @param targetUserId The ID of the user to be followed.
+     * @return Success message.
+     */
     public String followUser(String userId, String targetUserId) {
         User user = findById(userId);
         User target = findById(targetUserId);
@@ -85,28 +106,38 @@ public class UserService {
         return "Successfully followed user";
     }
 
-    // In UserService.java
-public String unfollowUser(String userId, String targetUserId) {
-    User user = getUserById(userId);
-    User target = getUserById(targetUserId);
+    /**
+     * Unfollow a user.
+     * @param userId The ID of the user who wants to unfollow.
+     * @param targetUserId The ID of the user to be unfollowed.
+     * @return Success message.
+     */
+    public String unfollowUser(String userId, String targetUserId) {
+        User user = getUserById(userId);
+        User target = getUserById(targetUserId);
 
-    if (!user.getFollowing().contains(targetUserId)) {
-        throw new RuntimeException("You are not following this user.");
+        if (!user.getFollowing().contains(targetUserId)) {
+            throw new RuntimeException("You are not following this user.");
+        }
+
+        if (!target.getFollowers().contains(userId)) {
+            throw new RuntimeException("Target does not have you as a follower.");
+        }
+
+        // Remove from both sides
+        user.getFollowing().remove(targetUserId);
+        target.getFollowers().remove(userId);
+
+        userRepository.save(user);
+        userRepository.save(target);
+
+        return "Successfully unfollowed user";
     }
 
-    if (!target.getFollowers().contains(userId)) {
-        throw new RuntimeException("Target does not have you as a follower.");
-    }
+    /**
+     * Get a user by ID or throw exception if not found.
+     */
 
-    // Remove from both sides
-    user.getFollowing().remove(targetUserId);
-    target.getFollowers().remove(userId);
-
-    userRepository.save(user);
-    userRepository.save(target);
-
-    return "Successfully unfollowed user";
-}
     public User getUserById(String userId) {
         User user = findById(userId);
         if (user == null) {
@@ -115,6 +146,9 @@ public String unfollowUser(String userId, String targetUserId) {
         return user;
     }
 
+    /**
+     * Upload a file to Cloudinary and return its URL.
+     */
     public String uploadFile(MultipartFile file) {
         try {
             Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(),
@@ -125,10 +159,16 @@ public String unfollowUser(String userId, String targetUserId) {
         }
     }
 
+    /**
+     * Save or update a user.
+     */
     public void save(User user) {
         userRepository.save(user);
     }
 
+    /**
+     * Delete (deactivate) a user by ID.
+     */
     public String deleteUser(String userId) {
         User user = findById(userId);
         if (user == null) {
@@ -138,6 +178,9 @@ public String unfollowUser(String userId, String targetUserId) {
         return "User deactivated successfully";
     }
 
+    /**
+     * Get suggested users for a user to follow, based on mutual followers.
+     */
     public List<User> getSuggestedUsers(String userId, int limit) {
         Aggregation aggregation = Aggregation.newAggregation(
                 Aggregation.match(Criteria.where("_id").ne(userId).and("following").nin(userId)),
@@ -165,6 +208,10 @@ public String unfollowUser(String userId, String targetUserId) {
         return results.getMappedResults();
     }
 
+    /**
+     * Search users by name or username, excluding the current user.
+     * Sets isFollowing flag for each user in the result.
+     */
     public List<User> searchUsers(String query, String currentUserId, int limit) {
         User currentUser = findById(currentUserId);
         if (currentUser == null) {
@@ -178,6 +225,10 @@ public String unfollowUser(String userId, String targetUserId) {
         return users.stream().limit(limit).toList();
     }
 
+    /**
+     * Get related users based on search query and likeSkill, excluding the current user and users already followed.
+     * Sets isFollowing flag for each user in the result.
+     */
     public List<User> getRelatedUsers(String query, String currentUserId, int limit) {
         User currentUser = findById(currentUserId);
         if (currentUser == null) {
@@ -219,6 +270,9 @@ public String unfollowUser(String userId, String targetUserId) {
         return relatedUsers;
     }
 
+    /**
+     * Get the list of followers for a user.
+     */
     public List<User> getFollowers(String userId) {
         User user = findById(userId);
         if (user == null) {
@@ -228,6 +282,9 @@ public String unfollowUser(String userId, String targetUserId) {
         return userRepository.findAllById(followerIds);
     }
 
+    /**
+     * Get the list of users the given user is following.
+     */
     public List<User> getFollowing(String userId) {
         User user = findById(userId);
         if (user == null) {
@@ -237,6 +294,9 @@ public String unfollowUser(String userId, String targetUserId) {
         return userRepository.findAllById(followingIds);
     }
 
+    /**
+     * Validate a JWT token and return the corresponding user.
+     */
     public User validateJwtToken(String token) throws Exception {
         try {
             SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
@@ -256,10 +316,16 @@ public String unfollowUser(String userId, String targetUserId) {
         }
     }
 
+    /**
+     * Validate a raw password against an encoded password.
+     */
     public boolean validatePassword(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 
+    /**
+     * Encode a raw password.
+     */
     public String encodePassword(String rawPassword) {
         return passwordEncoder.encode(rawPassword);
     }

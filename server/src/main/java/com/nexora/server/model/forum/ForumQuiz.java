@@ -9,34 +9,50 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Represents a quiz in the forum, containing questions, metadata, and participant data.
+ */
 @Document(collection = "quizzes")
 public class ForumQuiz {
     @Id
-    private String id;
-    private String title; // Added for quiz title
-    private String description; // Added for quiz description
-    private String category; // Already present
-    private String difficulty; // Added for difficulty level
-    private boolean allowComments; // Added for comment permission
-    private boolean isPublic; // Added for visibility
-    private List<Question> questions; // Changed to list of questions
-    private String authorId;
-    private String authorUsername;
-    private LocalDateTime createdAt = LocalDateTime.now();
-    private LocalDateTime deadline;
-    private boolean isActive = true;
-    private Map<String, Map<Integer, String>> participantAnswers = new HashMap<>(); // Updated to map user to
-                                                                                    // question-indexed answers
+    private String id; // Unique identifier for the quiz
+
+    private String title; // Title of the quiz
+    private String description; // Description of the quiz
+    private String category; // Category to which the quiz belongs
+    private String difficulty; // Difficulty level of the quiz
+    private boolean allowComments; // Whether comments are allowed on the quiz
+    private boolean isPublic; // Visibility of the quiz (public/private)
+    private List<Question> questions; // List of questions in the quiz
+
+    private String authorId; // ID of the quiz creator
+    private String authorUsername; // Username of the quiz creator
+
+    private LocalDateTime createdAt = LocalDateTime.now(); // Creation timestamp
+    private LocalDateTime deadline; // Deadline for quiz participation
+
+    private boolean isActive = true; // Whether the quiz is currently active
+
+    // Maps participant userId to their answers (question index -> answer)
+    private Map<String, Map<Integer, String>> participantAnswers = new HashMap<>();
+
+    // Maps participant userId to their score
     private Map<String, Integer> participantScores = new HashMap<>();
+
+    // List of userIds who upvoted the quiz
     private List<String> upvoteUserIds = new ArrayList<>();
+
+    // Maps userId to whether they have cleared their attempt
     private Map<String, Boolean> clearedAttempts = new HashMap<>();
 
-    // Nested Question class
+    /**
+     * Represents a single question in the quiz.
+     */
     public static class Question {
-        private String question;
-        private List<String> options;
-        private String correctAnswer;
-        private String explanation; // Added for explanation
+        private String question; // The question text
+        private List<String> options; // List of possible answer options
+        private String correctAnswer; // The correct answer
+        private String explanation; // Explanation for the correct answer
 
         // Getters and Setters
         public String getQuestion() {
@@ -72,7 +88,8 @@ public class ForumQuiz {
         }
     }
 
-    // Getters and Setters
+    // Getters and Setters for ForumQuiz fields
+
     public String getId() {
         return id;
     }
