@@ -383,6 +383,7 @@ const UserPlanPage = () => {
         </>
       )}
       {/* <NavbarLP /> */}
+      <Navbar />
       <div className="min-h-screen bg-gray-50 p-10">
         <h1 className="text-4xl font-bold mb-8 text-center">My Learning Plan</h1>
         {!plans.length && <p className="text-center">No cuisines added yet!</p>}
