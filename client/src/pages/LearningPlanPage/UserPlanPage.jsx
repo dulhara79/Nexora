@@ -407,7 +407,7 @@ const UserPlanPage = () => {
                     <button
                       onClick={() => handleRecipeDone(plan.id, r.name)}
                       className={`mt-2 px-4 py-1 rounded text-white ${r.isDone ? 'bg-yellow-300' : 'bg-yellow-600 hover:bg-yellow-700'}`}>
-                      {r.isDone ? ' Done' : 'Mark as Done'}
+                      {r.isDone ? '🎯 Done' : 'Mark as Done'}
                     </button>
                   </div>
                 ))}
