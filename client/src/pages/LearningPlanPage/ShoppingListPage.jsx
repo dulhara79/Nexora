@@ -166,9 +166,9 @@ const ShoppingListPage = () => {
             key={ci}
             className="bg-white shadow-lg rounded-lg overflow-hidden"
           >
-            <div className="px-6 py-6 bg-gradient-to-r from-red-500 to-orange-400">
+            {/* <div className="px-6 py-6 bg-gradient-to-r from-red-500 to-orange-400">
               <h2 className="text-3xl font-bold text-white">{cuisine.name}</h2>
-            </div>
+            </div> */}
 
             <div className="divide-y divide-gray-200">
               {(cuisine.recipes || []).map((r, ri) => {
@@ -177,16 +177,7 @@ const ShoppingListPage = () => {
                 (r.ingredients || []).forEach((ing) => {
                   const type = categorizeIngredient(ing);
                   if (!categorized[type]) categorized[type] = [];
-
-                  // Strip amount/measurement and keep only the ingredient name
-                  const shortName = ing
-                    .replace(/^(\d+\s?[\w/.,()]+)?\s*/i, "")
-                    .trim();
-
-                  // Avoid duplicates
-                  if (!categorized[type].includes(shortName)) {
-                    categorized[type].push(shortName);
-                  }
+                  categorized[type].push(ing);
                 });
 
                 return (
