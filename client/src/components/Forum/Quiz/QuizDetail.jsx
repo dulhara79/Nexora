@@ -132,8 +132,7 @@ const QuizDetail = () => {
           : [...prev.upvoteUserIds, userId],
       }));
     } catch (err) {
-      const errorMessage =
-        err.response?.data?.error || "Failed to upvote quiz";
+      const errorMessage = err.response?.data?.error || "Failed to upvote quiz";
       setError(errorMessage);
       if (err.response?.status === 401) {
         console.warn("Unauthorized upvote, redirecting to login...");
@@ -171,7 +170,9 @@ const QuizDetail = () => {
       }
       if (!quiz.questions[i].options.includes(answer)) {
         setError(
-          `Invalid answer for question ${i + 1}: ${answer}. Valid options: ${quiz.questions[i].options.join(", ")}`
+          `Invalid answer for question ${
+            i + 1
+          }: ${answer}. Valid options: ${quiz.questions[i].options.join(", ")}`
         );
         return;
       }
@@ -210,7 +211,8 @@ const QuizDetail = () => {
     } catch (err) {
       console.error("Answer submission error:", err.response?.data, err);
       const errorMessage =
-        err.response?.data?.error || "Failed to submit answers. Please try again.";
+        err.response?.data?.error ||
+        "Failed to submit answers. Please try again.";
       setError(errorMessage);
       if (err.response?.status === 401) {
         console.warn("Unauthorized submission, redirecting to login...");
@@ -254,7 +256,11 @@ const QuizDetail = () => {
   };
 
   const handleDeleteQuiz = async () => {
-    if (!window.confirm("Are you sure you want to delete this quiz? This action cannot be undone.")) {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this quiz? This action cannot be undone."
+      )
+    ) {
       return;
     }
     try {
@@ -262,10 +268,11 @@ const QuizDetail = () => {
       await axios.delete(`http://localhost:5000/api/quizzes/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      navigate("/forum/quizzes", { state: { message: "Quiz deleted successfully" } });
+      navigate("/forum/quizzes", {
+        state: { message: "Quiz deleted successfully" },
+      });
     } catch (err) {
-      const errorMessage =
-        err.response?.data?.error || "Failed to delete quiz";
+      const errorMessage = err.response?.data?.error || "Failed to delete quiz";
       setError(errorMessage);
       if (err.response?.status === 401) {
         console.warn("Unauthorized delete attempt, redirecting to login...");
@@ -387,7 +394,8 @@ const QuizDetail = () => {
               >
                 <p className="text-lg font-medium text-gray-800">Your Score:</p>
                 <p className="mt-2 text-3xl font-bold text-green-600">
-                  {quiz.participantScores[userId] || 0} / {quiz.questions?.length || 0}
+                  {quiz.participantScores[userId] || 0} /{" "}
+                  {quiz.questions?.length || 0}
                 </p>
                 <p className="mt-2 text-gray-600">
                   {quiz.participantScores[userId] > 0
@@ -415,48 +423,55 @@ const QuizDetail = () => {
                 </motion.div>
               )}
 
-              {quiz.participantAnswers[userId] && quiz.questions?.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ staggerChildren: 0.1 }}
-                  className="space-y-6"
-                >
-                  {quiz.questions.map((q, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="p-6 rounded-lg shadow-sm bg-gray-50"
-                    >
-                      <p className="text-lg font-medium text-gray-800">
-                        Question {index + 1}: {q.question}
-                      </p>
-                      <p className="mt-2 text-gray-700">
-                        Correct Answer: <span className="font-semibold text-green-600">{q.correctAnswer}</span>
-                      </p>
-                      <div className="flex items-center mt-2">
-                        <span className="text-gray-700">Your Answer: </span>
-                        <span
-                          className={`ml-2 text-lg font-medium ${
-                            quiz.participantAnswers[userId][index] === q.correctAnswer
-                              ? "text-green-600"
-                              : "text-red-500"
-                          }`}
-                        >
-                          {quiz.participantAnswers[userId][index] || "Not answered"}
-                        </span>
-                        {quiz.participantAnswers[userId][index] === q.correctAnswer ? (
-                          <CheckCircle className="w-5 h-5 ml-2 text-green-600" />
-                        ) : (
-                          <XCircle className="w-5 h-5 ml-2 text-red-500" />
-                        )}
-                      </div>
-                      <p className="mt-2 text-gray-600">{q.explanation}</p>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )}
+              {quiz.participantAnswers[userId] &&
+                quiz.questions?.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ staggerChildren: 0.1 }}
+                    className="space-y-6"
+                  >
+                    {quiz.questions.map((q, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-6 rounded-lg shadow-sm bg-gray-50"
+                      >
+                        <p className="text-lg font-medium text-gray-800">
+                          Question {index + 1}: {q.question}
+                        </p>
+                        <p className="mt-2 text-gray-700">
+                          Correct Answer:{" "}
+                          <span className="font-semibold text-green-600">
+                            {q.correctAnswer}
+                          </span>
+                        </p>
+                        <div className="flex items-center mt-2">
+                          <span className="text-gray-700">Your Answer: </span>
+                          <span
+                            className={`ml-2 text-lg font-medium ${
+                              quiz.participantAnswers[userId][index] ===
+                              q.correctAnswer
+                                ? "text-green-600"
+                                : "text-red-500"
+                            }`}
+                          >
+                            {quiz.participantAnswers[userId][index] ||
+                              "Not answered"}
+                          </span>
+                          {quiz.participantAnswers[userId][index] ===
+                          q.correctAnswer ? (
+                            <CheckCircle className="w-5 h-5 ml-2 text-green-600" />
+                          ) : (
+                            <XCircle className="w-5 h-5 ml-2 text-red-500" />
+                          )}
+                        </div>
+                        <p className="mt-2 text-gray-600">{q.explanation}</p>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
 
               <div className="flex flex-wrap justify-between gap-4 mt-8">
                 <motion.button
@@ -555,7 +570,9 @@ const QuizDetail = () => {
                 <Clock className="w-4 h-4 mr-1" /> {formatTimeLeft(timeLeft)}
               </span>
               <span className="flex items-center mr-4">
-                Difficulty: {quiz.difficulty.charAt(0).toUpperCase() + quiz.difficulty.slice(1)}
+                Difficulty:{" "}
+                {quiz.difficulty.charAt(0).toUpperCase() +
+                  quiz.difficulty.slice(1)}
               </span>
               <span className="flex items-center ml-auto">
                 <ThumbsUp className="w-4 h-4 mr-1" />{" "}
@@ -642,7 +659,9 @@ const QuizDetail = () => {
                             name={`answer-${currentQuestionIndex}`}
                             value={option}
                             checked={answers[currentQuestionIndex] === option}
-                            onChange={() => handleAnswerChange(currentQuestionIndex, option)}
+                            onChange={() =>
+                              handleAnswerChange(currentQuestionIndex, option)
+                            }
                           />
                         </label>
                       </motion.div>
@@ -652,7 +671,9 @@ const QuizDetail = () => {
                     <motion.button
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.97 }}
-                      onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
+                      onClick={() =>
+                        setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))
+                      }
                       disabled={currentQuestionIndex === 0}
                       className={`px-4 py-2 rounded-lg flex items-center ${
                         currentQuestionIndex === 0
@@ -671,7 +692,9 @@ const QuizDetail = () => {
                           Math.min(quiz.questions.length - 1, prev + 1)
                         )
                       }
-                      disabled={currentQuestionIndex === quiz.questions.length - 1}
+                      disabled={
+                        currentQuestionIndex === quiz.questions.length - 1
+                      }
                       className={`px-4 py-2 rounded-lg flex items-center ${
                         currentQuestionIndex === quiz.questions.length - 1
                           ? "bg-gray-200 text-gray-500 cursor-not-allowed"
@@ -687,9 +710,13 @@ const QuizDetail = () => {
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.97 }}
                       onClick={handleAnswerSubmit}
-                      disabled={Object.keys(answers).length !== quiz.questions.length || submitting}
+                      disabled={
+                        Object.keys(answers).length !== quiz.questions.length ||
+                        submitting
+                      }
                       className={`px-8 py-3 rounded-full font-medium text-white ${
-                        Object.keys(answers).length === quiz.questions.length && !submitting
+                        Object.keys(answers).length === quiz.questions.length &&
+                        !submitting
                           ? "bg-gradient-to-r from-blue-600 to-indigo-600 shadow-md hover:shadow-lg"
                           : "bg-gray-400 cursor-not-allowed"
                       } transition-all flex items-center`}
@@ -720,18 +747,41 @@ const QuizDetail = () => {
                     Your Submission
                   </h2>
                   <p className="mb-6 text-gray-700">
-                    Your Score: <span className="font-semibold">{quiz.participantScores[userId] || 0} / {quiz.questions.length}</span>
+                    Your Score:{" "}
+                    <span className="font-semibold">
+                      {quiz.participantScores[userId] || 0} /{" "}
+                      {quiz.questions.length}
+                    </span>
                   </p>
                   <div className="space-y-4">
                     {quiz.questions.map((q, index) => (
-                      <div key={index} className="p-4 bg-white rounded-lg shadow-sm">
+                      <div
+                        key={index}
+                        className="p-4 bg-white rounded-lg shadow-sm"
+                      >
                         <p className="font-medium text-gray-800">
                           Question {index + 1}: {q.question}
                         </p>
                         <p className="mt-1">
-                          Your Answer: <span className={quiz.participantAnswers[userId][index] === q.correctAnswer ? "text-green-600" : "text-red-500"}>{quiz.participantAnswers[userId][index] || "Not answered"}</span>
+                          Your Answer:{" "}
+                          <span
+                            className={
+                              quiz.participantAnswers[userId][index] ===
+                              q.correctAnswer
+                                ? "text-green-600"
+                                : "text-red-500"
+                            }
+                          >
+                            {quiz.participantAnswers[userId][index] ||
+                              "Not answered"}
+                          </span>
                         </p>
-                        <p className="mt-1">Correct Answer: <span className="text-green-600">{q.correctAnswer}</span></p>
+                        <p className="mt-1">
+                          Correct Answer:{" "}
+                          <span className="text-green-600">
+                            {q.correctAnswer}
+                          </span>
+                        </p>
                         <p className="mt-2 text-gray-600">{q.explanation}</p>
                       </div>
                     ))}
