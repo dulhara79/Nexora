@@ -8,6 +8,7 @@ const CompletedChallenges = () => {
   const navigate = useNavigate();
 
   return (
+    
     <>
     <Header />
     <motion.div
@@ -83,7 +84,7 @@ const CompletedChallenges = () => {
           Explore Challenges
         </motion.button>
       </div>
-      
+
     </motion.div>
     </>
   );
