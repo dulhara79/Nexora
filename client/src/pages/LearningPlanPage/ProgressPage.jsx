@@ -191,7 +191,7 @@ const ProgressPage = () => {
 
         {/* Ongoing Section */}
         <section className="mb-1">
-          <h2 className="text-3xl font-bold mb-6 text-orange-600">Ongoing Adventures</h2>
+          <h2 className="text-3xl font-bold mb-6 text-yellow-600">Ongoing Journeys</h2>
           {ongoingPlans.length === 0 ? (
             <p className="text-center text-gray-600">No cuisines in progress yet!</p>
           ) : (
@@ -206,7 +206,7 @@ const ProgressPage = () => {
                     <p className="text-gray-600 mb-4">{doneCount}/{total} Recipes Mastered</p>
                     <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                       <div
-                        className="bg-orange-500 h-3 rounded-full transition-all duration-300"
+                        className="bg-yellow-500 h-3 rounded-full transition-all duration-300"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
@@ -217,19 +217,23 @@ const ProgressPage = () => {
           )}
         </section>
 
+        <div className="flex justify-center mt-0 mb-0">
+            <div className="text-3xl text-red-700 drop-shadow-md">🎉🎉🎉</div>
+          </div>
+
         {/* Completed Section */}
         <section>
-          <h2 className="text-3xl font-bold mb-6 text-yellow-600">Triumphs</h2>
+          <h2 className="text-3xl font-bold mb-6 text-orange-500">Completed Adventures</h2>
           {completedPlans.length === 0 ? (
             <p className="text-center text-gray-600">No cuisines completed yet—keep cooking!</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {completedPlans.map(plan => (
-                <div key={plan.id} className="bg-yellow-100 p-6 rounded-xl shadow-md flex items-center space-x-4">
+                <div key={plan.id} className="bg-orange-100 p-6 rounded-xl shadow-md flex items-center space-x-4">
                   <span className="text-3xl">🏆</span>
                   <div>
-                    <h3 className="text-xl font-medium text-yellow-800">{plan.cuisineName}</h3>
-                    <p className="text-yellow-600">Mastered!</p>
+                    <h3 className="text-xl font-medium text-orange-700">{plan.cuisineName}</h3>
+                    <p className="text-orange-600">Mastered!</p>
                   </div>
                 </div>
               ))}
