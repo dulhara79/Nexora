@@ -184,14 +184,14 @@ const ProgressPage = () => {
     <>
       {/* <NavbarLP /> */}
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-b from-yellow-100 to-gray-50 p-10">
+      <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-gray-50 p-10">
         <h1 className="text-5xl font-extrabold mb-2 text-center text-red-600">
           My Culinary Journey
         </h1>
 
         {/* Ongoing Section */}
         <section className="mb-1">
-          <h2 className="text-3xl font-bold mb-6 text-yellow-600">Ongoing Adventures</h2>
+          <h2 className="text-3xl font-bold mb-6 text-red-600">Ongoing Adventures</h2>
           {ongoingPlans.length === 0 ? (
             <p className="text-center text-gray-600">No cuisines in progress yet!</p>
           ) : (
