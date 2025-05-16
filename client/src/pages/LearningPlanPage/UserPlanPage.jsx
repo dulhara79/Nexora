@@ -385,7 +385,7 @@ const UserPlanPage = () => {
       {/* <NavbarLP /> */}
       <Navbar />
       <div className="min-h-screen bg-gray-50 p-10">
-        <h1 className="text-5xl font-bold mb-10 text-center">My Learning Plan</h1>
+        <h1 className="text-5xl font-bold mb-10 text-center text-orange-500">My Learning Plan</h1>
         {!plans.length && <p className="text-center">No cuisines added yet!</p>}
         <div className="space-y-12">
           {plans.map(plan => (
@@ -409,7 +409,7 @@ const UserPlanPage = () => {
                     <img src={r.image} alt={r.name} className="w-full h-80 object-cover rounded-md my-2" />
                     <button
                       onClick={() => handleRecipeDone(plan.id, r.name)}
-                      className={`mt-2 px-4 py-1 rounded text-white ${r.isDone ? 'bg-green-300' : 'bg-green-600 hover:bg-green-700'}`}>
+                      className={`mt-2 px-4 py-1 rounded text-white ${r.isDone ? 'bg-gray-300' : 'bg-black hover:bg-green-700'}`}>
                       {r.isDone ? '🎯 Done' : 'Mark as Done'}
                     </button>
                   </div>
