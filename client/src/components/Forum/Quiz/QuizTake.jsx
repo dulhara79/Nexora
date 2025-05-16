@@ -57,9 +57,12 @@ const QuizTake = () => {
       const newFeedback = quiz.questions.map((q, index) => ({
         questionIndex: index,
         isCorrect: answers[index] === q.correctAnswer,
-        message: answers[index] === q.correctAnswer
-          ? "Correct! Well done!"
-          : `Incorrect. The correct answer is: ${q.correctAnswer}. Explanation: ${q.explanation || "No explanation provided."}`
+        message:
+          answers[index] === q.correctAnswer
+            ? "Correct! Well done!"
+            : `Incorrect. The correct answer is: ${
+                q.correctAnswer
+              }. Explanation: ${q.explanation || "No explanation provided."}`,
       }));
       setFeedback(newFeedback);
       setQuiz(response.data.quiz);
@@ -105,8 +108,8 @@ const QuizTake = () => {
         <h1 className="mb-4 text-3xl font-bold text-gray-800">{quiz.title}</h1>
         <p className="mb-4 text-gray-600">{quiz.description}</p>
         <p className="text-gray-600">
-          By {quiz.authorUsername} | Category: {quiz.category} | Difficulty: {quiz.difficulty} | Ends:{" "}
-          {new Date(quiz.deadline).toLocaleString()}
+          By {quiz.authorUsername} | Category: {quiz.category} | Difficulty:{" "}
+          {quiz.difficulty} | Ends: {new Date(quiz.deadline).toLocaleString()}
         </p>
         {error && <p className="mb-4 text-red-500">{error}</p>}
         {feedback.length > 0 && hasAnswered && (
@@ -141,7 +144,9 @@ const QuizTake = () => {
                       name={`answer-${qIndex}`}
                       value={option}
                       checked={answers[qIndex] === option}
-                      onChange={(e) => handleAnswerChange(qIndex, e.target.value)}
+                      onChange={(e) =>
+                        handleAnswerChange(qIndex, e.target.value)
+                      }
                       className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                     />
                     <label
@@ -170,11 +175,13 @@ const QuizTake = () => {
             {quiz.questions.map((question, qIndex) => (
               <p key={qIndex} className="mb-2 text-gray-700">
                 Question {qIndex + 1}: {question.question} <br />
-                Your Answer: {quiz.participantAnswers[userId][qIndex] || "Not answered"}
+                Your Answer:{" "}
+                {quiz.participantAnswers[userId][qIndex] || "Not answered"}
               </p>
             ))}
             <p className="text-gray-700">
-              Your Score: {quiz.participantScores[userId] || 0}/{quiz.questions.length}
+              Your Score: {quiz.participantScores[userId] || 0}/
+              {quiz.questions.length}
             </p>
             <button
               onClick={handleClearAttempt}
