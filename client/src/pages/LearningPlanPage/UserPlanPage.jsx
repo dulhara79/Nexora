@@ -405,7 +405,7 @@ const UserPlanPage = () => {
                 {plan.recipes.map(r => (
                   <div key={r.name} className="border p-4 rounded-lg">
                     <h3 className="font-semibold">{r.name}</h3>
-                    <p className="text-sm text-gray-600">⏱️ {r.time}</p>
+                    <p className="text-xl text-gray-600">⏱️ {r.time}</p>
                     <img src={r.image} alt={r.name} className="w-full h-32 object-cover rounded-md my-2" />
                     <button
                       onClick={() => handleRecipeDone(plan.id, r.name)}
@@ -419,7 +419,7 @@ const UserPlanPage = () => {
           ))}
         </div>
         <div className="text-center mt-10">
-          <button onClick={() => navigate('/cuisine')} className="px-6 py-2 bg-red-500 text-white rounded-full hover:bg-amber-600">
+          <button onClick={() => navigate('/cuisine')} className="px-6 py-2 bg-red-500 text-white rounded-full hover:bg-black">
             ← Back to Cuisines
           </button>
         </div>
