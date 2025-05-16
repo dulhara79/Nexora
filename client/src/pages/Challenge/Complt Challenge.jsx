@@ -83,6 +83,7 @@ const CompletedChallenges = () => {
           Explore Challenges
         </motion.button>
       </div>
+      
     </motion.div>
     </>
   );
