@@ -120,6 +120,7 @@ const API_BASE = 'http://localhost:5000';
 const CuisinePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [filterQuery, setFilterQuery] = useState('');
   const [cuisinesByLevel, setCuisinesByLevel] = useState({
     beginner: [],
     intermediate: [],
@@ -177,10 +178,21 @@ const CuisinePage = () => {
     });
   };
 
-  const renderCuisineCards = (category, color) => (
+  const renderCuisineCards = (category, color) => {
+    const filtered = cuisinesByLevel[category].filter(c => {
+      const q = filterQuery.toLowerCase();
+      const nameMatch = c.name.toLowerCase().includes(q);
+      const ingMatch = (c.recipes || []).some(r =>
+        (r.ingredients || []).some(i => i.toLowerCase().includes(q))
+      );
+      return nameMatch || ingMatch;
+    });
+    return (
+
     <div className="scroll-smooth">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {cuisinesByLevel[category]?.map((cuisine, index) => (
+        {/* {cuisinesByLevel[category]?.map((cuisine, index) => ( */}
+        {filtered.map((cuisine, index) => (
           <CuisineCard
             key={index}
             cuisine={cuisine}
@@ -191,11 +203,23 @@ const CuisinePage = () => {
       </div>
     </div>
   );
+  };
 
   return (
     <>
       {/* <NavbarLP /> */}
       <Navbar />
+     {/* 2️⃣ live-search input */}
+     <div className="max-w-7xl mx-auto mt-8 px-4 mb-2">
+      <input
+         type="text"
+         placeholder="🔍 Search Cuisines"
+         value={filterQuery}
+         onChange={e => setFilterQuery(e.target.value)}
+         className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+       />
+     </div>
+
       <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-white p-10">
         <div className="max-w-7xl mx-auto -space-y-8 -mt-20">
           <section>

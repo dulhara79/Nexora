@@ -58,7 +58,6 @@ const HomePage = () => {
             Ready For Your Cooking Journey?
           </h1>
 
-          {/* Downward pointing arrow with bounce animation */}
           <div className="flex justify-center mt-10 mb-6">
             <div className="text-7xl text-red-700 drop-shadow-md">👩🏻‍🍳👨🏻‍🍳</div>
           </div>
