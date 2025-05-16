@@ -358,7 +358,7 @@ const RecipePage = () => {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto p-10">
+      <div className="max-w-8xl mx-auto p-10">
         <div className="text-right mb-6">
           <button
             onClick={handleAddPlan}
