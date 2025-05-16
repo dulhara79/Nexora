@@ -26,7 +26,7 @@ import RecipePage from "./pages/LearningPlanPage/RecipePage";
 import CuisinePage from "./pages/LearningPlanPage/CuisinePage";
 import UserPlanPage from "./pages/LearningPlanPage/UserPlanPage";
 import ProgressPage from "./pages/LearningPlanPage/ProgressPage";
-import ShoppingListPage from "./pages/LearningPlanPage/ShoppingListPage";
+import KitchenWisdomPage from "./pages/LearningPlanPage/KitchenWisdomPage";
 
 // Forum Pages
 import ForumHomeLandingPage from "./pages/Forum/ForumHomeLandingPage";
@@ -94,8 +94,7 @@ function App() {
           <Route path="/userplan" element={<UserPlanPage />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/progress/:userId" element={<ProgressPage />} />
-          <Route path="/shoppinglist" element={<ShoppingListPage />} />
-          <Route path="/shoppinglist/:userId" element={<ShoppingListPage />} />
+          <Route path="/kitchenwisdom" element={<KitchenWisdomPage />} />
 
           {/* Forum Routes */}
           <Route path="/forum" element={<ForumHomeLandingPage />} />
@@ -108,10 +107,7 @@ function App() {
           <Route path="/forum/tags/:tag" element={<TagPage />} />
           <Route path="/forum/community" element={<ForumCommunityPage />} />
           <Route path="/forum/notifications" element={<ForumNotification />} />
-          <Route
-            path="/forum/community/:communityId"
-            element={<ForumCommunityPage />}
-          />
+          <Route path="/forum/community/:communityId" element={<ForumCommunityPage />} />
           <Route path="/forum/my-questions" element={<UserQuestionsPage />} />
           <Route path="/forum/quizzes" element={<QuizList />} />
           <Route path="/forum/quizzes/create" element={<QuizCreate />} />
@@ -124,16 +120,16 @@ function App() {
           <Route path="/create-post" element={<CreatePost />} />
           <Route path="/post-notifications" element={<Notifications />} />
           <Route path="/saved-posts" element={<SavedPosts />} />
+
           {/* Challenges Routes */}
           <Route path="/challenges" element={<ChallengeList />} />
           <Route path="/challenge/:challengeId" element={<ChallengeDetail />} />
           <Route path="/create-challenge" element={<CreateChallenge />} />
-          <Route
-            path="/edit-challenge/:challengeId"
-            element={<CreateChallenge />}
-          />
+          <Route path="/edit-challenge/:challengeId" element={<CreateChallenge />} />
+          
           {/* Test Page */}
           {/* <Route path="/test" element={<TestPage />} /> */}
+          
           {/* Challenges Routes */}
           <Route path="/challenges" element={<ChallengeList />} />
           <Route path="/challenge/:challengeId" element={<ChallengeDetail />} />
@@ -150,8 +146,10 @@ function App() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/remix-gallery" element={<RemixGallery />} />
           <Route path="/recipe-generator" element={<RecipeGenerator />} />
+          
           {/* 404 Page */}
           <Route path="/*" element={<PageNotFound />} />
+          
         </Routes>
       </AuthProvider>
     </Router>
