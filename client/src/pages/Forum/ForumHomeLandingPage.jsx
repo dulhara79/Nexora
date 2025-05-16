@@ -18,6 +18,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import BellIcon from "../../components/Forum/BellIcon";
+import Chatbot from "../../components/Forum/Chatbot";
 
 const BASE_URL = "http://localhost:5000";
 
@@ -258,6 +259,7 @@ export default function ForumHomePage() {
     <>
       <Header />
       <BellIcon />
+      <Chatbot />
       <div className="min-h-screen mt-0 bg-gradient-to-b from-orange-50 to-white">
         {/* Hero Section */}
         <div className="relative overflow-hidden bg-gradient-to-r from-orange-500 to-amber-500">
