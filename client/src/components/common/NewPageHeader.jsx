@@ -142,8 +142,8 @@ export default function EnhancedHeader() {
       theme: "challenges",
       submenu: [
         { path: "/challenges", label: "All Challenges" },
-        { path: "/challenges/completed", label: "Completed" },
-        { path: "/challenges/create", label: "Create" }
+        { path: "/completed-challenges", label: "Completed" },
+        { path: "/create-challenge", label: "Create" }
       ]
     },
     forum: {
