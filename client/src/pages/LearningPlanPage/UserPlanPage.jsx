@@ -419,7 +419,7 @@ const UserPlanPage = () => {
           ))}
         </div>
         <div className="text-center mt-10">
-          <button onClick={() => navigate('/cuisine')} className="px-6 py-2 bg-yellow-500 text-white rounded-full hover:bg-black">
+          <button onClick={() => navigate('/cuisine')} className="px-6 py-2 bg-yellow-500 text-white rounded-full hover:bg-red-600">
             ← Back to Cuisines
           </button>
         </div>
