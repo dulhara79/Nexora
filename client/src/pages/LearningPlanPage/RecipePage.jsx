@@ -300,14 +300,71 @@ import jsPDF from "jspdf";
 const API_BASE = 'http://localhost:5000';
 
 const RecipePage = () => {
-// Function to generate PDF
-  const generatePDF = () => {
-    const doc = new jsPDF();
 
-  
-    // Save the PDF
-  }
+// inside RecipePage component, replace generatePDF with:
+const generatePDF = () => {
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
 
+  // Title
+  doc.setFontSize(22);
+  doc.text(cuisine.name || "Cuisine", 40, 60);
+
+  // Level & Description
+  doc.setFontSize(12);
+  doc.text(`Level: ${level}`, 40, 90);
+  doc.text(`Description: ${cuisine.description || "—"}`, 40, 110);
+
+  // Start listing recipes
+  let y = 140;
+  recipes.forEach((recipe, idx) => {
+    // New page if we’re at the bottom
+    if (y > 750) {
+      doc.addPage();
+      y = 60;
+    }
+    // Recipe header
+    doc.setFontSize(16);
+    doc.text(`${idx + 1}. ${recipe.name}`, 40, y);
+    y += 24;
+
+    // Time
+    doc.setFontSize(11);
+    doc.text(`Time: ${recipe.time || '—'}`, 50, y);
+    y += 18;
+
+    // Ingredients
+    doc.text(`Ingredients:`, 50, y);
+    y += 16;
+    (recipe.ingredients || []).forEach((ing) => {
+      doc.text(`• ${ing}`, 60, y);
+      y += 14;
+      if (y > 750) {
+        doc.addPage();
+        y = 60;
+      }
+    });
+
+    // Method
+    y += 6;
+    doc.text(`Method:`, 50, y);
+    y += 16;
+    const lines = doc.splitTextToSize(recipe.method || '—', 460);
+    lines.forEach((line) => {
+      doc.text(line, 60, y);
+      y += 14;
+      if (y > 750) {
+        doc.addPage();
+        y = 60;
+      }
+    });
+
+    // space before next recipe
+    y += 24;
+  });
+
+  // download
+  doc.save(`${(cuisine.name || 'cuisine').replace(/\s+/g, '_')}_recipes.pdf`);
+};
 
 
 
