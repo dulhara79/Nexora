@@ -141,8 +141,8 @@ export default function EnhancedHeader() {
       submenu: [
         { path: "/learninghome", label: "Explore" },
         { path: "/cuisine/beginner", label: "Cuisines" },
-        { path: `/userplan?userId=${user.id}`, label: "My Plan" },
-        { path: `/progress?userId=${user.id}`, label: "My Progress" },
+        { path: `/userplan?userId=${user?.id ?? ''}`, label: "My Plan" },
+        { path: `/progress?userId=${user?.id ?? ''}`, label: "My Progress" },
       ],
     },
     challenges: {
