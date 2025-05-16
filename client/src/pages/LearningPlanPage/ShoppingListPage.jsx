@@ -226,142 +226,337 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React, { useEffect, useState } from 'react';
+// import Navbar from '../../components/common/NewPageHeader';
+
+// const API_BASE = 'http://localhost:5000';
+
+// // 🧠 Mini database: ingredient → cost, category, nutrition
+// const INGREDIENT_DB = {
+//   "1 cup red lentils": { category: "Grains", cost: 0.5, cal: 230, protein: 18, carbs: 40, fat: 1 },
+//   "1 small onion": { category: "Produce", cost: 0.3, cal: 45, protein: 1, carbs: 11, fat: 0 },
+//   "2 cloves garlic": { category: "Produce", cost: 0.2, cal: 10, protein: 0.5, carbs: 2, fat: 0 },
+//   // ➕ Add more mappings like above...
+// };
+
+// const ShoppingListPage = () => {
+//   const [cuisines, setCuisines] = useState([]);
+//   const [scale, setScale] = useState(1); // multiplier
+//   const [checkedItems, setCheckedItems] = useState(new Set());
+
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       const levels = ['beginner', 'intermediate', 'advanced'];
+//       const all = await Promise.all(levels.map(level =>
+//         fetch(`${API_BASE}/api/cuisines?level=${level}`).then(res => res.json())
+//       ));
+//       const embed = obj => obj._embedded ? obj._embedded[Object.keys(obj._embedded)[0]] || [] : [];
+//       setCuisines(all.flatMap(res => embed(res)));
+//     };
+//     fetchData();
+//   }, []);
+
+//   const handleCheck = (item) => {
+//     setCheckedItems(prev =>
+//       prev.has(item) ? new Set([...prev].filter(i => i !== item)) : new Set(prev.add(item))
+//     );
+//   };
+
+//   // 🔥 Ingredient grouping
+//   const groupedIngredients = {};
+//   let totalCost = 0, totalCal = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0;
+
+//   cuisines.forEach(c => {
+//     (c.recipes || []).forEach(r => {
+//       (r.ingredients || []).forEach(raw => {
+//         const key = raw.trim();
+//         const meta = INGREDIENT_DB[key] || {
+//           category: "Other", cost: 1, cal: 50, protein: 1, carbs: 5, fat: 1
+//         };
+//         if (!groupedIngredients[meta.category]) groupedIngredients[meta.category] = [];
+//         groupedIngredients[meta.category].push({ name: key, recipe: r.name, cuisine: c.name });
+
+//         totalCost += meta.cost * scale;
+//         totalCal += meta.cal * scale;
+//         totalProtein += meta.protein * scale;
+//         totalCarbs += meta.carbs * scale;
+//         totalFat += meta.fat * scale;
+//       });
+//     });
+//   });
+
+//   const handlePrint = () => window.print();
+
+//   return (
+//     <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-100 to-yellow-50 pb-20">
+//       <Navbar />
+
+//       {/* Header */}
+//       <header className="h-48 bg-gradient-to-r from-red-500 to-yellow-400 flex items-center justify-center text-white text-4xl font-bold">
+//         🍅 Ultimate Shopping List
+//       </header>
+
+//       <div className="max-w-5xl mx-auto px-6 mt-8 space-y-8">
+
+//         {/* Serving Size Slider */}
+//         <div className="bg-white rounded-lg shadow p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+//           <div>
+//             <p className="text-lg font-semibold text-red-600">Portion Multiplier</p>
+//             <p className="text-sm text-gray-500">Adjust based on how many you're cooking for!</p>
+//           </div>
+//           <input
+//             type="range"
+//             min={1}
+//             max={5}
+//             value={scale}
+//             onChange={e => setScale(Number(e.target.value))}
+//             className="w-full sm:w-60 accent-orange-500"
+//           />
+//           <span className="text-lg font-semibold text-orange-600">{scale}x</span>
+//         </div>
+
+//         {/* Nutrition Summary */}
+//         <div className="bg-yellow-50 border-l-8 border-yellow-400 p-6 rounded shadow-md">
+//           <h3 className="text-xl font-bold mb-2 text-orange-600">Nutrition Snapshot (est.)</h3>
+//           <ul className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-gray-800">
+//             <li>🔥 Calories: <strong>{Math.round(totalCal)}</strong></li>
+//             <li>💪 Protein: <strong>{Math.round(totalProtein)} g</strong></li>
+//             <li>🍞 Carbs: <strong>{Math.round(totalCarbs)} g</strong></li>
+//             <li>🧈 Fat: <strong>{Math.round(totalFat)} g</strong></li>
+//             <li>💰 Estimated Cost: <strong>${totalCost.toFixed(2)}</strong></li>
+//           </ul>
+//         </div>
+
+//         {/* Ingredient Lists by Aisle */}
+//         {Object.entries(groupedIngredients).map(([category, items], idx) => (
+//           <section key={idx} className="bg-white rounded-lg shadow p-6">
+//             <h4 className="text-2xl font-bold text-red-500 mb-4">🛒 {category}</h4>
+//             <ul className="space-y-2">
+//               {items.map(({ name, recipe, cuisine }, i) => (
+//                 <li key={`${name}-${i}`} className="flex items-start gap-2">
+//                   <input
+//                     type="checkbox"
+//                     checked={checkedItems.has(name)}
+//                     onChange={() => handleCheck(name)}
+//                     className="mt-1"
+//                   />
+//                   <div className={checkedItems.has(name) ? "line-through text-gray-400" : ""}>
+//                     <span className="font-medium text-gray-800">{name}</span>
+//                     <span className="ml-2 text-sm text-gray-500 italic">
+//                       ({recipe} • {cuisine})
+//                     </span>
+//                   </div>
+//                 </li>
+//               ))}
+//             </ul>
+//           </section>
+//         ))}
+
+//         {/* Print Button */}
+//         <div className="text-center">
+//           <button
+//             onClick={handlePrint}
+//             className="px-6 py-2 mt-6 bg-red-500 text-white font-bold rounded-full hover:bg-red-600 transition"
+//           >
+//             🖨️ Print This List
+//           </button>
+//         </div>
+
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default ShoppingListPage;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import React, { useEffect, useState } from 'react';
 import Navbar from '../../components/common/NewPageHeader';
 
 const API_BASE = 'http://localhost:5000';
 
-// 🧠 Mini database: ingredient → cost, category, nutrition
-const INGREDIENT_DB = {
-  "1 cup red lentils": { category: "Grains", cost: 0.5, cal: 230, protein: 18, carbs: 40, fat: 1 },
-  "1 small onion": { category: "Produce", cost: 0.3, cal: 45, protein: 1, carbs: 11, fat: 0 },
-  "2 cloves garlic": { category: "Produce", cost: 0.2, cal: 10, protein: 0.5, carbs: 2, fat: 0 },
-  // ➕ Add more mappings like above...
+// 🧠 Ingredient category & pricing map
+const categorizeAndPrice = (ingredient) => {
+  const map = [
+    { category: 'Produce', keywords: ['onion', 'garlic', 'tomato', 'chili', 'pepper', 'zucchini', 'cucumber', 'carrot', 'lettuce'], price: 0.5 },
+    { category: 'Dairy', keywords: ['milk', 'butter', 'cream', 'cheese', 'yogurt', 'mozzarella', 'mascarpone'], price: 1.5 },
+    { category: 'Spices & Condiments', keywords: ['salt', 'pepper', 'curry', 'turmeric', 'paprika', 'sugar', 'vinegar', 'soy', 'sauce'], price: 0.3 },
+    { category: 'Grains & Flour', keywords: ['flour', 'rice', 'bread', 'pasta', 'semolina', 'dough', 'roti'], price: 1.2 },
+    { category: 'Protein', keywords: ['chicken', 'egg', 'beef', 'pork', 'tofu', 'shrimp', 'fish', 'lentils', 'chickpeas'], price: 2.0 },
+    { category: 'Baking & Sweets', keywords: ['sugar', 'jaggery', 'chocolate', 'cocoa', 'vanilla'], price: 0.8 },
+    { category: 'Misc', keywords: [], price: 0.9 },
+  ];
+
+  const name = ingredient.toLowerCase();
+  for (let item of map) {
+    if (item.keywords.some(k => name.includes(k))) {
+      return { category: item.category, price: item.price };
+    }
+  }
+  return { category: 'Misc', price: 0.9 };
 };
 
 const ShoppingListPage = () => {
   const [cuisines, setCuisines] = useState([]);
-  const [scale, setScale] = useState(1); // multiplier
-  const [checkedItems, setCheckedItems] = useState(new Set());
+  const [ingredientsMap, setIngredientsMap] = useState({});
+  const [servingMultiplier, setServingMultiplier] = useState(1);
 
   useEffect(() => {
     const fetchData = async () => {
       const levels = ['beginner', 'intermediate', 'advanced'];
-      const all = await Promise.all(levels.map(level =>
-        fetch(`${API_BASE}/api/cuisines?level=${level}`).then(res => res.json())
-      ));
-      const embed = obj => obj._embedded ? obj._embedded[Object.keys(obj._embedded)[0]] || [] : [];
-      setCuisines(all.flatMap(res => embed(res)));
+      try {
+        const results = await Promise.all(
+          levels.map(level =>
+            fetch(`${API_BASE}/api/cuisines?level=${level}`).then(res => res.json())
+          )
+        );
+        const extract = data => {
+          const emb = data._embedded || {};
+          const key = Object.keys(emb)[0];
+          return emb[key] || [];
+        };
+        const allCuisines = results.flatMap(r => extract(r));
+        setCuisines(allCuisines);
+
+        // Collect & group ingredients
+        const map = {};
+        allCuisines.forEach(cuisine => {
+          (cuisine.recipes || []).forEach(recipe => {
+            (recipe.ingredients || []).forEach(ing => {
+              const { category, price } = categorizeAndPrice(ing);
+              if (!map[category]) map[category] = [];
+              if (!map[category].some(e => e.name === ing)) {
+                map[category].push({ name: ing, price });
+              }
+            });
+          });
+        });
+        setIngredientsMap(map);
+      } catch (e) {
+        console.error('Error loading data', e);
+      }
     };
+
     fetchData();
   }, []);
 
-  const handleCheck = (item) => {
-    setCheckedItems(prev =>
-      prev.has(item) ? new Set([...prev].filter(i => i !== item)) : new Set(prev.add(item))
-    );
-  };
-
-  // 🔥 Ingredient grouping
-  const groupedIngredients = {};
-  let totalCost = 0, totalCal = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0;
-
-  cuisines.forEach(c => {
-    (c.recipes || []).forEach(r => {
-      (r.ingredients || []).forEach(raw => {
-        const key = raw.trim();
-        const meta = INGREDIENT_DB[key] || {
-          category: "Other", cost: 1, cal: 50, protein: 1, carbs: 5, fat: 1
-        };
-        if (!groupedIngredients[meta.category]) groupedIngredients[meta.category] = [];
-        groupedIngredients[meta.category].push({ name: key, recipe: r.name, cuisine: c.name });
-
-        totalCost += meta.cost * scale;
-        totalCal += meta.cal * scale;
-        totalProtein += meta.protein * scale;
-        totalCarbs += meta.carbs * scale;
-        totalFat += meta.fat * scale;
-      });
-    });
-  });
+  const totalCost = Object.values(ingredientsMap).flat().reduce(
+    (acc, item) => acc + item.price * servingMultiplier,
+    0
+  );
 
   const handlePrint = () => window.print();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-100 to-yellow-50 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-100 to-yellow-50 pb-16">
       <Navbar />
 
-      {/* Header */}
-      <header className="h-48 bg-gradient-to-r from-red-500 to-yellow-400 flex items-center justify-center text-white text-4xl font-bold">
-        🍅 Ultimate Shopping List
+      {/* 🔥 Hero */}
+      <header className="relative h-48 flex items-center justify-center bg-gradient-to-r from-red-500 via-orange-500 to-yellow-400 mb-8 shadow-md">
+        <h1 className="text-4xl text-white font-extrabold drop-shadow-lg">
+          🛍️ Ingredients List
+        </h1>
+        <button
+          onClick={handlePrint}
+          className="absolute right-6 top-6 px-4 py-2 bg-white text-red-600 font-semibold rounded-full hover:bg-gray-100 transition"
+        >
+          🖨️ Print Ingredients List
+        </button>
       </header>
 
-      <div className="max-w-5xl mx-auto px-6 mt-8 space-y-8">
-
-        {/* Serving Size Slider */}
-        <div className="bg-white rounded-lg shadow p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <p className="text-lg font-semibold text-red-600">Portion Multiplier</p>
-            <p className="text-sm text-gray-500">Adjust based on how many you're cooking for!</p>
-          </div>
+      <div className="max-w-4xl mx-auto px-4">
+        {/* 🍽️ Serving Control */}
+        {/* <div className="mb-6">
+          <label className="block text-gray-700 font-medium mb-2">
+            👨‍👩‍👧‍👦 Select serving multiplier:
+          </label>
           <input
             type="range"
-            min={1}
-            max={5}
-            value={scale}
-            onChange={e => setScale(Number(e.target.value))}
-            className="w-full sm:w-60 accent-orange-500"
+            min="1"
+            max="6"
+            value={servingMultiplier}
+            onChange={(e) => setServingMultiplier(parseInt(e.target.value))}
+            className="w-full"
           />
-          <span className="text-lg font-semibold text-orange-600">{scale}x</span>
-        </div>
+          <div className="text-sm mt-1 text-gray-600">
+            Cooking for <span className="font-semibold">{servingMultiplier}</span>{' '}
+            {servingMultiplier === 1 ? 'person' : 'people'}
+          </div>
+        </div> */}
 
-        {/* Nutrition Summary */}
-        <div className="bg-yellow-50 border-l-8 border-yellow-400 p-6 rounded shadow-md">
-          <h3 className="text-xl font-bold mb-2 text-orange-600">Nutrition Snapshot (est.)</h3>
-          <ul className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-gray-800">
-            <li>🔥 Calories: <strong>{Math.round(totalCal)}</strong></li>
-            <li>💪 Protein: <strong>{Math.round(totalProtein)} g</strong></li>
-            <li>🍞 Carbs: <strong>{Math.round(totalCarbs)} g</strong></li>
-            <li>🧈 Fat: <strong>{Math.round(totalFat)} g</strong></li>
-            <li>💰 Estimated Cost: <strong>${totalCost.toFixed(2)}</strong></li>
-          </ul>
-        </div>
+        {/* 💸 Estimated Cost
+        <div className="mb-6 text-right">
+          <p className="text-lg font-semibold text-red-600">
+            💰 Estimated Cost: LKR {totalCost.toFixed(2)}
+          </p>
+        </div> */}
 
-        {/* Ingredient Lists by Aisle */}
-        {Object.entries(groupedIngredients).map(([category, items], idx) => (
-          <section key={idx} className="bg-white rounded-lg shadow p-6">
-            <h4 className="text-2xl font-bold text-red-500 mb-4">🛒 {category}</h4>
-            <ul className="space-y-2">
-              {items.map(({ name, recipe, cuisine }, i) => (
-                <li key={`${name}-${i}`} className="flex items-start gap-2">
-                  <input
-                    type="checkbox"
-                    checked={checkedItems.has(name)}
-                    onChange={() => handleCheck(name)}
-                    className="mt-1"
-                  />
-                  <div className={checkedItems.has(name) ? "line-through text-gray-400" : ""}>
-                    <span className="font-medium text-gray-800">{name}</span>
-                    <span className="ml-2 text-sm text-gray-500 italic">
-                      ({recipe} • {cuisine})
-                    </span>
-                  </div>
+        {/* 🛒 Ingredient Categories */}
+        {Object.entries(ingredientsMap).map(([category, items], ci) => (
+          <section key={ci} className="bg-white shadow-md rounded-lg mb-6 p-6 print:bg-transparent print:shadow-none">
+            <h2 className="text-2xl font-bold text-orange-600 mb-4">{category}</h2>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {items.map((item, ii) => (
+                <li key={ii} className="flex items-center">
+                  <input type="checkbox" id={`${category}-${ii}`} className="mr-2" />
+                  <label htmlFor={`${category}-${ii}`} className="select-none text-gray-800">
+                    {servingMultiplier > 1 ? `${servingMultiplier} x ` : ''}
+                    {item.name}
+                  </label>
                 </li>
               ))}
             </ul>
           </section>
         ))}
 
-        {/* Print Button */}
-        <div className="text-center">
-          <button
-            onClick={handlePrint}
-            className="px-6 py-2 mt-6 bg-red-500 text-white font-bold rounded-full hover:bg-red-600 transition"
-          >
-            🖨️ Print This List
-          </button>
-        </div>
-
+        {Object.keys(ingredientsMap).length === 0 && (
+          <p className="text-center text-gray-500">Loading ingredients… 🍅🧀🌶️</p>
+        )}
       </div>
     </div>
   );
