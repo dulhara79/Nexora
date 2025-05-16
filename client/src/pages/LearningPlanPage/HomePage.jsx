@@ -59,7 +59,7 @@ const HomePage = () => {
             Ready For Your Cooking Journey?
           </h1>
 
-          <div className="w-full py-6 text-center bg-yellow-400 text-white rounded-xl shadow-lg mb-8 mt-9">
+          <div className="w-full py-7 text-center bg-yellow-400 text-white rounded-xl shadow-lg mb-8 mt-9">
             <h1 className="text-2xl font-extrabold tracking-wide text-white animate__animated animate__fadeInUp">
               From Zero to Hero - Pick Your Level!
             </h1>
@@ -68,7 +68,7 @@ const HomePage = () => {
           <LearningPlanCreator />
 
           {/* Join Nexora Banner */}
-          <div className="w-full py-6 text-center bg-orange-600 text-white rounded-xl shadow-lg mb-8 mt-9">
+          <div className="w-full py-7 text-center bg-orange-600 text-white rounded-xl shadow-lg mb-8 mt-9">
             <h1 className="text-2xl font-extrabold tracking-wide text-white animate__animated animate__fadeInUp">
               Join Nexora Today and Cook Like a Pro!
             </h1>
