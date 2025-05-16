@@ -81,7 +81,7 @@ const HomePage = () => {
             </div>
           </div> */}
 
-          <div className="flex justify-center mt-4 mb-6">
+          {/* <div className="flex justify-center mt-4 mb-6">
   <svg
     className="animate-bounce w-8 h-8 text-red-700 drop-shadow-md"
     fill="currentColor"
@@ -94,7 +94,7 @@ const HomePage = () => {
       clipRule="evenodd"
     />
   </svg>
-</div>
+</div> */}
 
 
           <div className="flex flex-col space-y-8 mt-10">
