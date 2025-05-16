@@ -7,18 +7,31 @@ import Comment from "./Comment";
 import { containerVariants, itemVariants } from "./Variants";
 import FallbackAvatar from "../../components/common/FallbackAvatar";
 
-const CommentSection = ({ questionId, user, token, isAuthenticated, comments, setComments }) => {
+const CommentSection = ({
+  questionId,
+  user,
+  token,
+  isAuthenticated,
+  comments,
+  setComments,
+}) => {
   const [newComment, setNewComment] = useState("");
 
   const submitComment = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      toast.info("Please log in to comment", { position: "top-right", autoClose: 3000 });
+      toast.info("Please log in to comment", {
+        position: "top-right",
+        autoClose: 3000,
+      });
       return;
     }
 
     if (!newComment.trim()) {
-      toast.warn("Comment cannot be empty", { position: "top-right", autoClose: 3000 });
+      toast.warn("Comment cannot be empty", {
+        position: "top-right",
+        autoClose: 3000,
+      });
       return;
     }
 
@@ -44,7 +57,10 @@ const CommentSection = ({ questionId, user, token, isAuthenticated, comments, se
         { ...newCommentData, replies: [] },
       ]);
       setNewComment("");
-      toast.success("Comment added", { position: "top-right", autoClose: 2000 });
+      toast.success("Comment added", {
+        position: "top-right",
+        autoClose: 2000,
+      });
     } catch (error) {
       toast.error(error.response?.data?.error || "Failed to add comment", {
         position: "top-right",
@@ -94,11 +110,19 @@ const CommentSection = ({ questionId, user, token, isAuthenticated, comments, se
           onSubmit={submitComment}
         >
           <div className="flex items-center mb-4">
-            <motion.div whileHover={{ scale: 1.1 }}>
+            {/* <motion.div whileHover={{ scale: 1.1 }}>
               <FallbackAvatar className="w-8 h-8 mr-3 rounded-full ring-2 ring-orange-400" />
-            </motion.div>
+            </motion.div> */}
+            <motion.img
+              src={user.profilePhotoUrl || "/default-avatar.png"}
+              alt="Author Avatar"
+              className="w-10 h-10 mr-3 rounded-full ring-2 ring-offset-2 ring-orange-500"
+            ></motion.img>
             <span className="font-medium text-gray-800 dark:text-gray-200">
-              Comment as {user.username}
+              Comment as{" "}
+              <span className="font-semibold text-orange-500 dark:text-orange-400">
+                {user.name}{" "}
+              </span>
             </span>
           </div>
           <textarea

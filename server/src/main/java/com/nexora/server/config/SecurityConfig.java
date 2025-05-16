@@ -182,7 +182,8 @@ public class SecurityConfig {
                                 "/api/feedposts/**", 
                                 "/api/challenges/**", 
                                 "/api/forum/**",
-                                "/api/forum/notifications/**")
+                                "/api/forum/notifications/**",
+                                "/api/quizzes/**")
                         .permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
 

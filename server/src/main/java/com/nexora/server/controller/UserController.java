@@ -161,6 +161,68 @@ public class UserController {
         }
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<?> searchUsers(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                        .body(Map.of("error", "No valid token provided"));
+            }
+            String token = authHeader.substring(7);
+            User user = userService.validateJwtToken(token);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                        .body(Map.of("error", "Invalid token"));
+            }
+
+            List<User> searchResults = userService.searchUsers(query, user.getId(), limit);
+            List<User> relatedUsers = userService.getRelatedUsers(query, user.getId(), limit);
+            List<Map<String, Object>> searchResultResponses = searchResults.stream().map(u -> {
+                Map<String, Object> userMap = new HashMap<>();
+                userMap.put("id", u.getId());
+                userMap.put("name", u.getName());
+                userMap.put("username", u.getUsername());
+                userMap.put("profilePhotoUrl", u.getProfilePhotoUrl());
+                userMap.put("likeSkill", u.getLikeSkill());
+                Map<String, String> userLinks = new HashMap<>();
+                userLinks.put("self", "/api/users/" + u.getId());
+                userMap.put("_links", userLinks);
+                return userMap;
+            }).toList();
+            List<Map<String, Object>> relatedUserResponses = relatedUsers.stream().map(u -> {
+                Map<String, Object> userMap = new HashMap<>();
+                userMap.put("id", u.getId());
+                userMap.put("name", u.getName());
+                userMap.put("username", u.getUsername());
+                userMap.put("profilePhotoUrl", u.getProfilePhotoUrl());
+                userMap.put("likeSkill", u.getLikeSkill());
+                Map<String, String> userLinks = new HashMap<>();
+                userLinks.put("self", "/api/users/" + u.getId());
+                userMap.put("_links", userLinks);
+                return userMap;
+            }).toList();
+            Map<String, Object> response = new HashMap<>();
+            response.put("searchResults", searchResultResponses);
+            response.put("relatedUsers", relatedUserResponses);
+            Map<String, String> links = new HashMap<>();
+            links.put("self", "/api/users/search?query=" + query + "&limit=" + limit);
+            response.put("_links", links);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                    .header(HttpHeaders.ETAG, "\"" + query + "-search-" + limit + "\"")
+                    .body(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<?> editUser(
             @PathVariable String id,

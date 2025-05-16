@@ -36,6 +36,11 @@ import TagPage from "./pages/Forum/TagPage";
 import ForumNotification from "./pages/Forum/ForumNotificationPage";
 import ForumCommunityPage from "./pages/Forum/ForumCommunityPage";
 import UserQuestionsPage from "./pages/Forum/UserQuestionsPage";
+import QuizList from "./components/Forum/Quiz/QuizList";
+import QuizCreate from "./components/Forum/Quiz/QuizCreate";
+import QuizDetail from "./components/Forum/Quiz/QuizDetail";
+import QuizStats from "./components/Forum/Quiz/QuizStats";
+import QuizTake from "./components/Forum/Quiz/QuizTake";
 
 // Post Pages
 import Home from "./pages/post/Home";
@@ -48,10 +53,16 @@ import ChallengeDetail from "./pages/Challenge/ChallengeDetail";
 import ChallengeList from "./pages/Challenge/ChallengeList";
 import CreateChallenge from "./pages/Challenge/CreateChallenge";
 import StartChallenge from "./pages/Challenge/StartChallenge";
+import CollaborationHub from "./pages/Challenge/CollabHub";
+import Leaderboard from "./pages/Challenge/Leaderboard";
+import RemixGallery from "./pages/Challenge/ChallenfeRemix";
+import RecipeGenerator from "./pages/Challenge/RecipeGenerator";
 
 // Test Page
 import TestPage from "./pages/TestPage";
 import EditQuestionPage from "./pages/Forum/EditQuestionPage";
+import SearchResultsPage from "./pages/User/SearchResultsPage";
+import QuizEdit from "./components/Forum/Quiz/QuizEdit";
 
 function App() {
   return (
@@ -68,6 +79,7 @@ function App() {
           <Route path="/profile/:userId" element={<Profile />} />
           <Route path="/edit/:userId" element={<EditProfile />} />
           <Route path="/feed" element={<UserFeedPage />} />
+          <Route path="/search" element={<SearchResultsPage />} />
 
           {/* Learning Plan Routes */}
           <Route path="/learninghome" element={<HomePage />} />
@@ -95,6 +107,17 @@ function App() {
             element={<ForumCommunityPage />}
           />
           <Route path="/forum/my-questions" element={<UserQuestionsPage />} />
+          {/* <Route path="/forum/quizzes" element={<QuizList />} />
+          <Route path="/forum/quizzes/create" element={<QuizCreate />} />
+          <Route path="/forum/quizzes/:id" element={<QuizDetail />} />
+          <Route path="/forum/quizzes/:id/stats" element={<QuizStats />} />
+          <Route path="/forum/quizzes/:id/take" element={<QuizTake />} /> */}
+
+          <Route path="/forum/quizzes" element={<QuizList />} />
+          <Route path="/forum/quizzes/create" element={<QuizCreate />} />
+          <Route path="/forum/quizzes/:id" element={<QuizDetail />} />
+          <Route path="/forum/quizzes/:id/stats" element={<QuizStats />} />
+          <Route path="/forum/quizzes/:id/edit" element={<QuizEdit />} />12
 
           {/* Post Routes */}
           <Route path="/post" element={<Home />} />
@@ -120,6 +143,11 @@ function App() {
           <Route path="/create-challenge" element={<CreateChallenge />} />
           <Route path="/edit-challenge/:challengeId" element={<CreateChallenge />} />
           <Route path="/start-challenge/:challengeId" element={<StartChallenge />} />
+          <Route path="/collaboration-hub" element={<CollaborationHub />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/remix-gallery" element={<RemixGallery />} />
+          <Route path="/recipe-generator" element={<RecipeGenerator />} />
+
 
           {/* 404 Page */}
           <Route path="/*" element={<PageNotFound />} />

@@ -79,6 +79,7 @@ const Comment = ({ comment, user, token, isAuthenticated, setComments, level }) 
           parentCommentId: replyTo,
           content: replyContent,
           authorName: user.username,
+          authorAvatarUrl: user.profilePhotoUrl,
         },
         {
           headers: {
@@ -340,9 +341,14 @@ const Comment = ({ comment, user, token, isAuthenticated, setComments, level }) 
         <div className="flex-1">
           <div className="flex flex-wrap items-center mb-3">
             <div className="flex items-center">
-              <motion.div whileHover={{ scale: 1.1 }}>
+              {/* <motion.div whileHover={{ scale: 1.1 }}>
                 <FallbackAvatar className="w-8 h-8 mr-2 rounded-full ring-2 ring-orange-400" />
-              </motion.div>
+              </motion.div> */}
+              <motion.img
+                  src={comment.authorAvatarUrl || "/default-avatar.png"}
+                  alt="Comment Author Avatar"
+                  className="w-10 h-10 mr-3 rounded-full ring-2 ring-offset-2 ring-orange-500">
+                  </motion.img>
               <span className="font-semibold text-gray-800 dark:text-gray-100">
                 {comment.authorName || "Anonymous"}
               </span>

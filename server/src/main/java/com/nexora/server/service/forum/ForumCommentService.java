@@ -244,6 +244,7 @@ public class ForumCommentService {
 
         comment.setAuthorId(userId);
         comment.setAuthorName(user.getName());
+        comment.setAuthorAvatarUrl(user.getProfilePhotoUrl());
         ForumComment savedComment = commentRepository.save(comment);
         LOGGER.info("Comment created with ID: " + savedComment.getId());
 

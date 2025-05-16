@@ -1,10 +1,10 @@
 // HomePage.jsx
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import FallbackAvatar from '../../components/common/FallbackAvatar';
-import Header from "../../components/common/NewPageHeader"
+import FallbackAvatar from "../../components/common/FallbackAvatar";
+import Header from "../../components/common/NewPageHeader";
 
 export default function UserFeedPage() {
   const [posts, setPosts] = useState([]);
@@ -20,28 +20,36 @@ export default function UserFeedPage() {
       axios.get(`${BASE_URL}/posts`),
       axios.get(`${BASE_URL}/cuisines?level=beginner`),
       axios.get(`${BASE_URL}/challenges`),
-      axios.get(`${BASE_URL}/questions`)
+      axios.get(`${BASE_URL}/questions`),
     ]).then(([postsRes, cuisinesRes, challengesRes, questionsRes]) => {
       // Process posts to handle nested structure
-      const processedPosts = postsRes.data.map(item => item.post || item);
-      
+      const processedPosts = postsRes.data.map((item) => item.post || item);
+
       // Process challenges to handle nested structure
-      const processedChallenges = challengesRes.data.map(item => item.challenge || item);
+      const processedChallenges = challengesRes.data.challenges.map(
+        (item) => item.challenge || item
+      );
       console.log("Posts API Response:", postsRes.data);
-      console.log("Cuisines API Response:", cuisinesRes.data);
+      console.log(
+        "Cuisines API Response:",
+        cuisinesRes.data._embedded.cuisineList
+      );
       console.log("Challenges API Response:", challengesRes.data);
       console.log("Questions API Response:", questionsRes.data.questions);
 
       setPosts(processedPosts);
-    setCuisines(cuisinesRes.data);
-    setChallenges(processedChallenges);
-    setQuestions(questionsRes.data.questions);
-  });
-}, []);
+      setCuisines(cuisinesRes.data._embedded.cuisineList);
+      setChallenges(processedChallenges);
+      setQuestions(questionsRes.data.questions);
+    });
+  }, []);
 
-function getSafe(obj, path, defaultValue = '') {
-  return path.split('.').reduce((acc, part) => acc && acc[part], obj) || defaultValue;
-}
+  function getSafe(obj, path, defaultValue = "") {
+    return (
+      path.split(".").reduce((acc, part) => acc && acc[part], obj) ||
+      defaultValue
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -140,22 +148,26 @@ function HeroSection() {
         <div className="absolute w-64 h-64 delay-1000 bg-white rounded-full top-1/2 left-10 opacity-5 animate-pulse"></div>
       </div>
       <div className="container relative z-10 px-4 mx-auto">
-        <motion.div 
+        <motion.div
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8 }}
         >
-          <h1 className="mb-6 text-4xl font-bold md:text-6xl">Master Culinary Arts with Nexora</h1>
-          <p className="mb-8 text-xl">Connect, Learn, and Share Your Cooking Journey with the World</p>
+          <h1 className="mb-6 text-4xl font-bold md:text-6xl">
+            Master Culinary Arts with Nexora
+          </h1>
+          <p className="mb-8 text-xl">
+            Connect, Learn, and Share Your Cooking Journey with the World
+          </p>
           <div className="flex flex-wrap gap-4">
             <button
-              onClick={() => navigate('/learninghome')}
+              onClick={() => navigate("/learninghome")}
               className="px-8 py-3 font-semibold text-orange-600 transition-all transform bg-white rounded-full hover:bg-opacity-90 hover:scale-105"
             >
               Start Learning
             </button>
             <button
-              onClick={() => navigate('/post')}
+              onClick={() => navigate("/post")}
               className="px-8 py-3 font-semibold text-white transition-all border-2 border-white rounded-full hover:bg-white hover:text-orange-600"
             >
               Explore Recipes
@@ -173,11 +185,11 @@ function TabNavigation() {
   const location = useLocation();
 
   const tabRoutes = [
-    { name: 'all', path: '/feed' },
-    { name: 'posts', path: '/post' },
-    { name: 'learning', path: '/learninghome' },
-    { name: 'challenges', path: '/challenges' },
-    { name: 'forum', path: '/forum/home' },
+    { name: "all", path: "/feed" },
+    { name: "posts", path: "/post" },
+    { name: "learning", path: "/learninghome" },
+    { name: "challenges", path: "/challenges" },
+    { name: "forum", path: "/forum/home" },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -191,8 +203,8 @@ function TabNavigation() {
             onClick={() => navigate(path)}
             className={`px-6 py-3 rounded-full whitespace-nowrap transition-all ${
               isActive(path)
-                ? 'bg-orange-500 text-white shadow-lg'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? "bg-orange-500 text-white shadow-lg"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
             }`}
           >
             {name.charAt(0).toUpperCase() + name.slice(1)}
@@ -213,7 +225,7 @@ function ChallengeCard({ challenge, delay }) {
       className="overflow-hidden transition-all duration-300 bg-white shadow-md rounded-xl hover:shadow-xl"
     >
       <img
-        src={challenge.image}
+        src={challenge.photoUrl}
         alt={challenge.title}
         className="object-cover w-full h-48"
       />
@@ -232,39 +244,68 @@ function ChallengeCard({ challenge, delay }) {
 function AllContent({ posts, cuisines, challenges, questions }) {
   return (
     <div className="space-y-16">
+    
       <section>
         <h2 className="mb-6 text-3xl font-bold">Recent Culinary Creations</h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {Array.isArray(posts) && posts.slice(0, 3).map((post, index) => (
-            <PostCard key={post.id || index} post={post} delay={index * 0.1} />
-          ))}
+          {Array.isArray(posts) &&
+            posts
+              .slice(0, 3)
+              .map((post, index) => (
+                <PostCard
+                  key={post.id || index}
+                  post={post}
+                  delay={index * 0.1}
+                />
+              ))}
         </div>
       </section>
 
       <section>
         <h2 className="mb-6 text-3xl font-bold">Learning Paths</h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {Array.isArray(cuisines) && cuisines.slice(0, 3).map((cuisine, index) => (
-            <CuisineCard key={cuisine.id} cuisine={cuisine} delay={index * 0.1} />
-          ))}
+          {Array.isArray(cuisines) &&
+            cuisines
+              .slice(0, 3)
+              .map((cuisine, index) => (
+                <CuisineCard
+                  key={cuisine.id}
+                  cuisine={cuisine}
+                  delay={index * 0.1}
+                />
+              ))}
         </div>
       </section>
 
       <section>
         <h2 className="mb-6 text-3xl font-bold">Ongoing Challenges</h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {Array.isArray(challenges) && challenges.slice(0, 3).map((challenge, index) => (
-            <ChallengeCard key={challenge.challengeId} challenge={challenge} delay={index * 0.1} />
-          ))}
+          {Array.isArray(challenges) &&
+            challenges
+              .slice(0, 3)
+              .map((challenge, index) => (
+                <ChallengeCard
+                  key={challenge.challengeId}
+                  challenge={challenge}
+                  delay={index * 0.1}
+                />
+              ))}
         </div>
       </section>
 
       <section>
         <h2 className="mb-6 text-3xl font-bold">Community Forum</h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {Array.isArray(questions) && questions.slice(0, 2).map((question, index) => (
-            <ForumCard key={question.id} question={question} delay={index * 0.1} />
-          ))}
+          {Array.isArray(questions) &&
+            questions
+              .slice(0, 2)
+              .map((question, index) => (
+                <ForumCard
+                  key={question.id}
+                  question={question}
+                  delay={index * 0.1}
+                />
+              ))}
         </div>
       </section>
     </div>
@@ -274,8 +315,10 @@ function AllContent({ posts, cuisines, challenges, questions }) {
 // Post Card Component
 function PostCard({ post, delay }) {
   const media = post.post?.media || post.media || [];
-  const imageUrl = media[0]?.fileUrl || 'https://via.placeholder.com/400x300?text=No+Image';
-  
+  const imageUrl = media[0]?.fileUrl || "";
+
+  console.log("Post Data:", post); // Debugging line
+
   return (
     <motion.div
       initial={{ y: 20, opacity: 0 }}
@@ -283,18 +326,23 @@ function PostCard({ post, delay }) {
       transition={{ delay }}
       className="overflow-hidden transition-shadow duration-300 bg-white shadow-md rounded-xl hover:shadow-lg"
     >
-      <img 
-        src={imageUrl} 
-        alt={(post.post?.description || post.description) || "User post"} 
+      <img
+        src={imageUrl}
+        alt={post.post?.description || post.description || "User post"}
         className="object-cover w-full h-48"
       />
       <div className="p-5">
         <div className="flex items-center mb-2">
-          <img
+          {/* <img
             src={post.userAvatar}
             alt={post.userName}
             className="w-8 h-8 mr-2 rounded-full"
-          />
+          /> */}
+          {/* <FallbackAvatar
+            src={post.userAvatar}
+            name={post.userName}
+            size={10}
+          /> */}
           <span className="font-medium">{post.userName}</span>
         </div>
         <p className="mb-3 text-gray-700">{post.description}</p>
@@ -310,10 +358,12 @@ function PostCard({ post, delay }) {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
+                stroke="red"
+                fill="red"
                 d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
               />
             </svg>
-            {post.likes}
+            {post.likes.length || 0} Likes
           </button>
           <span className="text-sm text-gray-400">{post.date}</span>
         </div>
@@ -354,6 +404,7 @@ function CuisineCard({ cuisine, delay }) {
 
 // Challenge Carousel Component
 function ChallengeCarousel({ challenges }) {
+  console.log("Challenges:", challenges); // Debugging line
   return (
     <section className="container px-4 py-8 mx-auto">
       <h2 className="mb-6 text-3xl font-bold">Ongoing Cooking Challenges</h2>
@@ -361,11 +412,11 @@ function ChallengeCarousel({ challenges }) {
         <div className="flex pb-4 space-x-4 overflow-x-auto scrollbar-hide">
           {challenges.map((challenge, index) => {
             // Handle both direct challenge objects and API response format
-            const challengeData =  challenge;
+            const challengeData = challenge;
             const imageUrl = challengeData.photoUrl;
 
             console.log("Challenge Data:", challengeData); // Debugging line
-            
+
             return (
               <motion.div
                 key={challengeData.challengeId || index}
@@ -374,23 +425,23 @@ function ChallengeCarousel({ challenges }) {
                 transition={{ delay: index * 0.1 }}
                 className="min-w-[300px] bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300"
               >
-                <img 
-                  src={imageUrl} 
-                  alt={challengeData.title || "Challenge"} 
+                <img
+                  src={imageUrl}
+                  alt={challengeData.title || "Challenge"}
                   className="object-cover w-full h-48"
                 />
-              <div className="p-5">
-                <h3 className="mb-2 text-xl font-bold">{challenge.title}</h3>
-                <p className="mb-4 text-gray-600">{challenge.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-orange-500">
-                    {challenge.theme}
-                  </span>
-                  <button className="px-4 py-2 text-white transition-colors bg-orange-500 rounded-lg hover:bg-orange-600">
-                    Join
-                  </button>
+                <div className="p-5">
+                  <h3 className="mb-2 text-xl font-bold">{challenge.title}</h3>
+                  <p className="mb-4 text-gray-600">{challenge.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-orange-500">
+                      {challenge.theme}
+                    </span>
+                    <button className="px-4 py-2 text-white transition-colors bg-orange-500 rounded-lg hover:bg-orange-600">
+                      Join
+                    </button>
+                  </div>
                 </div>
-              </div>
               </motion.div>
             );
           })}
@@ -401,51 +452,8 @@ function ChallengeCarousel({ challenges }) {
 }
 
 // Forum Card Component
-// function ForumCard({ question, delay }) {
-//   return (
-//     <motion.div
-//       initial={{ y: 20, opacity: 0 }}
-//       animate={{ y: 0, opacity: 1 }}
-//       transition={{ delay }}
-//       className="p-5 transition-shadow duration-300 bg-white shadow-md rounded-xl hover:shadow-lg"
-//     >
-//       <div className="flex items-center mb-3">
-//         <img
-//           src={question.author.avatar}
-//           alt={question.authorUsername}
-//           className="w-10 h-10 mr-3 rounded-full"
-//         />
-//         <div>
-//           <h3 className="font-bold">{question.title}</h3>
-//           <p className="text-sm text-gray-500">{question.author.name}</p>
-//         </div>
-//       </div>
-//       <p className="mb-4 text-gray-700">{question.content}</p>
-//       <div className="flex items-center justify-between text-sm text-gray-500">
-//         <span>{question.tags.join(", ")}</span>
-//         <div className="flex items-center">
-//           <svg
-//             className="w-4 h-4 mr-1"
-//             fill="none"
-//             stroke="currentColor"
-//             viewBox="0 0 24 24"
-//           >
-//             <path
-//               strokeLinecap="round"
-//               strokeLinejoin="round"
-//               strokeWidth="2"
-//               d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-//             />
-//           </svg>
-//           {question.comments.length} Comments
-//         </div>
-//       </div>
-//     </motion.div>
-//   );
-// }
-
 function ForumCard({ question, delay }) {
-  const authorName = question.author?.name || 'Anonymous';
+  const authorName = question.author?.name || "Anonymous";
   const avatarUrl = question.author?.avatar;
 
   return (
@@ -456,22 +464,37 @@ function ForumCard({ question, delay }) {
       className="p-5 transition-shadow duration-300 bg-white shadow-md rounded-xl hover:shadow-lg"
     >
       <div className="flex items-center mb-3">
-        <FallbackAvatar 
+        {/* <FallbackAvatar 
           src={avatarUrl} 
           name={authorName} 
           size={10} 
-        />
+        /> */}
+        <motion.img
+          src={question.authorAvatarUrl || "/default-avatar.png"}
+          alt="Author Avatar"
+          className="w-10 h-10 mr-3 rounded-full ring-2 ring-offset-2 ring-orange-500"
+        ></motion.img>
         <div className="ml-3">
           <h3 className="font-bold">{question.title}</h3>
-          <p className="text-sm text-gray-500">{authorName}</p>
+          <p className="text-sm text-gray-500">{question.authorUsername}</p>
         </div>
       </div>
       <p className="mb-4 text-gray-700">{question.description}</p>
       <div className="flex items-center justify-between text-sm text-gray-500">
-        <span>{question.tags?.join(', ') || 'Uncategorized'}</span>
+        <span>{question.tags?.join(", ") || "Uncategorized"}</span>
         <div className="flex items-center">
-          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+          <svg
+            className="w-4 h-4 mr-1"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+            />
           </svg>
           {question.upvoteUserIds?.length || 0} Likes
         </div>
