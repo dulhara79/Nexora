@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * REST controller for managing forum quizzes.
+ */
 @RestController
 @RequestMapping("/api/quizzes")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
@@ -28,6 +31,9 @@ public class ForumQuizController {
     @Autowired
     private AuthenticationService authenticationService;
 
+    /**
+     * Creates a new quiz.
+     */
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createQuiz(
             @RequestHeader("Authorization") String authHeader,
@@ -58,6 +64,9 @@ public class ForumQuizController {
         }
     }
 
+    /**
+     * Updates an existing quiz.
+     */
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateQuiz(
             @PathVariable String id,
@@ -86,6 +95,9 @@ public class ForumQuizController {
         }
     }
 
+    /**
+     * Deletes a quiz by ID.
+     */
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteQuiz(
             @PathVariable String id,
@@ -110,6 +122,9 @@ public class ForumQuizController {
         }
     }
 
+    /**
+     * Submits answers to a quiz.
+     */
     @PatchMapping(value = "/{id}/answer", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> submitAnswer(
             @PathVariable String id,
@@ -141,6 +156,9 @@ public class ForumQuizController {
         }
     }
 
+    /**
+     * Clears a user's attempt for a quiz.
+     */
     @PatchMapping(value = "/{id}/clear-attempt", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> clearAttempt(
             @PathVariable String id,
@@ -168,6 +186,9 @@ public class ForumQuizController {
         }
     }
 
+    /**
+     * Upvotes a quiz.
+     */
     @PatchMapping(value = "/{id}/vote", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> upvoteQuiz(
             @PathVariable String id,
@@ -195,6 +216,9 @@ public class ForumQuizController {
         }
     }
 
+    /**
+     * Gets all active quizzes.
+     */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getActiveQuizzes(
             @RequestHeader(value = "If-None-Match", required = false) String ifNoneMatch) {
@@ -224,6 +248,9 @@ public class ForumQuizController {
         }
     }
 
+    /**
+     * Gets statistics for a specific quiz.
+     */
     @GetMapping(value = "/{id}/stats", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getQuizStats(
             @PathVariable String id,
@@ -251,6 +278,9 @@ public class ForumQuizController {
         }
     }
 
+    /**
+     * Gets all quizzes created by a specific author.
+     */
     @GetMapping(value = "/author/{authorId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getQuizzesByAuthor(
             @PathVariable String authorId,
@@ -280,6 +310,9 @@ public class ForumQuizController {
         }
     }
 
+    /**
+     * Gets a quiz by its ID.
+     */
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getQuiz(
             @PathVariable String id,
@@ -292,6 +325,7 @@ public class ForumQuizController {
                         .body(createErrorResponse("Quiz not found"));
             }
             ForumQuiz quiz = quizOptional.get();
+            // Deactivate quiz if deadline has passed
             if (quiz.getDeadline().isBefore(LocalDateTime.now())) {
                 quiz.setActive(false);
                 quizService.saveQuiz(quiz);
@@ -319,6 +353,9 @@ public class ForumQuizController {
         }
     }
 
+    /**
+     * Extracts the user ID from the JWT token in the Authorization header.
+     */
     private String extractUserIdFromToken(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return null;
@@ -331,6 +368,9 @@ public class ForumQuizController {
         }
     }
 
+    /**
+     * Creates a simple error response map.
+     */
     private Map<String, String> createErrorResponse(String message) {
         Map<String, String> error = new HashMap<>();
         error.put("error", message);
