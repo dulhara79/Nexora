@@ -149,7 +149,9 @@ const EditProfile = () => {
 
   // Theme handling
   useEffect(() => {
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
     setIsDarkMode(prefersDark);
   }, []);
 
@@ -182,7 +184,10 @@ const EditProfile = () => {
   const uploadImageToCloudinary = async (file, type, userId, token) => {
     try {
       const formData = new FormData();
-      formData.append(type === "profile" ? "profileImage" : "bannerImage", file);
+      formData.append(
+        type === "profile" ? "profileImage" : "bannerImage",
+        file
+      );
 
       const response = await axios.post(
         `http://localhost:5000/api/users/${userId}/images`,
@@ -248,7 +253,11 @@ const EditProfile = () => {
         socialMedia: JSON.stringify(socialMediaLinks),
       };
 
-      if (userData.currentPassword && userData.password && userData.confirmPassword) {
+      if (
+        userData.currentPassword &&
+        userData.password &&
+        userData.confirmPassword
+      ) {
         if (userData.password !== userData.confirmPassword) {
           setPasswordError("New passwords do not match");
           setLoading(false);
@@ -301,8 +310,14 @@ const EditProfile = () => {
       }, 2000);
     } catch (error) {
       console.error("Error updating profile:", error);
-      setError(error.response?.data?.error || `Failed to update profile: ${error.message}`);
-      toast.error(error.response?.data?.error || `Failed to update profile: ${error.message}`);
+      setError(
+        error.response?.data?.error ||
+          `Failed to update profile: ${error.message}`
+      );
+      toast.error(
+        error.response?.data?.error ||
+          `Failed to update profile: ${error.message}`
+      );
     } finally {
       setLoading(false);
     }
@@ -550,7 +565,9 @@ const EditProfile = () => {
                             <div className="p-6">
                               <SocialMediaSection
                                 userData={userData}
-                                handleSocialMediaChange={handleSocialMediaChange}
+                                handleSocialMediaChange={
+                                  handleSocialMediaChange
+                                }
                                 isDarkMode={isDarkMode}
                               />
                             </div>
