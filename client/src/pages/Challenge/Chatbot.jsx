@@ -24,7 +24,7 @@ const Chatbot = () => {
     if (foundRecipe) {
       setRecipeResult(foundRecipe);
     } else {
-      setRecipeResult({ error: 'No recipe found. Try names like "Pasta Perfection" or "Vegan Dessert Delight".' });
+      setRecipeResult({ error: 'No recipe found for the search.' });
     }
     setMessage('');
   };
@@ -91,7 +91,7 @@ const Chatbot = () => {
           </div>
 
           <p style={{ color: '#4b5563', marginBottom: '12px' }}>
-            Ask for a recipe (e.g., "Pasta Perfection")!
+            Ask for a Challenge Help (e.g., "Pasta Perfection")!
           </p>
 
           {/* Input area */}
@@ -100,7 +100,7 @@ const Chatbot = () => {
               type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Enter a dish name..."
+              placeholder="Enter a challenge name..."
               onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
               style={{
                 flex: 1,
