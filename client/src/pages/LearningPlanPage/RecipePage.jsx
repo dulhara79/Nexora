@@ -326,8 +326,6 @@ const generatePDF = () => {
   doc.rect(30, y - 10, pageWidth - 60, 50, 'F');
   doc.setFontSize(12);
   doc.setTextColor(30);
-  doc.text(`Level: ${level}`, 40, y + 4);
-  doc.text(`Description: ${cuisine.description || "—"}`, 40, y + 22);
   y += 70;
 
   // 4. Recipes Section Title
@@ -357,12 +355,12 @@ const generatePDF = () => {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
     doc.setTextColor(60);
-    doc.text(`⏱️ Time: ${recipe.time || '—'}`, 40, y);
+    doc.text(`⏱ Time: ${recipe.time || '—'}`, 40, y);
     y += 20;
 
     // Ingredients label
     doc.setFont('helvetica', 'bold');
-    doc.text("🧂 Ingredients:", 40, y);
+    doc.text("Ingredients:", 40, y);
     y += 16;
     doc.setFont('helvetica', 'normal');
     (recipe.ingredients || []).forEach((ing) => {
@@ -377,7 +375,7 @@ const generatePDF = () => {
     // Method label
     y += 6;
     doc.setFont('helvetica', 'bold');
-    doc.text("👩🏻‍🍳 Method:", 40, y);
+    doc.text("Method:", 40, y);
     y += 16;
     doc.setFont('helvetica', 'normal');
     const lines = doc.splitTextToSize(recipe.method || '—', pageWidth - 100);
