@@ -36,7 +36,7 @@ public class SecurityConfig {
                                 "/api/learningplan/**", 
                                 "/api/completedplans/**",
                                 "/api/progress/**",
-                                "/api/shoppinglist/**",
+                                "/api/kitchenwisdom/**",
                                 "/api/userplan/**", 
                                 "/api/users/**", 
                                 "/api/auth/**",
