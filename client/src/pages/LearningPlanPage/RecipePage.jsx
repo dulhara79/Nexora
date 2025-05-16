@@ -468,7 +468,7 @@ const generatePDF = () => {
   return (
     <>
       <div className="max-w-8xl mx-auto p-10">
-        <div className="text-right mb-6">
+        <div className="text-right mb-6 space-x-4">
           <button
             onClick={handleAddPlan}
             className={`px-4 py-2 rounded-full bg-${theme.color}-500 text-white hover:bg-${theme.color}-600`}
