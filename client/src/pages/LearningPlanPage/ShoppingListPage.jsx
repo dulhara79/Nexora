@@ -150,7 +150,7 @@ const ShoppingListPage = () => {
           onClick={handlePrint}
           className="absolute right-8 top-6 px-4 py-2 bg-white text-red-600 font-semibold rounded-full hover:bg-gray-100 transition"
         >
-          🖨️ Print
+          🖨️ Print the Ingredients List
         </button>
       </header>
 
@@ -185,7 +185,7 @@ const ShoppingListPage = () => {
         )}
 
         <p className="text-center text-gray-600 text-sm">
-          Generated from all cuisines (beginner ↔ advanced) in the app.
+          Happy Cooking!
         </p>
       </div>
     </div>
