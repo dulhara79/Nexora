@@ -524,7 +524,13 @@ const generatePDF = () => {
                 
               </div>
             ))}
-            
+                    <div className="text-center mt-10">
+          <button onClick={() => navigate('/cuisine')} 
+          
+                        className={`px-4 py-2 rounded-full bg-${theme.color}-500 text-white hover:bg-${theme.color}-600`}>
+            🍽️ Explore More Cuisines
+          </button>
+        </div>
           </div>
         </div>
       </div>
