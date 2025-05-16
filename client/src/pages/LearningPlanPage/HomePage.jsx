@@ -14,9 +14,9 @@ const HomePage = () => {
       route: "/cuisine/beginner",
       description:
         "Start with simple recipes to build your kitchen confidence. Enjoy easy-to-follow recipes and begin your culinary journey!",
-      borderClass: "border-blue-600",
-      textClass: "text-blue-800",
-      buttonClass: "bg-blue-500 hover:bg-blue-600",
+      borderClass: "border-yellow-600",
+      textClass: "text-yellow-800",
+      buttonClass: "bg-yellow-500 hover:bg-yellow-600",
       image:
         "https://www.baltana.com/files/wallpapers-28/Cupcake-Unicorn-Desktop-Wallpaper-85046.jpg",
     },
@@ -25,9 +25,9 @@ const HomePage = () => {
       route: "/cuisine/intermediate",
       description:
         "Take your skills up a notch with diverse and challenging dishes. Perfect for those who have mastered the basics and are ready for more adventure!",
-      borderClass: "border-yellow-600",
-      textClass: "text-yellow-800",
-      buttonClass: "bg-yellow-500 hover:bg-yellow-600",
+      borderClass: "border-orange-600",
+      textClass: "text-orange-800",
+      buttonClass: "bg-orange-500 hover:bg-orange-600",
       image:
         "https://www.baltana.com/files/wallpapers-25/Spaghetti-Wallpaper-1332x850-68239.jpg",
     },
