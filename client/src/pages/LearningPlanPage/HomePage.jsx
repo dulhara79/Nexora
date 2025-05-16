@@ -2,6 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import LearningPlanCreator from "../../components/LearningPlan/LearningPlanCreator.jsx";
 import NavbarLP from "../../components/LearningPlan/NavbarLP.jsx";
+import Navbar from "../../components/common/NewPageHeader";
+
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -48,7 +50,8 @@ const HomePage = () => {
 
   return (
     <>
-      <NavbarLP />
+      {/* <NavbarLP /> */}
+      <Navbar />
 
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-10">
         <div className="max-w-7xl mx-auto">
