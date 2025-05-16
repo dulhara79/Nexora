@@ -355,7 +355,7 @@ const generatePDF = () => {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
     doc.setTextColor(60);
-    doc.text(`⏱ Time: ${recipe.time || '—'}`, 40, y);
+    doc.text(`Time: ${recipe.time || '—'}`, 40, y);
     y += 20;
 
     // Ingredients label
