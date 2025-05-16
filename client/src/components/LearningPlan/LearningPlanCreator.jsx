@@ -319,9 +319,9 @@ const LearningPlanCreator = () => {
     {
       name: 'Intermediate',
       // greeting: 'Hey Intermediate Chef',
-      icon: <FaUtensils className="text-6xl text-orange-400 mb-4 animate-pulse drop-shadow-md" />,
+      icon: <FaUtensils className="text-6xl text-orange-500 mb-4 animate-pulse drop-shadow-md" />,
       // gradient: 'from-yellow-100 to-yellow-50',
-      borderColor: 'border-l-8 border-orange-400',
+      borderColor: 'border-l-8 border-orange-500',
       textColor: 'text-orange-800',
       statement: '“I’ve tried some recipes before… now I want to get even better!”',
     },
