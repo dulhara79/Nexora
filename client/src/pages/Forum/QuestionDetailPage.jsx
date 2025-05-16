@@ -12,7 +12,12 @@ import CommentSection from "../../components/Forum/CommentSection";
 const QuestionDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, token, isAuthenticated, loading: authLoading } = useContext(AuthContext);
+  const {
+    user,
+    token,
+    isAuthenticated,
+    loading: authLoading,
+  } = useContext(AuthContext);
   const [question, setQuestion] = useState(null);
   const [comments, setComments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,7 +48,8 @@ const QuestionDetailPage = () => {
         // Initialize question state
         let updatedQuestion = {
           ...questionResponse.data.question,
-          savedQuestionIds: questionResponse.data.question.savedQuestionIds || [],
+          savedQuestionIds:
+            questionResponse.data.question.savedQuestionIds || [],
         };
 
         // Fallback: Fetch user's saved questions to verify save state
@@ -53,14 +59,26 @@ const QuestionDetailPage = () => {
               `http://localhost:5000/api/questions/saved-questions?_=${timestamp}`,
               { headers: { Authorization: `Bearer ${token}` } }
             );
-            console.log("Saved Questions Response:", savedQuestionsResponse.data);
-            const savedQuestionIds = savedQuestionsResponse.data.questions.map((q) => q.id);
-            if (savedQuestionIds.includes(id) && !updatedQuestion.savedQuestionIds.includes(user.id)) {
+            console.log(
+              "Saved Questions Response:",
+              savedQuestionsResponse.data
+            );
+            const savedQuestionIds = savedQuestionsResponse.data.questions.map(
+              (q) => q.id
+            );
+            if (
+              savedQuestionIds.includes(id) &&
+              !updatedQuestion.savedQuestionIds.includes(user.id)
+            ) {
               updatedQuestion.savedQuestionIds.push(user.id);
-            } else if (!savedQuestionIds.includes(id) && updatedQuestion.savedQuestionIds.includes(user.id)) {
-              updatedQuestion.savedQuestionIds = updatedQuestion.savedQuestionIds.filter(
-                (uid) => uid !== user.id
-              );
+            } else if (
+              !savedQuestionIds.includes(id) &&
+              updatedQuestion.savedQuestionIds.includes(user.id)
+            ) {
+              updatedQuestion.savedQuestionIds =
+                updatedQuestion.savedQuestionIds.filter(
+                  (uid) => uid !== user.id
+                );
             }
           } catch (savedError) {
             console.error("Error fetching saved questions:", savedError);
@@ -68,11 +86,15 @@ const QuestionDetailPage = () => {
         }
 
         setQuestion(updatedQuestion);
-        const processedComments = buildCommentTree(commentsResponse.data.comments || []);
+        const processedComments = buildCommentTree(
+          commentsResponse.data.comments || []
+        );
         setComments(processedComments);
       } catch (err) {
         console.error("Error fetching question:", err);
-        setError(err.response?.data?.error || err.message || "Failed to load question");
+        setError(
+          err.response?.data?.error || err.message || "Failed to load question"
+        );
       } finally {
         setIsLoading(false);
       }
@@ -179,7 +201,6 @@ const QuestionDetailPage = () => {
         animate="visible"
         className="max-w-4xl px-4 py-8 mx-auto md:px-6"
       >
-
         <QuestionDetailCard
           question={question}
           user={user}
