@@ -1,14 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import Chatbot from './Chatbot';
 import Header from "../../components/common/NewPageHeader";
 
 const CompletedChallenges = () => {
   const navigate = useNavigate();
 
   return (
-    
+
     <>
     <Header />
     <motion.div
