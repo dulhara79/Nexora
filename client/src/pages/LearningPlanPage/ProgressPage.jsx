@@ -190,8 +190,8 @@ const ProgressPage = () => {
         </h1>
 
         {/* Ongoing Section */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-6 text-blue-600">Ongoing Adventures</h2>
+        <section className="mb-5">
+          <h2 className="text-3xl font-bold mb-6 text-yellow-600">Ongoing Adventures</h2>
           {ongoingPlans.length === 0 ? (
             <p className="text-center text-gray-600">No cuisines in progress yet!</p>
           ) : (
