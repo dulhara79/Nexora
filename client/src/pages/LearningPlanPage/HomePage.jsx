@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import LearningPlanCreator from "../../components/LearningPlan/LearningPlanCreator.jsx";
-import NavbarLP from "../../components/LearningPlan/NavbarLP.jsx";
+//import NavbarLP from "../../components/LearningPlan/NavbarLP.jsx";
 import Navbar from "../../components/common/NewPageHeader";
 
 
