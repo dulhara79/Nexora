@@ -1,6 +1,5 @@
 package com.nexora.server.controller.post;
 
-// Imports for dependencies like JWT handling, Spring components, and HTTP utilities
 import com.nexora.server.model.post.Post;
 import com.nexora.server.service.post.PostService;
 import io.jsonwebtoken.Jwts;
@@ -22,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-// Defines the REST controller for handling post-related API requests
+// REST controller for managing posts, mapped to /api/posts
 @RestController
 @RequestMapping("/api/posts")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
@@ -32,16 +31,16 @@ public class PostController {
     @Autowired
     private PostService postService;
 
-    // Loads JWT secret from configuration
+    // JWT secret for token verification
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    // Creates a SecretKey for JWT signing
+    // Creates a SecretKey for JWT parsing
     private SecretKey getJwtSecretKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    // Extracts user ID from JWT token in the Authorization header
+    // Extracts user ID from JWT token in Authorization header
     private String extractUserIdFromToken(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return null;
@@ -60,7 +59,7 @@ public class PostController {
         }
     }
 
-    // Builds HATEOAS-style links for a post (self, comments, like, save, all-posts)
+    // Builds HATEOAS-style links for post-related endpoints
     private List<Map<String, String>> buildPostLinks(String postId) {
         return Arrays.asList(
             Map.of("rel", "self", "href", "/api/posts/" + postId),
@@ -71,7 +70,10 @@ public class PostController {
         );
     }
 
-    // Handles POST request to create a new post with description and optional files
+    // Endpoint: POST /api/posts
+    // Purpose: Creates a new post with description and optional media files
+    // Request: Multipart form-data with description (string), files (List<MultipartFile>, optional), Authorization header (Bearer token)
+    // Response: 201 Created with post details and links, or 401/400/500 for errors
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<Map<String, Object>> createPost(
             @RequestPart("description") String description,
@@ -88,8 +90,9 @@ public class PostController {
         try {
             // Create post using PostService
             Post post = postService.createPost(userId, description, files);
-            // Set cache control and ETag headers
+            // Set cache control to prevent caching
             response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+            // Set ETag for cache validation
             response.setHeader("ETag", "\"" + post.getId() + "-" + post.getCreatedAt().toInstant(ZoneOffset.UTC).toEpochMilli() + "\"");
 
             // Build response with post and links
@@ -111,7 +114,10 @@ public class PostController {
         }
     }
 
-    // Handles GET request to retrieve a specific post by ID
+    // Endpoint: GET /api/posts/{postId}
+    // Purpose: Retrieves a specific post by ID
+    // Request: Path variable postId
+    // Response: 200 OK with post details and links, or 404/500 for errors
     @GetMapping("/{postId}")
     public ResponseEntity<Map<String, Object>> getPost(
             @PathVariable String postId,
@@ -119,7 +125,6 @@ public class PostController {
         try {
             // Fetch post using PostService
             Post post = postService.getPost(postId);
-            // Set cache control and ETag headers
             response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
             response.setHeader("ETag", "\"" + post.getId() + "-" + post.getCreatedAt().toInstant(ZoneOffset.UTC).toEpochMilli() + "\"");
 
@@ -139,11 +144,14 @@ public class PostController {
         }
     }
 
-    // Handles GET request to retrieve all posts
+    // Endpoint: GET /api/posts
+    // Purpose: Retrieves all posts
+    // Request: None
+    // Response: 200 OK with list of posts and their links, or 500 for errors
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> getAllPosts(HttpServletResponse response) {
         try {
-            // Fetch all posts using PostService
+            // Fetch all posts
             List<Post> posts = postService.getAllPosts();
             // Map posts to response format with links
             List<Map<String, Object>> responseBody = posts.stream().map(post -> {
@@ -153,7 +161,6 @@ public class PostController {
                 return postWithLinks;
             }).collect(Collectors.toList());
 
-            // Set cache control and ETag headers
             response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
             response.setHeader("ETag", "\"" + System.currentTimeMillis() + "\"");
 
@@ -165,12 +172,15 @@ public class PostController {
         }
     }
 
-    // Handles GET request to retrieve saved posts for the authenticated user
+    // Endpoint: GET /api/posts/saved
+    // Purpose: Retrieves posts saved by the authenticated user
+    // Request: Authorization header (Bearer token)
+    // Response: 200 OK with list of saved posts and links, or 401/500 for errors
     @GetMapping("/saved")
     public ResponseEntity<List<Map<String, Object>>> getSavedPosts(
             @RequestHeader("Authorization") String authHeader,
             HttpServletResponse response) {
-        // Authenticate user via JWT
+        // Authenticate user
         String userId = extractUserIdFromToken(authHeader);
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -178,9 +188,8 @@ public class PostController {
         }
 
         try {
-            // Fetch saved posts using PostService
+            // Fetch saved posts
             List<Post> posts = postService.getSavedPosts(userId);
-            // Map posts to response format with links
             List<Map<String, Object>> responseBody = posts.stream().map(post -> {
                 Map<String, Object> postWithLinks = new HashMap<>();
                 postWithLinks.put("post", post);
@@ -188,7 +197,6 @@ public class PostController {
                 return postWithLinks;
             }).collect(Collectors.toList());
 
-            // Set cache control and ETag headers
             response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
             response.setHeader("ETag", "\"" + System.currentTimeMillis() + "\"");
 
@@ -200,7 +208,10 @@ public class PostController {
         }
     }
 
-    // Handles PUT request to update a post's description and optional files
+    // Endpoint: PUT /api/posts/{postId}
+    // Purpose: Updates an existing post’s description and media
+    // Request: Multipart form-data with description (string), files (List<MultipartFile>, optional), Authorization header
+    // Response: 200 OK with updated post and links, or 401/403/404/500 for errors
     @PutMapping(value = "/{postId}", consumes = "multipart/form-data")
     public ResponseEntity<Map<String, Object>> updatePost(
             @PathVariable String postId,
@@ -208,7 +219,7 @@ public class PostController {
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @RequestHeader("Authorization") String authHeader,
             HttpServletResponse response) {
-        // Authenticate user via JWT
+        // Authenticate user
         String userId = extractUserIdFromToken(authHeader);
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -216,13 +227,12 @@ public class PostController {
         }
 
         try {
-            // Update post using PostService
+            // Update post
             Post updatedPost = postService.updatePost(postId, userId, description, files);
-            // Set cache control and ETag headers
             response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
             response.setHeader("ETag", "\"" + updatedPost.getId() + "-" + updatedPost.getCreatedAt().toInstant(ZoneOffset.UTC).toEpochMilli() + "\"");
 
-            // Build response with updated post and links
+            // Build response
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("post", updatedPost);
             responseBody.put("_links", buildPostLinks(updatedPost.getId()));
@@ -241,13 +251,16 @@ public class PostController {
         }
     }
 
-    // Handles DELETE request to delete a post
+    // Endpoint: DELETE /api/posts/{postId}
+    // Purpose: Deletes a post
+    // Request: Path variable postId, Authorization header
+    // Response: 200 OK with success message and links, or 401/403/404/500 for errors
     @DeleteMapping("/{postId}")
     public ResponseEntity<Map<String, Object>> deletePost(
             @PathVariable String postId,
             @RequestHeader("Authorization") String authHeader,
             HttpServletResponse response) {
-        // Authenticate user via JWT
+        // Authenticate user
         String userId = extractUserIdFromToken(authHeader);
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -255,12 +268,11 @@ public class PostController {
         }
 
         try {
-            // Delete post using PostService
+            // Delete post
             postService.deletePost(postId, userId);
-            // Set cache control header
             response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 
-            // Build response with success message and link to all posts
+            // Build response
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("message", "Post deleted successfully");
             responseBody.put("_links", Arrays.asList(
@@ -281,13 +293,16 @@ public class PostController {
         }
     }
 
-    // Handles POST request to like a post
+    // Endpoint: POST /api/posts/{postId}/like
+    // Purpose: Toggles like status for a post
+    // Request: Path variable postId, Authorization header
+    // Response: 200 OK with updated post and links, or 401/404/500 for errors
     @PostMapping("/{postId}/like")
     public ResponseEntity<Map<String, Object>> likePost(
             @PathVariable String postId,
             @RequestHeader("Authorization") String authHeader,
             HttpServletResponse response) {
-        // Authenticate user via JWT
+        // Authenticate user
         String userId = extractUserIdFromToken(authHeader);
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -295,13 +310,12 @@ public class PostController {
         }
 
         try {
-            // Like post using PostService
+            // Toggle like
             Post post = postService.likePost(postId, userId);
-            // Set cache control and ETag headers
             response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
             response.setHeader("ETag", "\"" + post.getId() + "-" + post.getCreatedAt().toInstant(ZoneOffset.UTC).toEpochMilli() + "\"");
 
-            // Build response with post and links
+            // Build response
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("post", post);
             responseBody.put("_links", buildPostLinks(post.getId()));
@@ -311,19 +325,22 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            System.err.println("Error liking post: " + e.getMessage());
+            System.err.println("Error toggling like: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Error liking post: " + e.getMessage()));
+                .body(Map.of("error", "Error toggling like: " + e.getMessage()));
         }
     }
 
-    // Handles POST request to save a post
+    // Endpoint: POST /api/posts/{postId}/save
+    // Purpose: Saves a post for the user
+    // Request: Path variable postId, Authorization header
+    // Response: 200 OK with updated post and links, or 401/404/500 for errors
     @PostMapping("/{postId}/save")
     public ResponseEntity<Map<String, Object>> savePost(
             @PathVariable String postId,
             @RequestHeader("Authorization") String authHeader,
             HttpServletResponse response) {
-        // Authenticate user via JWT
+        // Authenticate user
         String userId = extractUserIdFromToken(authHeader);
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -331,13 +348,12 @@ public class PostController {
         }
 
         try {
-            // Save post using PostService
+            // Save post
             Post post = postService.savePost(postId, userId);
-            // Set cache control and ETag headers
             response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
             response.setHeader("ETag", "\"" + post.getId() + "-" + post.getCreatedAt().toInstant(ZoneOffset.UTC).toEpochMilli() + "\"");
 
-            // Build response with post and links
+            // Build response
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("post", post);
             responseBody.put("_links", buildPostLinks(post.getId()));
@@ -353,13 +369,16 @@ public class PostController {
         }
     }
 
-    // Handles DELETE request to unsave a post
+    // Endpoint: DELETE /api/posts/{postId}/save
+    // Purpose: Removes a post from the user’s saved list
+    // Request: Path variable postId, Authorization header
+    // Response: 200 OK with updated post and links, or 401/404/500 for errors
     @DeleteMapping("/{postId}/save")
     public ResponseEntity<Map<String, Object>> unsavePost(
             @PathVariable String postId,
             @RequestHeader("Authorization") String authHeader,
             HttpServletResponse response) {
-        // Authenticate user via JWT
+        // Authenticate user
         String userId = extractUserIdFromToken(authHeader);
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -367,13 +386,12 @@ public class PostController {
         }
 
         try {
-            // Unsave post using PostService
+            // Unsave post
             Post post = postService.unsavePost(postId, userId);
-            // Set cache control and ETag headers
             response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
             response.setHeader("ETag", "\"" + post.getId() + "-" + post.getCreatedAt().toInstant(ZoneOffset.UTC).toEpochMilli() + "\"");
 
-            // Build response with post and links
+            // Build response
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("post", post);
             responseBody.put("_links", buildPostLinks(post.getId()));
@@ -389,14 +407,17 @@ public class PostController {
         }
     }
 
-    // Handles POST request to add a comment to a post
+    // Endpoint: POST /api/posts/{postId}/comment
+    // Purpose: Adds a comment to a post
+    // Request: Path variable postId, JSON body with comment (string), Authorization header
+    // Response: 201 Created with updated post and links, or 401/404/500 for errors
     @PostMapping("/{postId}/comment")
     public ResponseEntity<Map<String, Object>> addComment(
             @PathVariable String postId,
             @RequestBody CommentRequest commentRequest,
             @RequestHeader("Authorization") String authHeader,
             HttpServletResponse response) {
-        // Authenticate user via JWT
+        // Authenticate user
         String userId = extractUserIdFromToken(authHeader);
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -404,13 +425,12 @@ public class PostController {
         }
 
         try {
-            // Add comment using PostService
+            // Add comment
             Post post = postService.addComment(postId, userId, commentRequest.getComment());
-            // Set cache control and ETag headers
             response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
             response.setHeader("ETag", "\"" + post.getId() + "-" + post.getCreatedAt().toInstant(ZoneOffset.UTC).toEpochMilli() + "\"");
 
-            // Build response with post and links
+            // Build response
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("post", post);
             responseBody.put("_links", buildPostLinks(post.getId()));
@@ -427,7 +447,10 @@ public class PostController {
         }
     }
 
-    // Handles PUT request to update a comment on a post
+    // Endpoint: PUT /api/posts/{postId}/comment/{commentId}
+    // Purpose: Updates a comment on a post
+    // Request: Path variables postId and commentId, JSON body with comment (string), Authorization header
+    // Response: 200 OK with updated post and links, or 401/403/404/500 for errors
     @PutMapping("/{postId}/comment/{commentId}")
     public ResponseEntity<Map<String, Object>> updateComment(
             @PathVariable String postId,
@@ -435,7 +458,7 @@ public class PostController {
             @RequestBody CommentRequest commentRequest,
             @RequestHeader("Authorization") String authHeader,
             HttpServletResponse response) {
-        // Authenticate user via JWT
+        // Authenticate user
         String userId = extractUserIdFromToken(authHeader);
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -443,13 +466,12 @@ public class PostController {
         }
 
         try {
-            // Update comment using PostService
+            // Update comment
             Post post = postService.updateComment(postId, commentId, userId, commentRequest.getComment());
-            // Set cache control and ETag headers
             response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
             response.setHeader("ETag", "\"" + post.getId() + "-" + post.getCreatedAt().toInstant(ZoneOffset.UTC).toEpochMilli() + "\"");
 
-            // Build response with post and links
+            // Build response
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("post", post);
             responseBody.put("_links", buildPostLinks(post.getId()));
@@ -468,14 +490,17 @@ public class PostController {
         }
     }
 
-    // Handles DELETE request to delete a comment from a post
+    // Endpoint: DELETE /api/posts/{postId}/comment/{commentId}
+    // Purpose: Deletes a comment from a post
+    // Request: Path variables postId and commentId, Authorization header
+    // Response: 200 OK with updated post and links, or 401/403/404/500 for errors
     @DeleteMapping("/{postId}/comment/{commentId}")
     public ResponseEntity<Map<String, Object>> deleteComment(
             @PathVariable String postId,
             @PathVariable String commentId,
             @RequestHeader("Authorization") String authHeader,
             HttpServletResponse response) {
-        // Authenticate user via JWT
+        // Authenticate user
         String userId = extractUserIdFromToken(authHeader);
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -483,13 +508,12 @@ public class PostController {
         }
 
         try {
-            // Delete comment using PostService
+            // Delete comment
             Post post = postService.deleteComment(postId, commentId, userId);
-            // Set cache control and ETag headers
             response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
             response.setHeader("ETag", "\"" + post.getId() + "-" + post.getCreatedAt().toInstant(ZoneOffset.UTC).toEpochMilli() + "\"");
 
-            // Build response with post and links
+            // Build response
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("post", post);
             responseBody.put("_links", buildPostLinks(post.getId()));
@@ -509,16 +533,14 @@ public class PostController {
     }
 }
 
-// Defines a simple DTO for handling comment requests
+// DTO for comment requests
 class CommentRequest {
     private String comment;
 
-    // Getter for comment
     public String getComment() {
         return comment;
     }
 
-    // Setter for comment
     public void setComment(String comment) {
         this.comment = comment;
     }
