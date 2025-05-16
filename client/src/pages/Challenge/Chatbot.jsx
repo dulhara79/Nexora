@@ -71,7 +71,7 @@ const Chatbot = () => {
           {/* Header with title and close button */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <h3 style={{ color: '#3b82f6', fontSize: '1.25rem' }}>
-              🤖 Recipe Bot
+              🤖 Challenge Help Bot
             </h3>
             <motion.button
               onClick={toggleChatbot}
