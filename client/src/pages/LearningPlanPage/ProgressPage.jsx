@@ -190,7 +190,7 @@ const ProgressPage = () => {
         </h1>
 
         {/* Ongoing Section */}
-        <section className="mb-5">
+        <section className="mb-1">
           <h2 className="text-3xl font-bold mb-6 text-yellow-600">Ongoing Adventures</h2>
           {ongoingPlans.length === 0 ? (
             <p className="text-center text-gray-600">No cuisines in progress yet!</p>
@@ -206,7 +206,7 @@ const ProgressPage = () => {
                     <p className="text-gray-600 mb-4">{doneCount}/{total} Recipes Mastered</p>
                     <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                       <div
-                        className="bg-blue-500 h-3 rounded-full transition-all duration-300"
+                        className="bg-red-500 h-3 rounded-full transition-all duration-300"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
