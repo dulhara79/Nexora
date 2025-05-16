@@ -62,6 +62,7 @@ import RecipeGenerator from "./pages/Challenge/RecipeGenerator";
 import TestPage from "./pages/TestPage";
 import EditQuestionPage from "./pages/Forum/EditQuestionPage";
 import SearchResultsPage from "./pages/User/SearchResultsPage";
+import QuizEdit from "./components/Forum/Quiz/QuizEdit";
 
 function App() {
   return (
@@ -116,6 +117,7 @@ function App() {
           <Route path="/forum/quizzes/create" element={<QuizCreate />} />
           <Route path="/forum/quizzes/:id" element={<QuizDetail />} />
           <Route path="/forum/quizzes/:id/stats" element={<QuizStats />} />
+          <Route path="/forum/quizzes/:id/edit" element={<QuizEdit />} />12
 
           {/* Post Routes */}
           <Route path="/post" element={<Home />} />
