@@ -46,7 +46,6 @@ public class PostService {
         post.setDescription(description);
         post.setCreatedAt(LocalDateTime.now());
 
-        // Fetch username
         com.nexora.server.model.User user = userRepository.findById(userId)
                 .orElseThrow(() -> new Exception("User not found"));
         post.setUserName(user.getName());
@@ -56,7 +55,6 @@ public class PostService {
                 throw new IllegalArgumentException("A post can contain a maximum of 3 photos or videos.");
             }
 
-            // Check for null content type
             String firstContentType = files.get(0).getContentType();
             if (firstContentType == null) {
                 throw new IllegalArgumentException("Content type of the first file is missing.");
@@ -145,7 +143,6 @@ public class PostService {
                 throw new IllegalArgumentException("A post can contain a maximum of 3 photos or videos.");
             }
 
-            // Check for null content type
             String firstContentType = files.get(0).getContentType();
             if (firstContentType == null) {
                 throw new IllegalArgumentException("Content type of the first file is missing.");
@@ -222,14 +219,15 @@ public class PostService {
 
     public Post likePost(String postId, String userId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
 
-        if (!post.getLikes().contains(userId)) {
+        boolean isLiked = post.getLikes().contains(userId);
+        if (isLiked) {
+            post.getLikes().remove(userId);
+        } else {
             post.getLikes().add(userId);
-
             User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
             if (!userId.equals(post.getUserId())) {
                 Notification notification = new Notification();
                 notification.setId(UUID.randomUUID().toString());
@@ -247,7 +245,7 @@ public class PostService {
 
     public Post addComment(String postId, String userId, String commentText) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
 
         User user = userService.getUserById(userId);
 
@@ -275,15 +273,15 @@ public class PostService {
 
     public Post updateComment(String postId, String commentId, String userId, String updatedComment) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
 
         Post.Comment comment = post.getComments().stream()
                 .filter(c -> c.getId().equals(commentId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
 
         if (!comment.getUserId().equals(userId)) {
-            throw new RuntimeException("Unauthorized to edit this comment");
+            throw new SecurityException("Unauthorized to edit this comment");
         }
 
         comment.setText(updatedComment);
@@ -292,15 +290,15 @@ public class PostService {
 
     public Post deleteComment(String postId, String commentId, String userId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
 
         Post.Comment comment = post.getComments().stream()
                 .filter(c -> c.getId().equals(commentId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
 
         if (!comment.getUserId().equals(userId) && !post.getUserId().equals(userId)) {
-            throw new RuntimeException("Unauthorized to delete this comment");
+            throw new SecurityException("Unauthorized to delete this comment");
         }
 
         post.getComments().remove(comment);
@@ -309,7 +307,7 @@ public class PostService {
 
     public Post savePost(String postId, String userId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
 
         if (!post.getSavedBy().contains(userId)) {
             post.getSavedBy().add(userId);
@@ -320,7 +318,7 @@ public class PostService {
 
     public Post unsavePost(String postId, String userId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
 
         post.getSavedBy().remove(userId);
         return postRepository.save(post);

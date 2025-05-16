@@ -137,6 +137,7 @@ public class UserService {
     /**
      * Get a user by ID or throw exception if not found.
      */
+
     public User getUserById(String userId) {
         User user = findById(userId);
         if (user == null) {

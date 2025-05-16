@@ -164,6 +164,7 @@ public class UserController {
 
             List<User> followers = userService.getFollowers(userId);
             // Build response for each follower
+
             List<Map<String, Object>> followerResponses = followers.stream().map(user -> {
                 Map<String, Object> userMap = new HashMap<>();
                 userMap.put("id", user.getId());
@@ -212,6 +213,7 @@ public class UserController {
 
             List<User> following = userService.getFollowing(userId);
             // Build response for each followed user
+
             List<Map<String, Object>> followingResponses = following.stream().map(user -> {
                 Map<String, Object> userMap = new HashMap<>();
                 userMap.put("id", user.getId());

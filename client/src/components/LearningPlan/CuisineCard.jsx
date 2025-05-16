@@ -63,7 +63,7 @@ const CuisineCard = ({ cuisine, onSelectCuisine, color = 'blue' }) => {
         className="w-full h-60 object-cover rounded-lg mb-5"
       />
       <div className="text-center">
-        <h3 className={`text-2xl font-semibold text-${color}-700 mb-4`}>
+        <h3 className={`text-2xl font-semibold text-${color}-500 mb-4`}>
           {cuisine.name}
         </h3>
         <p className="text-gray-600 text-sm mb-4">{cuisine.description}</p>
