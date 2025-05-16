@@ -210,7 +210,7 @@ const CuisinePage = () => {
       {/* <NavbarLP /> */}
       <Navbar />
      {/* 2️⃣ live-search input */}
-     <div className="max-w-7xl mx-auto mt-8 px-4">
+     <div className="max-w-7xl mx-auto mt-8 px-4 mb-2">
       <input
          type="text"
          placeholder="🔍 Search Cuisines"
