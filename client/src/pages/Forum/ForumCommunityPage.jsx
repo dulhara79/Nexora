@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import axios from "axios";
 // import Header from '../../components/Forum/Header';
 import Header from "../../components/common/NewPageHeader";
 
 // Configure Axios instance
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = "http://localhost:5000/api";
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
@@ -14,13 +14,13 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('jwtToken');
+    const token = localStorage.getItem("jwtToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     const etag = localStorage.getItem(`etag-${config.url}`);
     if (etag) {
-      config.headers['If-None-Match'] = etag;
+      config.headers["If-None-Match"] = etag;
     }
     return config;
   },
@@ -31,7 +31,10 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     if (response.headers.etag) {
-      localStorage.setItem(`etag-${response.config.url}`, response.headers.etag);
+      localStorage.setItem(
+        `etag-${response.config.url}`,
+        response.headers.etag
+      );
     }
     return response.data;
   },
@@ -40,10 +43,10 @@ api.interceptors.response.use(
       return Promise.resolve(null);
     }
     if (error.response?.status === 401) {
-      localStorage.removeItem('jwtToken');
-      window.location.href = '/login';
+      localStorage.removeItem("jwtToken");
+      window.location.href = "/login";
     }
-    return Promise.reject(error.response?.data?.error || 'An error occurred');
+    return Promise.reject(error.response?.data?.error || "An error occurred");
   }
 );
 
@@ -56,10 +59,10 @@ const CommunityPage = () => {
     const fetchCommunities = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/communities');
+        const response = await api.get("/communities");
         setCommunities(response?.communities || []);
       } catch (err) {
-        setError('Failed to load communities.');
+        setError("Failed to load communities.");
       } finally {
         setLoading(false);
       }
@@ -69,10 +72,10 @@ const CommunityPage = () => {
 
   const getRandomGradient = () => {
     const gradients = [
-      'from-blue-500 to-indigo-600',
-      'from-emerald-500 to-teal-600',
-      'from-purple-500 to-pink-600',
-      'from-amber-500 to-orange-600',
+      "from-blue-500 to-indigo-600",
+      "from-emerald-500 to-teal-600",
+      "from-purple-500 to-pink-600",
+      "from-amber-500 to-orange-600",
     ];
     return gradients[Math.floor(Math.random() * gradients.length)];
   };
@@ -107,7 +110,7 @@ const CommunityPage = () => {
                   <div
                     className={`flex items-center justify-center w-12 h-12 rounded-lg bg-gradient-to-br ${getRandomGradient()}`}
                   >
-                    <span className="text-xl">{community.icon || '🌟'}</span>
+                    <span className="text-xl">{community.icon || "🌟"}</span>
                   </div>
                   <div>
                     <h2 className="text-lg font-semibold text-slate-800 dark:text-white">

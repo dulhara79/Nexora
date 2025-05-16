@@ -4,7 +4,9 @@ import { Link } from "react-router-dom";
 const PageNotFound = () => {
   return (
     <div className="flex items-center justify-center w-screen min-h-screen p-5 bg-gradient-to-br from-purple-600 via-blue-600 to-green-500">
-      <div className="relative w-full max-w-6xl mx-auto text-center"> {/* Added container constraints */}
+      <div className="relative w-full max-w-6xl mx-auto text-center">
+        {" "}
+        {/* Added container constraints */}
         {/* Animated 404 Text */}
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
@@ -28,7 +30,6 @@ const PageNotFound = () => {
             ))}
           </h1>
         </motion.div>
-
         {/* Animated Content */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -39,8 +40,8 @@ const PageNotFound = () => {
             Oops! Page Lost in Space
           </h2>
           <p className="max-w-2xl mx-auto mb-8 text-xl text-white/90">
-            The knowledge you're seeking has drifted into the cosmic void. 
-            Let's navigate back to familiar territory together.
+            The knowledge you're seeking has drifted into the cosmic void. Let's
+            navigate back to familiar territory together.
           </p>
 
           {/* Animated SVG */}
@@ -58,10 +59,7 @@ const PageNotFound = () => {
           </motion.svg>
 
           {/* Back Home Button */}
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Link
               to="/"
               className="inline-block px-8 py-3 text-lg font-semibold text-blue-600 transition-all duration-200 bg-white rounded-full hover:bg-opacity-90"
@@ -70,9 +68,10 @@ const PageNotFound = () => {
             </Link>
           </motion.div>
         </motion.div>
-
         {/* Floating Stars - Wrap in container */}
-        <div className="fixed inset-0 pointer-events-none"> {/* Changed to fixed positioning */}
+        <div className="fixed inset-0 pointer-events-none">
+          {" "}
+          {/* Changed to fixed positioning */}
           {[...Array(20)].map((_, index) => (
             <motion.div
               key={index}

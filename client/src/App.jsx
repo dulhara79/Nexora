@@ -17,6 +17,8 @@ import "./index.css";
 // User Pages
 import Profile from "./pages/User/UserProfilePage";
 import EditProfile from "./pages/User/EditProfilePage";
+import FollowersList from "./pages/User/FollowersList";
+import FollowingList from "./pages/User/FollowingList";
 
 // Learning Plan Pages
 import HomePage from "./pages/LearningPlanPage/HomePage";
@@ -59,7 +61,7 @@ import RemixGallery from "./pages/Challenge/ChallenfeRemix";
 import RecipeGenerator from "./pages/Challenge/RecipeGenerator";
 
 // Test Page
-import TestPage from "./pages/TestPage";
+// import TestPage from "./pages/TestPage";
 import EditQuestionPage from "./pages/Forum/EditQuestionPage";
 import SearchResultsPage from "./pages/User/SearchResultsPage";
 import QuizEdit from "./components/Forum/Quiz/QuizEdit";
@@ -75,11 +77,12 @@ function App() {
           <Route path="/auth/google-callback" element={<GoogleCallback />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/otp-verify" element={<OTPVerify />} />
-
           <Route path="/profile/:userId" element={<Profile />} />
           <Route path="/edit/:userId" element={<EditProfile />} />
           <Route path="/feed" element={<UserFeedPage />} />
           <Route path="/search" element={<SearchResultsPage />} />
+          <Route path="/profile/:userId/followers" element={<FollowersList />} />
+          <Route path="/profile/:userId/following" element={<FollowingList />} />
 
           {/* Learning Plan Routes */}
           <Route path="/learninghome" element={<HomePage />} />
@@ -90,7 +93,6 @@ function App() {
           <Route path="/userplan" element={<UserPlanPage />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/progress/:userId" element={<ProgressPage />} />
-
           {/* Forum Routes */}
           <Route path="/forum" element={<ForumHomeLandingPage />} />
           <Route path="/forum/home" element={<ForumDashBoard />} />
@@ -107,24 +109,17 @@ function App() {
             element={<ForumCommunityPage />}
           />
           <Route path="/forum/my-questions" element={<UserQuestionsPage />} />
-          {/* <Route path="/forum/quizzes" element={<QuizList />} />
-          <Route path="/forum/quizzes/create" element={<QuizCreate />} />
-          <Route path="/forum/quizzes/:id" element={<QuizDetail />} />
-          <Route path="/forum/quizzes/:id/stats" element={<QuizStats />} />
-          <Route path="/forum/quizzes/:id/take" element={<QuizTake />} /> */}
-
           <Route path="/forum/quizzes" element={<QuizList />} />
           <Route path="/forum/quizzes/create" element={<QuizCreate />} />
           <Route path="/forum/quizzes/:id" element={<QuizDetail />} />
           <Route path="/forum/quizzes/:id/stats" element={<QuizStats />} />
-          <Route path="/forum/quizzes/:id/edit" element={<QuizEdit />} />12
+          <Route path="/forum/quizzes/:id/edit" element={<QuizEdit />} />
 
           {/* Post Routes */}
           <Route path="/post" element={<Home />} />
           <Route path="/create-post" element={<CreatePost />} />
           <Route path="/post-notifications" element={<Notifications />} />
           <Route path="/saved-posts" element={<SavedPosts />} />
-
           {/* Challenges Routes */}
           <Route path="/challenges" element={<ChallengeList />} />
           <Route path="/challenge/:challengeId" element={<ChallengeDetail />} />
@@ -133,22 +128,24 @@ function App() {
             path="/edit-challenge/:challengeId"
             element={<CreateChallenge />}
           />
-
           {/* Test Page */}
-          <Route path="/test" element={<TestPage />} />
-
+          {/* <Route path="/test" element={<TestPage />} /> */}
           {/* Challenges Routes */}
           <Route path="/challenges" element={<ChallengeList />} />
           <Route path="/challenge/:challengeId" element={<ChallengeDetail />} />
           <Route path="/create-challenge" element={<CreateChallenge />} />
-          <Route path="/edit-challenge/:challengeId" element={<CreateChallenge />} />
-          <Route path="/start-challenge/:challengeId" element={<StartChallenge />} />
+          <Route
+            path="/edit-challenge/:challengeId"
+            element={<CreateChallenge />}
+          />
+          <Route
+            path="/start-challenge/:challengeId"
+            element={<StartChallenge />}
+          />
           <Route path="/collaboration-hub" element={<CollaborationHub />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/remix-gallery" element={<RemixGallery />} />
           <Route path="/recipe-generator" element={<RecipeGenerator />} />
-
-
           {/* 404 Page */}
           <Route path="/*" element={<PageNotFound />} />
         </Routes>

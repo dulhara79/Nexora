@@ -97,7 +97,8 @@ export default function AskQuestionPage() {
     //   return;
     // }
 
-    if (formData.tags.length > 5) { // Corrected validation
+    if (formData.tags.length > 5) {
+      // Corrected validation
       setError("You can add up to 5 tags.");
       return;
     }
@@ -108,7 +109,7 @@ export default function AskQuestionPage() {
       if (!token) {
         throw new Error("No authentication token found. Please log in.");
       }
-      
+
       // Send properly structured data
       const postData = {
         title: formData.title,
@@ -123,7 +124,7 @@ export default function AskQuestionPage() {
           "Content-Type": "application/json",
         },
       });
-      
+
       setSuccess(true);
       setTimeout(() => {
         navigate(`/forum/question/${res.data.question.id}`);
@@ -132,7 +133,7 @@ export default function AskQuestionPage() {
       console.error("Error submitting question:", error);
       setError(
         error.response?.data?.error || // Match backend error key
-        "Failed to post your question. Please try again."
+          "Failed to post your question. Please try again."
       );
       setLoading(false);
     }
@@ -303,7 +304,7 @@ export default function AskQuestionPage() {
             </motion.div>
 
             {/* Community Select */}
-          {/* <motion.div className="mb-8" variants={itemVariants}>
+            {/* <motion.div className="mb-8" variants={itemVariants}>
             <label className="block mb-2 text-lg font-medium text-gray-700">
               Community
             </label>

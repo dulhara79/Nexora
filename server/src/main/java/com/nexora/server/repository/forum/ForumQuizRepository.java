@@ -10,6 +10,8 @@ import java.util.List;
 @Repository
 public interface ForumQuizRepository extends MongoRepository<ForumQuiz, String> {
     List<ForumQuiz> findByIsActiveTrue();
+
     List<ForumQuiz> findByAuthorId(String authorId);
+
     List<ForumQuiz> findByDeadlineBeforeAndIsActiveTrue(LocalDateTime deadline);
 }

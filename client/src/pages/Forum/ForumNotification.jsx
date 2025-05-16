@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import axios from "axios";
 // import Header from '../../components/Forum/Header';
 import Header from "../../components/common/NewPageHeader";
 
 // Configure Axios instance
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = "http://localhost:5000/api";
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
@@ -14,13 +14,13 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('jwtToken');
+    const token = localStorage.getItem("jwtToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     const etag = localStorage.getItem(`etag-${config.url}`);
     if (etag) {
-      config.headers['If-None-Match'] = etag;
+      config.headers["If-None-Match"] = etag;
     }
     return config;
   },
@@ -31,7 +31,10 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     if (response.headers.etag) {
-      localStorage.setItem(`etag-${response.config.url}`, response.headers.etag);
+      localStorage.setItem(
+        `etag-${response.config.url}`,
+        response.headers.etag
+      );
     }
     return response.data;
   },
@@ -40,10 +43,10 @@ api.interceptors.response.use(
       return Promise.resolve(null);
     }
     if (error.response?.status === 401) {
-      localStorage.removeItem('jwtToken');
-      window.location.href = '/login';
+      localStorage.removeItem("jwtToken");
+      window.location.href = "/login";
     }
-    return Promise.reject(error.response?.data?.error || 'An error occurred');
+    return Promise.reject(error.response?.data?.error || "An error occurred");
   }
 );
 
@@ -56,10 +59,10 @@ const NotificationsPage = () => {
     const fetchNotifications = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/forum/notifications');
+        const response = await api.get("/forum/notifications");
         setNotifications(response || []);
       } catch (err) {
-        setError('Failed to load notifications.');
+        setError("Failed to load notifications.");
       } finally {
         setLoading(false);
       }
@@ -72,7 +75,7 @@ const NotificationsPage = () => {
       await api.post(`/forum/notifications/${id}/read`);
       setNotifications(notifications.filter((n) => n.id !== id));
     } catch (err) {
-      setError('Failed to mark notification as read.');
+      setError("Failed to mark notification as read.");
     }
   };
 

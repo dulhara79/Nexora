@@ -2,7 +2,14 @@ import { useState, useEffect, useRef, useContext } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Filter, PlusCircle, ChevronDown, MessageSquare, Users } from "lucide-react";
+import {
+  Search,
+  Filter,
+  PlusCircle,
+  ChevronDown,
+  MessageSquare,
+  Users,
+} from "lucide-react";
 import QuestionCard from "../../components/Forum/QuestionCard";
 import CreateQuestionModal from "../../components/Forum/CreateQuestionModal";
 import SkeletonLoader from "../../components/Forum/SkeletonLoader";
@@ -66,14 +73,20 @@ export default function ForumHomePage() {
     try {
       setLoading(true);
       const timestamp = Date.now();
-      const res = await axios.get(`${BASE_URL}/api/questions?sortBy=${activeFilter}&_=${timestamp}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const res = await axios.get(
+        `${BASE_URL}/api/questions?sortBy=${activeFilter}&_=${timestamp}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
       console.log("Fetched Questions:", res.data.questions);
       setQuestions(res.data.questions || []);
     } catch (error) {
       console.error("Error fetching questions:", error);
-      toast.error("Failed to load questions", { position: "top-right", autoClose: 3000 });
+      toast.error("Failed to load questions", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     } finally {
       setLoading(false);
     }
@@ -87,22 +100,31 @@ export default function ForumHomePage() {
     }
     try {
       const timestamp = Date.now();
-      const res = await axios.get(`${BASE_URL}/api/questions/saved-questions?_=${timestamp}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(
+        `${BASE_URL}/api/questions/saved-questions?_=${timestamp}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const savedIds = res.data.questions?.map((q) => q.id) || [];
       console.log("Fetched Saved Question IDs:", savedIds);
       setSavedQuestionIds(savedIds);
     } catch (error) {
       console.error("Error fetching saved questions:", error);
-      toast.error("Failed to load saved questions", { position: "top-right", autoClose: 3000 });
+      toast.error("Failed to load saved questions", {
+        position: "top-right",
+        autoClose: 3000,
+      });
       setSavedQuestionIds([]);
     }
   };
 
   const handleSaveToggle = async (questionId, isSaved) => {
     if (!isAuthenticated) {
-      toast.info("Please log in to save questions", { position: "top-right", autoClose: 3000 });
+      toast.info("Please log in to save questions", {
+        position: "top-right",
+        autoClose: 3000,
+      });
       return;
     }
 
@@ -136,21 +158,35 @@ export default function ForumHomePage() {
         autoClose: 2000,
       });
     } catch (error) {
-      console.error(`Error ${isSaved ? "unsaving" : "saving"} question ${questionId}:`, error);
+      console.error(
+        `Error ${isSaved ? "unsaving" : "saving"} question ${questionId}:`,
+        error
+      );
       // Revert optimistic update on error
       setSavedQuestionIds(previousSavedQuestionIds);
-      toast.error(error.response?.data?.error || "Failed to save/unsave question", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.error(
+        error.response?.data?.error || "Failed to save/unsave question",
+        {
+          position: "top-right",
+          autoClose: 3000,
+        }
+      );
     }
   };
 
   const fetchTrending = async () => {
     // Mocked trending data
     setTrending([
-      { id: 1, title: "How to properly season a cast iron pan?", commentCount: 24 },
-      { id: 2, title: "Best way to make crispy pizza at home?", commentCount: 18 },
+      {
+        id: 1,
+        title: "How to properly season a cast iron pan?",
+        commentCount: 24,
+      },
+      {
+        id: 2,
+        title: "Best way to make crispy pizza at home?",
+        commentCount: 18,
+      },
       { id: 3, title: "Kneading techniques for beginners", commentCount: 12 },
     ]);
   };
@@ -163,7 +199,8 @@ export default function ForumHomePage() {
         name: "Baking Enthusiasts",
         icon: "🥖",
         members: 4523,
-        description: "A community for baking lovers to share recipes and techniques.",
+        description:
+          "A community for baking lovers to share recipes and techniques.",
       },
       {
         id: 2,
@@ -234,10 +271,12 @@ export default function ForumHomePage() {
               transition={{ duration: 0.6 }}
               className="max-w-3xl mx-auto text-center text-white"
             >
-              <h1 className="mb-4 text-4xl font-bold md:text-5xl">Nexora Cooking Community</h1>
+              <h1 className="mb-4 text-4xl font-bold md:text-5xl">
+                Nexora Cooking Community
+              </h1>
               <p className="mb-8 text-lg">
-                Share recipes, ask questions, and connect with cooking enthusiasts from around the
-                world
+                Share recipes, ask questions, and connect with cooking
+                enthusiasts from around the world
               </p>
 
               <div className="relative w-full max-w-xl mx-auto">
@@ -267,7 +306,9 @@ export default function ForumHomePage() {
             {/* Main Content */}
             <div className="flex-1">
               <div className="flex flex-wrap items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Cooking Q&A</h2>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  Cooking Q&A
+                </h2>
 
                 <div className="flex items-center gap-3">
                   <motion.button
@@ -279,7 +320,9 @@ export default function ForumHomePage() {
                     <Filter className="w-4 h-4" />
                     Filters
                     <ChevronDown
-                      className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""}`}
+                      className={`w-4 h-4 transition-transform ${
+                        showFilters ? "rotate-180" : ""
+                      }`}
                     />
                   </motion.button>
 
@@ -306,7 +349,9 @@ export default function ForumHomePage() {
                     className="p-4 mb-6 overflow-hidden bg-white rounded-lg shadow"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-medium text-gray-700">Filter Questions</h3>
+                      <h3 className="font-medium text-gray-700">
+                        Filter Questions
+                      </h3>
                       <button
                         onClick={clearFilters}
                         className="text-sm text-orange-500 hover:text-orange-600"
@@ -340,7 +385,10 @@ export default function ForumHomePage() {
                         <select
                           value={filterOptions.time}
                           onChange={(e) =>
-                            setFilterOptions({ ...filterOptions, time: e.target.value })
+                            setFilterOptions({
+                              ...filterOptions,
+                              time: e.target.value,
+                            })
                           }
                           className="w-full p-2 text-sm border border-gray-200 rounded"
                         >
@@ -356,7 +404,10 @@ export default function ForumHomePage() {
                         <select
                           value={filterOptions.answers}
                           onChange={(e) =>
-                            setFilterOptions({ ...filterOptions, answers: e.target.value })
+                            setFilterOptions({
+                              ...filterOptions,
+                              answers: e.target.value,
+                            })
                           }
                           className="w-full p-2 text-sm border border-gray-200 rounded"
                         >
@@ -439,7 +490,9 @@ export default function ForumHomePage() {
               {/* Top Communities */}
               <div className="p-5 mb-6 bg-white rounded-lg shadow">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800">Top Communities</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Top Communities
+                  </h3>
                   <Link
                     to="/forum/communities"
                     className="text-sm text-orange-500 hover:text-orange-600"
@@ -452,7 +505,10 @@ export default function ForumHomePage() {
                   {communities.map((community) => (
                     <motion.div
                       key={community.id}
-                      whileHover={{ y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
+                      whileHover={{
+                        y: -2,
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                      }}
                       className="p-3 transition-all rounded-lg bg-orange-50"
                     >
                       <div className="flex items-center">
@@ -460,7 +516,9 @@ export default function ForumHomePage() {
                           {community.icon}
                         </div>
                         <div>
-                          <h4 className="font-medium text-gray-800">{community.name}</h4>
+                          <h4 className="font-medium text-gray-800">
+                            {community.name}
+                          </h4>
                           <p className="text-xs text-gray-500">
                             {community.members.toLocaleString()} members
                           </p>
@@ -473,7 +531,10 @@ export default function ForumHomePage() {
                     whileHover={{ y: -2 }}
                     className="flex items-center justify-center p-3 text-orange-500 transition-colors border-2 border-orange-200 border-dashed rounded-lg hover:bg-orange-50"
                   >
-                    <Link to="/forum/communities/create" className="flex items-center">
+                    <Link
+                      to="/forum/communities/create"
+                      className="flex items-center"
+                    >
                       <Users className="w-4 h-4 mr-2" />
                       Create Community
                     </Link>
@@ -483,10 +544,16 @@ export default function ForumHomePage() {
 
               {/* Trending Topics */}
               <div className="p-5 mb-6 bg-white rounded-lg shadow">
-                <h3 className="mb-4 text-lg font-semibold text-gray-800">Trending Topics</h3>
+                <h3 className="mb-4 text-lg font-semibold text-gray-800">
+                  Trending Topics
+                </h3>
                 <div className="space-y-3">
                   {trending.map((topic) => (
-                    <motion.div key={topic.id} whileHover={{ x: 3 }} className="flex items-start">
+                    <motion.div
+                      key={topic.id}
+                      whileHover={{ x: 3 }}
+                      className="flex items-start"
+                    >
                       <div className="flex items-center justify-center w-6 h-6 mr-3 text-xs text-white bg-orange-500 rounded-full">
                         {topic.id}
                       </div>
@@ -497,7 +564,9 @@ export default function ForumHomePage() {
                         >
                           {topic.title}
                         </Link>
-                        <p className="text-xs text-gray-500">{topic.commentCount} answers</p>
+                        <p className="text-xs text-gray-500">
+                          {topic.commentCount} answers
+                        </p>
                       </div>
                     </motion.div>
                   ))}
@@ -511,7 +580,8 @@ export default function ForumHomePage() {
               >
                 <h3 className="mb-2 text-lg font-semibold">Need Help?</h3>
                 <p className="mb-4 text-sm">
-                  Check out our guidelines on how to ask good questions and get quality answers.
+                  Check out our guidelines on how to ask good questions and get
+                  quality answers.
                 </p>
                 <Link
                   to="/forum/guidelines"
@@ -527,7 +597,10 @@ export default function ForumHomePage() {
         {/* Modal */}
         <AnimatePresence>
           {showModal && (
-            <CreateQuestionModal onClose={() => setShowModal(false)} onSubmit={fetchQuestions} />
+            <CreateQuestionModal
+              onClose={() => setShowModal(false)}
+              onSubmit={fetchQuestions}
+            />
           )}
         </AnimatePresence>
 
