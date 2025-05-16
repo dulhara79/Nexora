@@ -22,6 +22,8 @@ export default function QuestionCard({
     onSaveToggle(question.id, isSaved);
   };
 
+  console.log("QuestionCard question", question);
+
   const commentCount = question.commentCount || 0;
   const viewCount = question.viewCount || 0;
 

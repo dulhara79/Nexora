@@ -144,7 +144,7 @@ public class RegistrationController {
             return ResponseEntity.ok()
                     .header(HttpHeaders.CACHE_CONTROL, "no-store")
                     .body(new UserResponse(registeredUser.getId(), registeredUser.getEmail(),
-                            registeredUser.getName(), token, links));
+                            registeredUser.getName(), registeredUser.getProfilePhotoUrl(), token, links));
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .header(HttpHeaders.CACHE_CONTROL, "no-store")

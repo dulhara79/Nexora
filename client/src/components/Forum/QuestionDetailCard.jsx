@@ -231,12 +231,17 @@ const QuestionDetailCard = ({ question, user, token, isAuthenticated, setQuestio
             />
             <div className="flex flex-col justify-between gap-4 pt-4 border-t border-gray-200 dark:border-gray-700 sm:flex-row sm:items-center">
               <div className="flex items-center">
-                <motion.div whileHover={{ scale: 1.1 }}>
+                {/* <motion.div whileHover={{ scale: 1.1 }}>
                   <FallbackAvatar className="w-10 h-10 mr-3 rounded-full ring-2 ring-offset-2 ring-orange-500" />
-                </motion.div>
+                </motion.div> */}
+                <motion.img
+                  src={question.authorAvatarUrl || "/default-avatar.png"}
+                  alt="Author Avatar"
+                  className="w-10 h-10 mr-3 rounded-full ring-2 ring-offset-2 ring-orange-500">
+                  </motion.img>
                 <div>
-                  <p className="font-medium text-gray-800 dark:text-gray-200">
-                    {question.author?.username || "Anonymous"}
+                  <p className="pr-8 font-medium text-gray-800 dark:text-gray-200">
+                    {question.authorUsername || "Anonymous"}
                   </p>
                   <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
                     <svg

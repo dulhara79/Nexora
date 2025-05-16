@@ -12,7 +12,8 @@ public class ForumQuestion {
     private String title;
     private String description;
     private String authorId;
-    private String authorUsername; // Add username field
+    private String authorUsername;
+    private String  authorAvatarUrl;
     private List<String> tags;
     private List<String> upvoteUserIds;
     private List<String> downvoteUserIds;
@@ -62,6 +63,14 @@ public class ForumQuestion {
 
     public void setAuthorUsername(String authorUsername) {
         this.authorUsername = authorUsername;
+    }
+
+    public String getAuthorAvatarUrl() {
+        return authorAvatarUrl;
+    }
+
+    public void setAuthorAvatarUrl(String authorAvatarUrl) {
+        this.authorAvatarUrl = authorAvatarUrl;
     }
 
     public List<String> getTags() {

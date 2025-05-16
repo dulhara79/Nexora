@@ -1,10 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Camera, MessageCircle, Edit, Share2, Bookmark, UserPlus, Settings } from 'lucide-react';
+import { Camera, MessageCircle, Edit, Share2, Bookmark, UserPlus, Settings, Search } from 'lucide-react';
 
 const QuickActions = ({ userId, isDarkMode }) => {
   const actions = [
+    { icon: <Search />, label: "Search", link: "/search", color: "from-blue-400 to-blue-600" },
     { icon: <Camera />, label: "New Post", color: "from-blue-400 to-blue-600" },
     { icon: <MessageCircle />, label: "Message", color: "from-purple-400 to-purple-600" },
     { icon: <Edit />, label: "Edit", link: `/edit/${userId}`, color: "from-indigo-400 to-indigo-600" },

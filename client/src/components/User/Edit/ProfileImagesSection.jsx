@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { toast } from 'react-hot-toast';
 
 const ProfileImagesSection = ({ userData, handleImageChange, isDarkMode }) => {
   const [dragActive, setDragActive] = useState({ profile: false, banner: false });
@@ -15,8 +16,19 @@ const ProfileImagesSection = ({ userData, handleImageChange, isDarkMode }) => {
   const handleFileChange = (e, type) => {
     const file = e.target.files[0];
     if (file) {
+      if (!["image/jpeg", "image/png"].includes(file.type)) {
+        toast.error("Only JPEG or PNG images are allowed");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image must be smaller than 5MB");
+        return;
+      }
+      if (!file.name) {
+        toast.error("Invalid file selected");
+        return;
+      }
       handleImageChange(file, type);
-      // Create a preview URL
       const url = URL.createObjectURL(file);
       setPreviewUrls(prev => ({ ...prev, [type]: url }));
     }
@@ -41,8 +53,19 @@ const ProfileImagesSection = ({ userData, handleImageChange, isDarkMode }) => {
     
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
+      if (!["image/jpeg", "image/png"].includes(file.type)) {
+        toast.error("Only JPEG or PNG images are allowed");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image must be smaller than 5MB");
+        return;
+      }
+      if (!file.name) {
+        toast.error("Invalid file selected");
+        return;
+      }
       handleImageChange(file, type);
-      // Create a preview URL
       const url = URL.createObjectURL(file);
       setPreviewUrls(prev => ({ ...prev, [type]: url }));
     }
@@ -101,7 +124,7 @@ const ProfileImagesSection = ({ userData, handleImageChange, isDarkMode }) => {
               type="file"
               ref={bannerInputRef}
               onChange={(e) => handleFileChange(e, 'banner')}
-              accept="image/*"
+              accept="image/jpeg,image/png"
               className="hidden"
             />
             
@@ -178,7 +201,7 @@ const ProfileImagesSection = ({ userData, handleImageChange, isDarkMode }) => {
                 type="file"
                 ref={profileInputRef}
                 onChange={(e) => handleFileChange(e, 'profile')}
-                accept="image/*"
+                accept="image/jpeg,image/png"
                 className="hidden"
               />
               
@@ -215,10 +238,10 @@ const ProfileImagesSection = ({ userData, handleImageChange, isDarkMode }) => {
                 Click to upload a profile photo
               </p>
               <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Square images work best. JPG, PNG or GIF.
+                Square images work best. JPG or PNG.
               </p>
               <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Max size: 2MB
+                Max size: 5MB
               </p>
             </motion.div>
           </div>

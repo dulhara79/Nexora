@@ -17,6 +17,7 @@ public class ForumComment {
     private String questionId; // References Question.id
     private String authorId; // References User.id
     private String authorName; // Optional: can be fetched from User service
+    private String authorAvatarUrl; // Optional: can be fetched from User service
     private String content;
     private String parentCommentId; // For threaded replies (null for top-level comments)
     private List<String> upvoteUserIds = new ArrayList<>();
@@ -63,6 +64,14 @@ public class ForumComment {
 
     public void setAuthorName(String authorName) {
         this.authorName = authorName;
+    }
+
+    public String getAuthorAvatarUrl() {
+        return authorAvatarUrl;
+    }
+
+    public void setAuthorAvatarUrl(String authorAvatarUrl) {
+        this.authorAvatarUrl = authorAvatarUrl;
     }
 
     public String getContent() {

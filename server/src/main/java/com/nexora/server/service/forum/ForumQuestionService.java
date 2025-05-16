@@ -353,6 +353,7 @@ public class ForumQuestionService {
         }
 
         question.setAuthorId(userId);
+        question.setAuthorAvatarUrl(user.getProfilePhotoUrl());
         question.setCreatedAt(LocalDateTime.now());
         List<String> tags = question.getTags() != null ? question.getTags() : new ArrayList<>();
         question.setTags(tags);
