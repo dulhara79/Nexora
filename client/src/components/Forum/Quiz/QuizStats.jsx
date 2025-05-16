@@ -109,12 +109,14 @@ const QuizStats = () => {
   }
 
   // Process answer distributions for each question
-  const answerDistributionData = stats.answerDistributions.map((dist, index) => {
-    return Object.entries(dist).map(([option, count]) => ({
-      name: option,
-      [`Question ${index + 1}`]: count,
-    }));
-  });
+  const answerDistributionData = stats.answerDistributions.map(
+    (dist, index) => {
+      return Object.entries(dist).map(([option, count]) => ({
+        name: option,
+        [`Question ${index + 1}`]: count,
+      }));
+    }
+  );
 
   // Aggregate data for grouped bar chart
   const groupedDistributionData = [];
@@ -154,7 +156,9 @@ const QuizStats = () => {
             className="mb-8 overflow-hidden bg-white shadow-lg rounded-xl"
           >
             <div className="p-6">
-              <h1 className="text-3xl font-bold text-orange-700">{quiz.title}</h1>
+              <h1 className="text-3xl font-bold text-orange-700">
+                {quiz.title}
+              </h1>
               <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-gray-600">
                 <span>By {quiz.authorUsername}</span>
                 <span>•</span>
@@ -375,7 +379,9 @@ const QuizStats = () => {
                         <Tooltip />
                         <Bar
                           dataKey={`Question ${qIndex + 1}`}
-                          fill={QUESTION_COLORS[qIndex % QUESTION_COLORS.length]}
+                          fill={
+                            QUESTION_COLORS[qIndex % QUESTION_COLORS.length]
+                          }
                           radius={[4, 4, 0, 0]}
                         />
                       </BarChart>

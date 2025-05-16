@@ -339,16 +339,16 @@ const HomePage = () => {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-gray-100 dark:from-slate-900 dark:to-slate-800">
-            <Header />
+        <Header />
         <main className="px-4 pt-8 pb-16 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <AnimatePresence>
             {showWelcomeCard && (
               <motion.div
-              className="relative mb-8 overflow-hidden shadow-xl rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600"
-              initial={{ opacity: 0, y: -30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -30, scale: 0.95 }}
-              transition={{ duration: 0.6, type: "spring", bounce: 0.3 }}
+                className="relative mb-8 overflow-hidden shadow-xl rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600"
+                initial={{ opacity: 0, y: -30, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -30, scale: 0.95 }}
+                transition={{ duration: 0.6, type: "spring", bounce: 0.3 }}
               >
                 <div className="relative z-10 flex flex-col items-start justify-between p-8 md:flex-row md:items-center">
                   <div className="mb-6 md:mb-0">

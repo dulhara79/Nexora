@@ -5,7 +5,14 @@ import { toast } from "react-toastify";
 import { buttonVariants, itemVariants } from "./Variants";
 import FallbackAvatar from "../../components/common/FallbackAvatar";
 
-const Comment = ({ comment, user, token, isAuthenticated, setComments, level }) => {
+const Comment = ({
+  comment,
+  user,
+  token,
+  isAuthenticated,
+  setComments,
+  level,
+}) => {
   const [replyTo, setReplyTo] = useState(null);
   const [replyContent, setReplyContent] = useState("");
   const [editingCommentId, setEditingCommentId] = useState(null);
@@ -14,7 +21,10 @@ const Comment = ({ comment, user, token, isAuthenticated, setComments, level }) 
 
   const handleCommentVote = async (commentId, voteType) => {
     if (!isAuthenticated) {
-      toast.info("Please log in to vote", { position: "top-right", autoClose: 3000 });
+      toast.info("Please log in to vote", {
+        position: "top-right",
+        autoClose: 3000,
+      });
       return;
     }
 
@@ -32,14 +42,22 @@ const Comment = ({ comment, user, token, isAuthenticated, setComments, level }) 
 
       const updatedComment = response.data.comment;
 
-      const updateCommentRecursively = (comments, commentId, updatedComment) => {
+      const updateCommentRecursively = (
+        comments,
+        commentId,
+        updatedComment
+      ) => {
         return comments.map((c) => {
           if (c.id === commentId) {
             return { ...c, ...updatedComment, replies: c.replies };
           } else if (c.replies && c.replies.length > 0) {
             return {
               ...c,
-              replies: updateCommentRecursively(c.replies, commentId, updatedComment),
+              replies: updateCommentRecursively(
+                c.replies,
+                commentId,
+                updatedComment
+              ),
             };
           }
           return c;
@@ -50,7 +68,10 @@ const Comment = ({ comment, user, token, isAuthenticated, setComments, level }) 
         updateCommentRecursively(prevComments, commentId, updatedComment)
       );
 
-      toast.success(`Comment ${voteType}d`, { position: "top-right", autoClose: 2000 });
+      toast.success(`Comment ${voteType}d`, {
+        position: "top-right",
+        autoClose: 2000,
+      });
     } catch (error) {
       toast.error(error.response?.data?.error || "Failed to vote on comment", {
         position: "top-right",
@@ -62,12 +83,18 @@ const Comment = ({ comment, user, token, isAuthenticated, setComments, level }) 
   const submitReply = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      toast.info("Please log in to reply", { position: "top-right", autoClose: 3000 });
+      toast.info("Please log in to reply", {
+        position: "top-right",
+        autoClose: 3000,
+      });
       return;
     }
 
     if (!replyContent.trim() || !replyTo) {
-      toast.warn("Reply cannot be empty", { position: "top-right", autoClose: 300 });
+      toast.warn("Reply cannot be empty", {
+        position: "top-right",
+        autoClose: 300,
+      });
       return;
     }
 
@@ -133,7 +160,10 @@ const Comment = ({ comment, user, token, isAuthenticated, setComments, level }) 
     }
 
     if (!editContent.trim()) {
-      toast.warn("Comment cannot be empty", { position: "top-right", autoClose: 3000 });
+      toast.warn("Comment cannot be empty", {
+        position: "top-right",
+        autoClose: 3000,
+      });
       return;
     }
 
@@ -151,14 +181,22 @@ const Comment = ({ comment, user, token, isAuthenticated, setComments, level }) 
 
       const updatedComment = response.data.comment;
 
-      const updateCommentRecursively = (comments, commentId, updatedComment) => {
+      const updateCommentRecursively = (
+        comments,
+        commentId,
+        updatedComment
+      ) => {
         return comments.map((c) => {
           if (c.id === commentId) {
             return { ...c, ...updatedComment, replies: c.replies };
           } else if (c.replies && c.replies.length > 0) {
             return {
               ...c,
-              replies: updateCommentRecursively(c.replies, commentId, updatedComment),
+              replies: updateCommentRecursively(
+                c.replies,
+                commentId,
+                updatedComment
+              ),
             };
           }
           return c;
@@ -170,7 +208,10 @@ const Comment = ({ comment, user, token, isAuthenticated, setComments, level }) 
       );
       setEditingCommentId(null);
       setEditContent("");
-      toast.success("Comment updated", { position: "top-right", autoClose: 2000 });
+      toast.success("Comment updated", {
+        position: "top-right",
+        autoClose: 2000,
+      });
     } catch (error) {
       toast.error(error.response?.data?.error || "Failed to update comment", {
         position: "top-right",
@@ -188,11 +229,18 @@ const Comment = ({ comment, user, token, isAuthenticated, setComments, level }) 
       return;
     }
 
-    if (window.confirm("Are you sure you want to delete this comment? This action cannot be undone.")) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this comment? This action cannot be undone."
+      )
+    ) {
       try {
-        await axios.delete(`http://localhost:5000/api/forum/comments/${commentId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await axios.delete(
+          `http://localhost:5000/api/forum/comments/${commentId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         const removeCommentRecursively = (comments, commentId) => {
           return comments.filter((c) => {
@@ -204,8 +252,13 @@ const Comment = ({ comment, user, token, isAuthenticated, setComments, level }) 
           });
         };
 
-        setComments((prevComments) => removeCommentRecursively(prevComments, commentId));
-        toast.success("Comment deleted", { position: "top-right", autoClose: 2000 });
+        setComments((prevComments) =>
+          removeCommentRecursively(prevComments, commentId)
+        );
+        toast.success("Comment deleted", {
+          position: "top-right",
+          autoClose: 2000,
+        });
       } catch (error) {
         toast.error(error.response?.data?.error || "Failed to delete comment", {
           position: "top-right",
@@ -255,7 +308,8 @@ const Comment = ({ comment, user, token, isAuthenticated, setComments, level }) 
   };
 
   const commentVoteCount =
-    (comment.upvoteUserIds?.length || 0) - (comment.downvoteUserIds?.length || 0);
+    (comment.upvoteUserIds?.length || 0) -
+    (comment.downvoteUserIds?.length || 0);
 
   return (
     <motion.div
@@ -345,10 +399,10 @@ const Comment = ({ comment, user, token, isAuthenticated, setComments, level }) 
                 <FallbackAvatar className="w-8 h-8 mr-2 rounded-full ring-2 ring-orange-400" />
               </motion.div> */}
               <motion.img
-                  src={comment.authorAvatarUrl || "/default-avatar.png"}
-                  alt="Comment Author Avatar"
-                  className="w-10 h-10 mr-3 rounded-full ring-2 ring-offset-2 ring-orange-500">
-                  </motion.img>
+                src={comment.authorAvatarUrl || "/default-avatar.png"}
+                alt="Comment Author Avatar"
+                className="w-10 h-10 mr-3 rounded-full ring-2 ring-offset-2 ring-orange-500"
+              ></motion.img>
               <span className="font-semibold text-gray-800 dark:text-gray-100">
                 {comment.authorName || "Anonymous"}
               </span>
@@ -368,7 +422,9 @@ const Comment = ({ comment, user, token, isAuthenticated, setComments, level }) 
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span className="hidden md:inline">{formatDate(comment.createdAt)}</span>
+              <span className="hidden md:inline">
+                {formatDate(comment.createdAt)}
+              </span>
               <span className="md:hidden">{timeAgo(comment.createdAt)}</span>
             </span>
             {comment.updatedAt && comment.updatedAt !== comment.createdAt && (

@@ -23,7 +23,7 @@ const ProfileInfo = ({ profileUser, isDarkMode }) => {
 
   const handleFollowToggle = async () => {
     try {
-      const token = localStorage.getItem('token'); // Adjust based on your AuthContext token storage
+      const token = localStorage.getItem('token');
       if (isFollowing) {
         await axios.post(
           `http://localhost:5000/api/users/${user.id}/unfollow/${profileUser.id}`,
@@ -107,59 +107,61 @@ const ProfileInfo = ({ profileUser, isDarkMode }) => {
           )}
         </motion.div>
         
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
-          className="flex flex-wrap gap-2"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleFollowToggle}
-            className={`px-6 py-2 font-medium transition-all duration-300 rounded-full shadow-md ${
-              isFollowing 
-                ? 'bg-indigo-100 text-indigo-700 border border-indigo-500' 
-                : 'bg-indigo-600 text-white hover:bg-indigo-700'
-            }`}
+        {user?.id !== profileUser.id && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-wrap gap-2"
           >
-            <motion.div
-              initial={false}
-              animate={{ width: 'auto' }}
-              className="flex items-center"
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleFollowToggle}
+              className={`px-6 py-2 font-medium transition-all duration-300 rounded-full shadow-md ${
+                isFollowing 
+                  ? 'bg-indigo-100 text-indigo-700 border border-indigo-500' 
+                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
+              }`}
             >
-              {isFollowing ? <UserCheck className="w-4 h-4 mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
-              {isFollowing ? 'Following' : 'Follow'}
-            </motion.div>
-          </motion.button>
-          
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={`px-6 py-2 font-medium transition-all duration-300 border rounded-full shadow-md ${
-              isDarkMode 
-                ? 'bg-gray-800 text-white border-gray-700 hover:bg-gray-700' 
-                : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            <div className="flex items-center">
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Message
-            </div>
-          </motion.button>
-          
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={`p-3 transition-all duration-300 rounded-full shadow-md ${
-              isDarkMode 
-                ? 'bg-gray-800 text-white border-gray-700 hover:bg-gray-700' 
-                : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            <Share2 className="w-4 h-4" />
-          </motion.button>
-        </motion.div>
+              <motion.div
+                initial={false}
+                animate={{ width: 'auto' }}
+                className="flex items-center"
+              >
+                {isFollowing ? <UserCheck className="w-4 h-4 mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
+                {isFollowing ? 'Following' : 'Follow'}
+              </motion.div>
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`px-6 py-2 font-medium transition-all duration-300 border rounded-full shadow-md ${
+                isDarkMode 
+                  ? 'bg-gray-800 text-white border-gray-700 hover:bg-gray-700' 
+                  : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              <div className="flex items-center">
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Message
+              </div>
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`p-3 transition-all duration-300 rounded-full shadow-md ${
+                isDarkMode 
+                  ? 'bg-gray-800 text-white border-gray-700 hover:bg-gray-700' 
+                  : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              <Share2 className="w-4 h-4" />
+            </motion.button>
+          </motion.div>
+        )}
       </div>
       
       <motion.div 

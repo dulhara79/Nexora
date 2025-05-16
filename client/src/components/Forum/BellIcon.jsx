@@ -1,10 +1,10 @@
 // src/components/common/BellIcon.jsx
-import React, { useEffect, useState, useContext } from 'react';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { AuthContext } from '../../context/AuthContext';
-import webSocket from '../../utils/websocket';
-import { FaBell } from 'react-icons/fa';
+import React, { useEffect, useState, useContext } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import { AuthContext } from "../../context/AuthContext";
+import webSocket from "../../utils/websocket";
+import { FaBell } from "react-icons/fa";
 
 const BellIcon = () => {
   const { token, user } = useContext(AuthContext);
@@ -20,19 +20,20 @@ const BellIcon = () => {
 
       try {
         const res = await axios.get(
-          'http://localhost:5000/api/forum/notifications',
+          "http://localhost:5000/api/forum/notifications",
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              'Cache-Control': 'no-cache',
+              "Cache-Control": "no-cache",
             },
           }
         );
-        const count = res.data.notifications.filter((notif) => !notif.isRead)
-          .length;
+        const count = res.data.notifications.filter(
+          (notif) => !notif.isRead
+        ).length;
         setUnreadCount(count);
       } catch (err) {
-        console.error('Failed to fetch notification count:', err);
+        console.error("Failed to fetch notification count:", err);
       } finally {
         setLoading(false);
       }

@@ -16,7 +16,12 @@ const QuizEdit = () => {
     difficulty: "",
     deadline: "",
     questions: [
-      { question: "", options: ["", "", "", ""], correctAnswer: "", explanation: "" },
+      {
+        question: "",
+        options: ["", "", "", ""],
+        correctAnswer: "",
+        explanation: "",
+      },
     ],
   });
   const [loading, setLoading] = useState(true);
@@ -28,9 +33,12 @@ const QuizEdit = () => {
     const fetchQuiz = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:5000/api/quizzes/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          `http://localhost:5000/api/quizzes/${id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         const fetchedQuiz = response.data.quiz;
         if (fetchedQuiz.authorId !== user?.id) {
           throw new Error("Only the quiz creator can edit this quiz");
@@ -49,7 +57,9 @@ const QuizEdit = () => {
           })),
         });
       } catch (err) {
-        setError(err.response?.data?.error || err.message || "Failed to fetch quiz");
+        setError(
+          err.response?.data?.error || err.message || "Failed to fetch quiz"
+        );
         if (err.response?.status === 401) {
           navigate("/login");
         }
@@ -86,7 +96,12 @@ const QuizEdit = () => {
       ...prev,
       questions: [
         ...prev.questions,
-        { question: "", options: ["", "", "", ""], correctAnswer: "", explanation: "" },
+        {
+          question: "",
+          options: ["", "", "", ""],
+          correctAnswer: "",
+          explanation: "",
+        },
       ],
     }));
   };
@@ -109,19 +124,25 @@ const QuizEdit = () => {
       setError(null);
       // Validate form data
       if (!quiz.title.trim()) throw new Error("Quiz title is required");
-      if (!quiz.description.trim()) throw new Error("Quiz description is required");
+      if (!quiz.description.trim())
+        throw new Error("Quiz description is required");
       if (!quiz.category.trim()) throw new Error("Quiz category is required");
       if (!quiz.difficulty) throw new Error("Quiz difficulty is required");
       if (!quiz.deadline || new Date(quiz.deadline) <= new Date()) {
         throw new Error("Valid future deadline is required");
       }
       quiz.questions.forEach((q, index) => {
-        if (!q.question.trim()) throw new Error(`Question ${index + 1} text is required`);
+        if (!q.question.trim())
+          throw new Error(`Question ${index + 1} text is required`);
         if (q.options.some((opt) => !opt.trim())) {
-          throw new Error(`All options for question ${index + 1} must be filled`);
+          throw new Error(
+            `All options for question ${index + 1} must be filled`
+          );
         }
         if (!q.correctAnswer || !q.options.includes(q.correctAnswer)) {
-          throw new Error(`Valid correct answer required for question ${index + 1}`);
+          throw new Error(
+            `Valid correct answer required for question ${index + 1}`
+          );
         }
       });
 
@@ -132,9 +153,13 @@ const QuizEdit = () => {
       await axios.put(`http://localhost:5000/api/quizzes/${id}`, quizData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      navigate(`/forum/quizzes/${id}`, { state: { message: "Quiz updated successfully" } });
+      navigate(`/forum/quizzes/${id}`, {
+        state: { message: "Quiz updated successfully" },
+      });
     } catch (err) {
-      setError(err.response?.data?.error || err.message || "Failed to update quiz");
+      setError(
+        err.response?.data?.error || err.message || "Failed to update quiz"
+      );
       if (err.response?.status === 401) {
         navigate("/login");
       }
@@ -156,7 +181,9 @@ const QuizEdit = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-gray-50">
         <div className="w-full max-w-md p-6 bg-white shadow-lg rounded-xl">
-          <h2 className="mb-4 text-2xl font-bold text-center text-gray-800">Error</h2>
+          <h2 className="mb-4 text-2xl font-bold text-center text-gray-800">
+            Error
+          </h2>
           <p className="mb-6 text-center text-red-500">{error}</p>
           <Link
             to="/forum/quizzes"
@@ -190,7 +217,9 @@ const QuizEdit = () => {
           <h1 className="mb-6 text-2xl font-bold text-gray-800">Edit Quiz</h1>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="block mb-2 font-medium text-gray-700">Title</label>
+              <label className="block mb-2 font-medium text-gray-700">
+                Title
+              </label>
               <input
                 type="text"
                 name="title"
@@ -201,7 +230,9 @@ const QuizEdit = () => {
               />
             </div>
             <div className="mb-4">
-              <label className="block mb-2 font-medium text-gray-700">Description</label>
+              <label className="block mb-2 font-medium text-gray-700">
+                Description
+              </label>
               <textarea
                 name="description"
                 value={quiz.description}
@@ -212,7 +243,9 @@ const QuizEdit = () => {
               />
             </div>
             <div className="mb-4">
-              <label className="block mb-2 font-medium text-gray-700">Category</label>
+              <label className="block mb-2 font-medium text-gray-700">
+                Category
+              </label>
               <input
                 type="text"
                 name="category"
@@ -223,7 +256,9 @@ const QuizEdit = () => {
               />
             </div>
             <div className="mb-4">
-              <label className="block mb-2 font-medium text-gray-700">Difficulty</label>
+              <label className="block mb-2 font-medium text-gray-700">
+                Difficulty
+              </label>
               <select
                 name="difficulty"
                 value={quiz.difficulty}
@@ -238,7 +273,9 @@ const QuizEdit = () => {
               </select>
             </div>
             <div className="mb-4">
-              <label className="block mb-2 font-medium text-gray-700">Deadline</label>
+              <label className="block mb-2 font-medium text-gray-700">
+                Deadline
+              </label>
               <input
                 type="datetime-local"
                 name="deadline"
@@ -250,9 +287,14 @@ const QuizEdit = () => {
             </div>
 
             {quiz.questions.map((q, index) => (
-              <div key={index} className="p-4 mb-6 border rounded-lg bg-gray-50">
+              <div
+                key={index}
+                className="p-4 mb-6 border rounded-lg bg-gray-50"
+              >
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-semibold">Question {index + 1}</h3>
+                  <h3 className="text-lg font-semibold">
+                    Question {index + 1}
+                  </h3>
                   {quiz.questions.length > 1 && (
                     <button
                       type="button"
@@ -265,7 +307,9 @@ const QuizEdit = () => {
                   )}
                 </div>
                 <div className="mb-2">
-                  <label className="block mb-1 font-medium text-gray-700">Question</label>
+                  <label className="block mb-1 font-medium text-gray-700">
+                    Question
+                  </label>
                   <input
                     type="text"
                     value={q.question}
@@ -282,17 +326,23 @@ const QuizEdit = () => {
                     <input
                       type="text"
                       value={option}
-                      onChange={(e) => handleInputChange(e, index, "options", optIndex)}
+                      onChange={(e) =>
+                        handleInputChange(e, index, "options", optIndex)
+                      }
                       className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     />
                   </div>
                 ))}
                 <div className="mb-2">
-                  <label className="block mb-1 font-medium text-gray-700">Correct Answer</label>
+                  <label className="block mb-1 font-medium text-gray-700">
+                    Correct Answer
+                  </label>
                   <select
                     value={q.correctAnswer}
-                    onChange={(e) => handleInputChange(e, index, "correctAnswer")}
+                    onChange={(e) =>
+                      handleInputChange(e, index, "correctAnswer")
+                    }
                     className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   >
@@ -305,7 +355,9 @@ const QuizEdit = () => {
                   </select>
                 </div>
                 <div className="mb-2">
-                  <label className="block mb-1 font-medium text-gray-700">Explanation</label>
+                  <label className="block mb-1 font-medium text-gray-700">
+                    Explanation
+                  </label>
                   <textarea
                     value={q.explanation}
                     onChange={(e) => handleInputChange(e, index, "explanation")}

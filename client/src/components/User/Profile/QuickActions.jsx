@@ -1,18 +1,21 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Camera, MessageCircle, Edit, Share2, Bookmark, UserPlus, Settings, Search } from 'lucide-react';
+import { Camera, MessageCircle, Edit, Share2, Bookmark, UserPlus, Settings, Search, Users } from 'lucide-react';
 
 const QuickActions = ({ userId, isDarkMode }) => {
   const actions = [
     { icon: <Search />, label: "Search", link: "/search", color: "from-blue-400 to-blue-600" },
-    { icon: <Camera />, label: "New Post", color: "from-blue-400 to-blue-600" },
+    { icon: <Users />, label: "Followers", link: `/profile/${userId}/followers`, color: "from-purple-500 to-pink-600" },
+    { icon: <UserPlus />, label: "Following", link: `/profile/${userId}/following`, color: "from-indigo-500 to-blue-600" },
+    { icon: <Camera />, label: "New Post", link: "/create-post", color: "from-blue-400 to-blue-600" },
     { icon: <MessageCircle />, label: "Message", color: "from-purple-400 to-purple-600" },
     { icon: <Edit />, label: "Edit", link: `/edit/${userId}`, color: "from-indigo-400 to-indigo-600" },
     { icon: <Bookmark />, label: "Save", color: "from-green-400 to-green-600" },
     { icon: <UserPlus />, label: "Invite", color: "from-pink-400 to-pink-600" },
-    { icon: <Settings />, label: "Settings", color: "from-gray-400 to-gray-600" }
+    { icon: <Settings />, label: "Settings", link: `/edit/${userId}`, color: "from-gray-400 to-gray-600" }
   ];
+
 
   const containerVariants = {
     hidden: { opacity: 0 },

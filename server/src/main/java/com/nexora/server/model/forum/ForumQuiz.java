@@ -25,7 +25,8 @@ public class ForumQuiz {
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime deadline;
     private boolean isActive = true;
-    private Map<String, Map<Integer, String>> participantAnswers = new HashMap<>(); // Updated to map user to question-indexed answers
+    private Map<String, Map<Integer, String>> participantAnswers = new HashMap<>(); // Updated to map user to
+                                                                                    // question-indexed answers
     private Map<String, Integer> participantScores = new HashMap<>();
     private List<String> upvoteUserIds = new ArrayList<>();
     private Map<String, Boolean> clearedAttempts = new HashMap<>();

@@ -1,7 +1,15 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import { LockClosedIcon, EnvelopeIcon, EyeIcon, EyeSlashIcon, UserIcon, PhotoIcon } from "@heroicons/react/24/outline";
+import {
+  LockClosedIcon,
+  EnvelopeIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  UserIcon,
+  PhotoIcon,
+  AtSymbolIcon,
+} from "@heroicons/react/24/outline";
 import { FcGoogle } from "react-icons/fc";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +18,7 @@ axios.defaults.withCredentials = true;
 
 const Signup = () => {
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -33,11 +42,16 @@ const Signup = () => {
       return;
     }
 
+    const userData = {
+      name,
+      username,
+      email,
+      password,
+      likeSkill,
+    };
+
     const formData = new FormData();
-    formData.append("name", name);
-    formData.append("email", email);
-    formData.append("password", password);
-    formData.append("likeSkill", likeSkill);
+    formData.append("user", JSON.stringify(userData));
     if (profilePhoto) {
       formData.append("profilePhoto", profilePhoto);
     }
@@ -48,19 +62,22 @@ const Signup = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/users/register", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/users",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       console.log("Signup response:", response.data);
       navigate("/verify-email", { state: { email } });
     } catch (err) {
-      console.error("Signup error:", err.response);
+      console.error("Signup error:", err.response?.data, err.message);
       setError(
-        typeof err.response?.data === "string"
-          ? err.response?.data
-          : err.response?.data?.error || "Failed to sign up. Please try again."
+        err.response?.data?.error ||
+          "Failed to sign up. Please try again."
       );
     } finally {
       setLoading(false);
@@ -85,9 +102,12 @@ const Signup = () => {
         if (authWindow.closed) {
           clearInterval(checkWindowClosed);
           try {
-            const response = await axios.get("http://localhost:5000/api/auth/check-session", {
-              withCredentials: true,
-            });
+            const response = await axios.get(
+              "http://localhost:5000/api/auth/check-session",
+              {
+                withCredentials: true,
+              }
+            );
             if (response.data.id) {
               navigate(`/profile/${response.data.id}`);
             }
@@ -111,13 +131,22 @@ const Signup = () => {
     visible: {
       opacity: 1,
       scale: 1,
-      transition: { delayChildren: 0.2, staggerChildren: 0.1, duration: 0.3, ease: "easeOut" },
+      transition: {
+        delayChildren: 0.2,
+        staggerChildren: 0.1,
+        duration: 0.3,
+        ease: "easeOut",
+      },
     },
   };
 
   const itemVariants = {
     hidden: { y: 10, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.4, ease: "backOut" } },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.4, ease: "backOut" },
+    },
   };
 
   return (
@@ -194,6 +223,24 @@ const Signup = () => {
                   disabled={loading}
                   className="w-full pl-11 pr-4 py-3.5 text-gray-900 placeholder-gray-400 bg-white/70 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all peer"
                   placeholder="John Doe"
+                />
+              </div>
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                Username
+              </label>
+              <div className="relative">
+                <AtSymbolIcon className="w-5 h-5 text-gray-400 absolute top-3.5 left-3 peer-focus:text-indigo-500" />
+                <input
+                  type="text"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  disabled={loading}
+                  className="w-full pl-11 pr-4 py-3.5 text-gray-900 placeholder-gray-400 bg-white/70 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all peer"
+                  placeholder="johndoe"
                 />
               </div>
             </motion.div>
