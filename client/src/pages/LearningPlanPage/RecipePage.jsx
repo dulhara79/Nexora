@@ -301,70 +301,111 @@ const API_BASE = 'http://localhost:5000';
 
 const RecipePage = () => {
 
-// inside RecipePage component, replace generatePDF with:
 const generatePDF = () => {
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  let y = 40;
 
-  // Title
-  doc.setFontSize(22);
-  doc.text(cuisine.name || "Cuisine", 40, 60);
+  // 1. Draw Header Banner
+  const bannerHeight = 80;
+  doc.setFillColor(255, 204, 102);            // warm yellow
+  doc.rect(0, 0, pageWidth, bannerHeight, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(28);
+  doc.setTextColor(80, 40, 10);                // dark brown
+  doc.text(cuisine.name || "Cuisine", pageWidth / 2, bannerHeight / 2 + 8, { align: 'center' });
+  y = bannerHeight + 20;
 
-  // Level & Description
+  // 2. Cuisine Image (if available)
+  if (cuisine.image) {
+    doc.addImage(cuisine.image, 'JPEG', pageWidth - 140, 10, 120, 60, undefined, 'FAST');
+  }
+
+  // 3. Level & Description on colored box
+  doc.setFillColor(240, 240, 240);             // light grey
+  doc.rect(30, y - 10, pageWidth - 60, 50, 'F');
   doc.setFontSize(12);
-  doc.text(`Level: ${level}`, 40, 90);
-  doc.text(`Description: ${cuisine.description || "—"}`, 40, 110);
+  doc.setTextColor(30);
+  doc.text(`Level: ${level}`, 40, y + 4);
+  doc.text(`Description: ${cuisine.description || "—"}`, 40, y + 22);
+  y += 70;
 
-  // Start listing recipes
-  let y = 140;
+  // 4. Recipes Section Title
+  doc.setFont('helvetica', 'bolditalic');
+  doc.setFontSize(18);
+  doc.setTextColor(200, 30, 30);               // deep red
+  doc.text("Recipes", 40, y);
+  y += 24;
+
+  // 5. Loop through recipes with colored subheaders
   recipes.forEach((recipe, idx) => {
-    // New page if we’re at the bottom
     if (y > 750) {
       doc.addPage();
-      y = 60;
+      y = 40;
     }
-    // Recipe header
-    doc.setFontSize(16);
+
+    // Subheader background
+    doc.setFillColor(255, 240, 230);           // pale peach
+    doc.rect(30, y - 16, pageWidth - 60, 24, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor(120, 40, 20);
     doc.text(`${idx + 1}. ${recipe.name}`, 40, y);
-    y += 24;
+    y += 30;
 
     // Time
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
-    doc.text(`Time: ${recipe.time || '—'}`, 50, y);
-    y += 18;
+    doc.setTextColor(60);
+    doc.text(`⏱️ Time: ${recipe.time || '—'}`, 40, y);
+    y += 20;
 
-    // Ingredients
-    doc.text(`Ingredients:`, 50, y);
+    // Ingredients label
+    doc.setFont('helvetica', 'bold');
+    doc.text("🧂 Ingredients:", 40, y);
     y += 16;
+    doc.setFont('helvetica', 'normal');
     (recipe.ingredients || []).forEach((ing) => {
-      doc.text(`• ${ing}`, 60, y);
-      y += 14;
       if (y > 750) {
         doc.addPage();
-        y = 60;
+        y = 40;
       }
+      doc.text(`• ${ing}`, 50, y);
+      y += 14;
     });
 
-    // Method
+    // Method label
     y += 6;
-    doc.text(`Method:`, 50, y);
+    doc.setFont('helvetica', 'bold');
+    doc.text("👩🏻‍🍳 Method:", 40, y);
     y += 16;
-    const lines = doc.splitTextToSize(recipe.method || '—', 460);
+    doc.setFont('helvetica', 'normal');
+    const lines = doc.splitTextToSize(recipe.method || '—', pageWidth - 100);
     lines.forEach((line) => {
-      doc.text(line, 60, y);
-      y += 14;
       if (y > 750) {
         doc.addPage();
-        y = 60;
+        y = 40;
       }
+      doc.text(line, 50, y);
+      y += 14;
     });
 
-    // space before next recipe
-    y += 24;
+    y += 24; // space before next recipe
   });
 
-  // download
-  doc.save(`${(cuisine.name || 'cuisine').replace(/\s+/g, '_')}_recipes.pdf`);
+  // 6. Footer with page numbers
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(10);
+    doc.setTextColor(150);
+    doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, doc.internal.pageSize.getHeight() - 20, { align: 'center' });
+  }
+
+  // 7. Save & Download
+  doc.save(`${(cuisine.name || 'Cuisine').replace(/\s+/g, '_')}_Recipe_Book.pdf`);
 };
+
 
 
 
