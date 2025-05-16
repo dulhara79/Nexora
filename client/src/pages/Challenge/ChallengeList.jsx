@@ -4,6 +4,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../../context/AuthContext";
 import Header from "../../components/common/NewPageHeader";
+import Chatbot from './Chatbot';
 
 const ChallengeList = () => {
   const { user, isAuthenticated, token } = useContext(AuthContext);
@@ -292,6 +293,7 @@ const ChallengeList = () => {
             </AnimatePresence>
           </motion.div>
         )}
+        <Chatbot />
       </motion.div>
     </>
   );
