@@ -217,9 +217,13 @@ const ProgressPage = () => {
           )}
         </section>
 
+        <div className="flex justify-center mt-0 mb-0">
+            <div className="text-3xl text-red-700 drop-shadow-md">🎉🎉🎉</div>
+          </div>
+
         {/* Completed Section */}
         <section>
-          <h2 className="text-3xl font-bold mb-6 text-orange-500">Triumphs</h2>
+          <h2 className="text-3xl font-bold mb-6 text-orange-500">Completed Journeys</h2>
           {completedPlans.length === 0 ? (
             <p className="text-center text-gray-600">No cuisines completed yet—keep cooking!</p>
           ) : (
