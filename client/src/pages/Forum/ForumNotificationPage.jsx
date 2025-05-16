@@ -43,36 +43,36 @@ const NotificationPage = () => {
   // };
 
   const fetchNotifications = async () => {
-  if (!token || !userId) {
-    console.error("No token or userId found");
-    toast.error("Please log in to view notifications");
-    setLoading(false);
-    return;
-  }
+    if (!token || !userId) {
+      console.error("No token or userId found");
+      toast.error("Please log in to view notifications");
+      setLoading(false);
+      return;
+    }
 
-  try {
-    const res = await axios.get(
-      "http://localhost:5000/api/forum/notifications",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Cache-Control": "no-cache",
-        },
-      }
-    );
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/forum/notifications",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Cache-Control": "no-cache",
+          },
+        }
+      );
 
-    // Sort notifications by createdAt (descending)
-    const sortedNotifications = [...res.data.notifications].sort(
-      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    );
+      // Sort notifications by createdAt (descending)
+      const sortedNotifications = [...res.data.notifications].sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
 
-    setNotifications(sortedNotifications);
-  } catch (err) {
-    handleApiError(err);
-  } finally {
-    setLoading(false);
-  }
-};
+      setNotifications(sortedNotifications);
+    } catch (err) {
+      handleApiError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleApiError = (err) => {
     console.error("Failed to fetch notifications:", err.response?.data);
@@ -142,8 +142,10 @@ const NotificationPage = () => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return new Intl.RelativeTimeFormat('en', { style: 'short' })
-      .format(Math.floor((date - new Date()) / (1000 * 60 * 60 * 24)), 'day');
+    return new Intl.RelativeTimeFormat("en", { style: "short" }).format(
+      Math.floor((date - new Date()) / (1000 * 60 * 60 * 24)),
+      "day"
+    );
   };
 
   if (loading) {
@@ -152,7 +154,10 @@ const NotificationPage = () => {
         <EnhancedHeader />
         <div className="max-w-3xl px-4 py-12 mx-auto space-y-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="flex p-4 space-x-4 bg-white rounded-lg shadow animate-pulse">
+            <div
+              key={i}
+              className="flex p-4 space-x-4 bg-white rounded-lg shadow animate-pulse"
+            >
               <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
               <div className="flex-1 space-y-4">
                 <div className="w-3/4 h-4 bg-gray-200 rounded"></div>
@@ -173,7 +178,8 @@ const NotificationPage = () => {
           <div>
             <h1 className="text-4xl font-bold text-gray-900">Notifications</h1>
             <p className="mt-2 text-gray-600">
-              {notifications.length} {notifications.length === 1 ? 'notification' : 'notifications'}
+              {notifications.length}{" "}
+              {notifications.length === 1 ? "notification" : "notifications"}
             </p>
           </div>
           {notifications.length > 0 && (
@@ -192,7 +198,9 @@ const NotificationPage = () => {
             <div className="p-6 text-orange-400 bg-orange-100 rounded-full">
               <FaRegBell size={40} />
             </div>
-            <h3 className="mt-4 text-xl font-medium text-gray-900">No notifications yet</h3>
+            <h3 className="mt-4 text-xl font-medium text-gray-900">
+              No notifications yet
+            </h3>
             <p className="max-w-md mt-2 text-gray-500">
               Stay tuned for updates from the cooking community!
             </p>
@@ -203,7 +211,9 @@ const NotificationPage = () => {
               <div
                 key={notif.id}
                 className={`p-5 bg-white rounded-xl shadow-sm transition-all duration-200 hover:shadow-md ${
-                  !notif.isRead ? 'border-l-4 border-orange-500' : 'border-l-4 border-transparent'
+                  !notif.isRead
+                    ? "border-l-4 border-orange-500"
+                    : "border-l-4 border-transparent"
                 }`}
               >
                 <div className="flex items-start space-x-4">
@@ -214,9 +224,13 @@ const NotificationPage = () => {
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="flex-1 min-w-0">
-                    <p className={`text-gray-800 ${!notif.isRead ? 'font-semibold' : ''}`}>
+                    <p
+                      className={`text-gray-800 ${
+                        !notif.isRead ? "font-semibold" : ""
+                      }`}
+                    >
                       {notif.type === "COMMENT" ||
                       notif.type === "QUESTION_VOTE" ? (
                         <Link
@@ -236,7 +250,7 @@ const NotificationPage = () => {
                         notif.message
                       )}
                     </p>
-                    
+
                     <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
                       <time>{formatDate(notif.createdAt)}</time>
                       {!notif.isRead && (
