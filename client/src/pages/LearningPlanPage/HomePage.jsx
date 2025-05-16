@@ -77,7 +77,7 @@ const HomePage = () => {
           {/* Downward pointing arrow with bounce animation */}
           <div className="flex justify-center mt-4 mb-6">
             <div className="animate-bounce text-4xl text-red-700 drop-shadow-md">
-              ⬇️
+              👩🏻‍🍳👨🏻‍🍳
             </div>
           </div>
 
