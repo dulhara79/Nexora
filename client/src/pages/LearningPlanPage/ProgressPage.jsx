@@ -119,6 +119,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 // import NavbarLP from '../../components/LearningPlan/NavbarLP';
+import Navbar from "../../components/common/NewPageHeader";
+
 import { AuthContext } from '../../context/AuthContext';
 
 const API_BASE = 'http://localhost:5000';
