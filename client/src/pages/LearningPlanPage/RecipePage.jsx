@@ -293,7 +293,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Confetti from 'react-confetti';
-import NavbarLP from '../../components/LearningPlan/NavbarLP';
 import { AuthContext } from '../../context/AuthContext';
 
 const API_BASE = 'http://localhost:5000';
@@ -359,7 +358,6 @@ const RecipePage = () => {
 
   return (
     <>
-      <NavbarLP />
       <div className="max-w-7xl mx-auto p-10">
         <div className="text-right mb-6">
           <button
