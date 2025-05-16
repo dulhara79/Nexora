@@ -254,7 +254,7 @@ const ChallengeList = () => {
                         }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        Start Challenge
+                        View Challenge
                       </motion.button>
                       {isAuthenticated && challenge.createdBy === user?.id && (
                         <div className="flex gap-3">
