@@ -7,9 +7,9 @@ const KitchenWisdomPage = () => {
       <Navbar />
 
       {/* Hero */}
-      <header className="relative h-60 flex items-center justify-center bg-gradient-to-r from-orange-500 to-pink-500 mb-12 shadow-xl">
-        <h1 className="text-4xl md:text-6xl text-white font-extrabold drop-shadow-xl">
-          🔥 Kitchen Wisdom & Vibes 🍲
+      <header className="relative h-30 flex items-center justify-center bg-gradient-to-r from-orange-500 to-pink-500 mb-12 shadow-xl">
+        <h1 className="text-4xl md:text-5xl text-white font-extrabold drop-shadow-xl">
+          Kitchen Wisdom
         </h1>
       </header>
 
