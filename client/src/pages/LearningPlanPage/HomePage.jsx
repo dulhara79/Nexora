@@ -55,7 +55,7 @@ const HomePage = () => {
 
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-10">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-red-500 text-center mb-6 drop-shadow-md animate-fade-in">
+          <h1 className="text-4xl md:text-6xl font-extrabold text-red-500 text-center mb-6 drop-shadow-md animate-fade-in">
             Ready For Your Cooking Journey?
           </h1>
 
