@@ -219,7 +219,7 @@ const ProgressPage = () => {
 
         {/* Completed Section */}
         <section>
-          <h2 className="text-3xl font-bold mb-6 text-yellow-600">Triumphs</h2>
+          <h2 className="text-3xl font-bold mb-6 text-yellow-500">Triumphs</h2>
           {completedPlans.length === 0 ? (
             <p className="text-center text-gray-600">No cuisines completed yet—keep cooking!</p>
           ) : (
@@ -228,7 +228,7 @@ const ProgressPage = () => {
                 <div key={plan.id} className="bg-yellow-100 p-6 rounded-xl shadow-md flex items-center space-x-4">
                   <span className="text-3xl">🏆</span>
                   <div>
-                    <h3 className="text-xl font-medium text-yellow-800">{plan.cuisineName}</h3>
+                    <h3 className="text-xl font-medium text-yellow-700">{plan.cuisineName}</h3>
                     <p className="text-yellow-600">Mastered!</p>
                   </div>
                 </div>
