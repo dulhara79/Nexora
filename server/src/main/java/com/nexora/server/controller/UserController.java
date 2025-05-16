@@ -20,6 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Controller for user-related endpoints such as profile management,
+ * following/unfollowing, searching, and image uploads.
+ */
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin(origins = "http://localhost:5173")
@@ -32,12 +36,16 @@ public class UserController {
     @Autowired
     private ObjectMapper objectMapper;
 
+    /**
+     * Follow another user.
+     */
     @PostMapping("/{userId}/follow/{targetUserId}")
     public ResponseEntity<?> followUser(
             @PathVariable String userId,
             @PathVariable String targetUserId,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
+            // Validate JWT token
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .header(HttpHeaders.CACHE_CONTROL, "no-store")
@@ -69,12 +77,16 @@ public class UserController {
         }
     }
 
+    /**
+     * Unfollow another user.
+     */
     @PostMapping("/{userId}/unfollow/{targetUserId}")
     public ResponseEntity<?> unfollowUser(
             @PathVariable String userId,
             @PathVariable String targetUserId,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
+            // Validate JWT token
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .header(HttpHeaders.CACHE_CONTROL, "no-store")
@@ -108,6 +120,9 @@ public class UserController {
         }
     }
 
+    /**
+     * Get user profile by ID.
+     */
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUserById(@PathVariable String userId) {
         try {
@@ -130,11 +145,15 @@ public class UserController {
         }
     }
 
-     @GetMapping("/{userId}/followers")
+    /**
+     * Get followers of a user.
+     */
+    @GetMapping("/{userId}/followers")
     public ResponseEntity<?> getFollowers(
             @PathVariable String userId,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
+            // Validate JWT token
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .header(HttpHeaders.CACHE_CONTROL, "no-store")
@@ -142,8 +161,9 @@ public class UserController {
             }
             String token = authHeader.substring(7);
             User currentUser = userService.validateJwtToken(token);
-            
+
             List<User> followers = userService.getFollowers(userId);
+            // Build response for each follower
             List<Map<String, Object>> followerResponses = followers.stream().map(user -> {
                 Map<String, Object> userMap = new HashMap<>();
                 userMap.put("id", user.getId());
@@ -156,7 +176,7 @@ public class UserController {
                 userMap.put("_links", userLinks);
                 return userMap;
             }).collect(Collectors.toList());
-            
+
             Map<String, String> links = new HashMap<>();
             links.put("self", "/api/users/" + userId + "/followers");
             Map<String, Object> response = new HashMap<>();
@@ -173,11 +193,15 @@ public class UserController {
         }
     }
 
+    /**
+     * Get users that the given user is following.
+     */
     @GetMapping("/{userId}/following")
     public ResponseEntity<?> getFollowing(
             @PathVariable String userId,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
+            // Validate JWT token
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .header(HttpHeaders.CACHE_CONTROL, "no-store")
@@ -185,8 +209,9 @@ public class UserController {
             }
             String token = authHeader.substring(7);
             User currentUser = userService.validateJwtToken(token);
-            
+
             List<User> following = userService.getFollowing(userId);
+            // Build response for each followed user
             List<Map<String, Object>> followingResponses = following.stream().map(user -> {
                 Map<String, Object> userMap = new HashMap<>();
                 userMap.put("id", user.getId());
@@ -199,7 +224,7 @@ public class UserController {
                 userMap.put("_links", userLinks);
                 return userMap;
             }).collect(Collectors.toList());
-            
+
             Map<String, String> links = new HashMap<>();
             links.put("self", "/api/users/" + userId + "/following");
             Map<String, Object> response = new HashMap<>();
@@ -216,12 +241,16 @@ public class UserController {
         }
     }
 
+    /**
+     * Get suggested users for the given user.
+     */
     @GetMapping("/{userId}/suggested")
     public ResponseEntity<?> getSuggestedUsers(
             @PathVariable String userId,
             @RequestParam(defaultValue = "5") int limit) {
         try {
             List<User> suggestedUsers = userService.getSuggestedUsers(userId, limit);
+            // Build response for each suggested user
             List<Map<String, Object>> userResponses = suggestedUsers.stream().map(user -> {
                 Map<String, Object> userMap = new HashMap<>();
                 userMap.put("id", user.getId());
@@ -250,12 +279,16 @@ public class UserController {
         }
     }
 
+    /**
+     * Search for users by query string.
+     */
     @GetMapping("/search")
     public ResponseEntity<?> searchUsers(
             @RequestParam String query,
             @RequestParam(defaultValue = "10") int limit,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
+            // Validate JWT token
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .header(HttpHeaders.CACHE_CONTROL, "no-store")
@@ -269,6 +302,7 @@ public class UserController {
                         .body(Map.of("error", "Invalid token"));
             }
 
+            // Search for users and related users
             List<User> searchResults = userService.searchUsers(query, user.getId(), limit);
             List<User> relatedUsers = userService.getRelatedUsers(query, user.getId(), limit);
             List<Map<String, Object>> searchResultResponses = searchResults.stream().map(u -> {
@@ -312,12 +346,16 @@ public class UserController {
         }
     }
 
+    /**
+     * Edit user profile.
+     */
     @PutMapping("/{id}")
     public ResponseEntity<?> editUser(
             @PathVariable String id,
             @Valid @RequestBody UpdateUserRequest request,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
+            // Validate JWT token
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .header(HttpHeaders.CACHE_CONTROL, "no-store")
@@ -338,6 +376,7 @@ public class UserController {
                         .body(Map.of("error", "User not found"));
             }
 
+            // Check for email and username uniqueness
             if (request.email() != null && !request.email().equals(user.getEmail()) &&
                     userService.findByEmail(request.email()).isPresent()) {
                 return ResponseEntity.badRequest()
@@ -351,6 +390,7 @@ public class UserController {
                         .body(Map.of("error", "Username already exists"));
             }
 
+            // Update user fields
             if (request.name() != null) user.setName(request.name());
             if (request.username() != null) user.setUsername(request.username());
             if (request.email() != null) user.setEmail(request.email());
@@ -388,6 +428,9 @@ public class UserController {
         }
     }
 
+    /**
+     * Upload or update user profile and banner images.
+     */
     @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadUserImages(
             @PathVariable String id,
@@ -395,6 +438,7 @@ public class UserController {
             @RequestPart(value = "bannerImage", required = false) MultipartFile bannerImage,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
+            // Validate JWT token
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .header(HttpHeaders.CACHE_CONTROL, "no-store")
@@ -415,6 +459,7 @@ public class UserController {
                         .body(Map.of("error", "User not found"));
             }
 
+            // Upload images if provided
             if (profileImage != null && !profileImage.isEmpty()) {
                 String profileUrl = userService.uploadFile(profileImage);
                 user.setProfilePhotoUrl(profileUrl);
@@ -441,11 +486,15 @@ public class UserController {
         }
     }
 
+    /**
+     * Delete a user account.
+     */
     @DeleteMapping("/{userId}")
     public ResponseEntity<?> deleteUser(
             @PathVariable String userId,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
+            // Validate JWT token
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .header(HttpHeaders.CACHE_CONTROL, "no-store")
@@ -476,6 +525,9 @@ public class UserController {
     }
 }
 
+/**
+ * Request record for updating user profile.
+ */
 record UpdateUserRequest(
         String name,
         String username,
