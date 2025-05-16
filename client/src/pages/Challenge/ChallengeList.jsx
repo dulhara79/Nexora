@@ -254,6 +254,7 @@ const ChallengeList = () => {
                         }}
                         whileTap={{ scale: 0.95 }}
                       >
+                        
                         View Challenge
                       </motion.button>
                       {isAuthenticated && challenge.createdBy === user?.id && (
