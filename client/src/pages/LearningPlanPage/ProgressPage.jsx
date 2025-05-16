@@ -184,8 +184,8 @@ const ProgressPage = () => {
     <>
       {/* <NavbarLP /> */}
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-b from-blue-100 to-gray-50 p-10">
-        <h1 className="text-5xl font-extrabold mb-12 text-center text-blue-800">
+      <div className="min-h-screen bg-gradient-to-b from-yellow-100 to-gray-50 p-10">
+        <h1 className="text-5xl font-extrabold mb-2 text-center text-red-600">
           My Culinary Journey
         </h1>
 
