@@ -376,7 +376,8 @@ const UserPlanPage = () => {
         <>
           <Confetti width={windowSize.width} height={windowSize.height} />
           <div className="fixed inset-0 flex items-center justify-center pointer-events-none">
-            <h2 className="text-4xl font-bold text-green-600 bg-white bg-opacity-80 p-6 rounded-lg">
+            <h2 className="text-4xl font-bold text-green-600 bg-white bg-opacity-80 p-6 rounded-lg height-20">
+              𝑪𝒐𝒏𝒈𝒓𝒂𝒕𝒖𝒍𝒂𝒕𝒊𝒐𝒏𝒔!
               🎉 Cuisine Completed! 🎉
             </h2>
           </div>
