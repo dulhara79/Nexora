@@ -374,7 +374,7 @@ const UserPlanPage = () => {
         <>
           <Confetti width={windowSize.width} height={windowSize.height} />
           <div className="fixed inset-0 flex items-center justify-center pointer-events-none">
-            <h2 className="text-4xl font-bold text-green-600 bg-white bg-opacity-80 p-4 rounded-lg">
+            <h2 className="text-4xl font-bold text-red-600 bg-white bg-opacity-80 p-4 rounded-lg">
               🎉 Cuisine Completed! 🎉
             </h2>
           </div>
@@ -390,7 +390,7 @@ const UserPlanPage = () => {
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-semibold">{plan.cuisineName}</h2>
                 <div className="space-x-4">
-                  <button onClick={() => startEditing(plan)} className="text-blue-500 hover:underline">
+                  <button onClick={() => startEditing(plan)} className="text-yellow-500 hover:underline">
                     Update Cuisine
                   </button>
                   <button onClick={() => handleDeletePlan(plan.id)} className="text-red-500 hover:underline">
@@ -406,8 +406,8 @@ const UserPlanPage = () => {
                     <img src={r.image} alt={r.name} className="w-full h-32 object-cover rounded-md my-2" />
                     <button
                       onClick={() => handleRecipeDone(plan.id, r.name)}
-                      className={`mt-2 px-4 py-1 rounded text-white ${r.isDone ? 'bg-green-300' : 'bg-green-600 hover:bg-green-700'}`}>
-                      {r.isDone ? '✅ Done' : 'Mark as Done'}
+                      className={`mt-2 px-4 py-1 rounded text-white ${r.isDone ? 'bg-yellow-300' : 'bg-yellow-600 hover:bg-yellow-700'}`}>
+                      {r.isDone ? ' Done' : 'Mark as Done'}
                     </button>
                   </div>
                 ))}
