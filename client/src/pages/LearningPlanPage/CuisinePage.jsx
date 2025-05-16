@@ -112,6 +112,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import CuisineCard from '../../components/LearningPlan/CuisineCard';
 // import NavbarLP from '../../components/LearningPlan/NavbarLP';
+import Navbar from "../../components/common/NewPageHeader";
+
 
 const API_BASE = 'http://localhost:5000';
 
