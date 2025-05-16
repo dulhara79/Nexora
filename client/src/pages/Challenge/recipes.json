@@ -1,0 +1,14 @@
+{
+    "recipes": [
+      {
+        "name": "Pasta Perfection",
+        "ingredients": ["Pasta", "Tomato Sauce", "Cheese"],
+        "instructions": ["Boil pasta.", "Add sauce.", "Top with cheese."]
+      },
+      {
+        "name": "Vegan Dessert Delight",
+        "ingredients": ["Coconut Milk", "Sugar", "Fruit"],
+        "instructions": ["Mix ingredients.", "Chill for 2 hours."]
+      }
+    ]
+  }
