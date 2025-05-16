@@ -1,21 +1,21 @@
-import React, { useEffect } from 'react';
-import Navbar from '../components/layout/Navbar';
-import Hero from '../components/sections/Hero';
-import Features from '../components/sections/Features';
-import HowItWorks from '../components/sections/HowItWorks';
-import Testimonials from '../components/sections/Testimonials';
-import Footer from '../components/layout/Footer';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-import '../styles/LandingPage.css'
+import React, { useEffect } from "react";
+import Navbar from "../components/layout/Navbar";
+import Hero from "../components/sections/Hero";
+import Features from "../components/sections/Features";
+import HowItWorks from "../components/sections/HowItWorks";
+import Testimonials from "../components/sections/Testimonials";
+import Footer from "../components/layout/Footer";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import "../styles/LandingPage.css";
 // test merge to develop/api branch
 const LandingPage = () => {
   useEffect(() => {
     AOS.init({
       duration: 800,
-      easing: 'ease-in-out',
+      easing: "ease-in-out",
       once: true,
-      mirror: false
+      mirror: false,
     });
   }, []);
 
