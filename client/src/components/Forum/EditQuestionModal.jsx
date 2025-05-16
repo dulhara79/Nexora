@@ -4,11 +4,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Edit2, Tag, Check, Loader } from "lucide-react";
 import toast from "react-hot-toast";
 
-export default function EditQuestionModal({ 
-  isOpen, 
-  onClose, 
-  question, 
-  onUpdate 
+export default function EditQuestionModal({
+  isOpen,
+  onClose,
+  question,
+  onUpdate,
 }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -37,25 +37,25 @@ export default function EditQuestionModal({
 
   // Remove tag from list
   const handleRemoveTag = (tagToRemove) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
+    setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
   // Validate form
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!title.trim()) {
       newErrors.title = "Title is required";
     }
-    
+
     if (!description.trim()) {
       newErrors.description = "Description is required";
     }
-    
+
     if (tags.length === 0) {
       newErrors.tags = "At least one tag is required";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -63,32 +63,32 @@ export default function EditQuestionModal({
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     try {
       setIsLoading(true);
-      
+
       const response = await axios.put(
         `http://localhost:5000/api/questions/${question.id}`,
         {
           title,
           description,
-          tags
+          tags,
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
-      
+
       // Call update handler with updated question
       onUpdate(response.data.question);
-      
+
       // Show success toast
       toast.success("Question updated successfully");
-      
+
       // Close modal
       onClose();
     } catch (error) {
@@ -149,7 +149,9 @@ export default function EditQuestionModal({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 ${
-                    errors.title ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-orange-400"
+                    errors.title
+                      ? "border-red-500 focus:ring-red-400"
+                      : "border-gray-300 focus:ring-orange-400"
                   }`}
                   placeholder="Be specific and clear"
                   disabled={isLoading}
@@ -169,13 +171,17 @@ export default function EditQuestionModal({
                   onChange={(e) => setDescription(e.target.value)}
                   rows={6}
                   className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 ${
-                    errors.description ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-orange-400"
+                    errors.description
+                      ? "border-red-500 focus:ring-red-400"
+                      : "border-gray-300 focus:ring-orange-400"
                   }`}
                   placeholder="Include all relevant details..."
                   disabled={isLoading}
                 />
                 {errors.description && (
-                  <p className="mt-1 text-sm text-red-500">{errors.description}</p>
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.description}
+                  </p>
                 )}
               </div>
 
@@ -186,7 +192,10 @@ export default function EditQuestionModal({
                 </label>
                 <div className="flex flex-wrap gap-2 mb-3">
                   {tags.map((tag, index) => (
-                    <div key={index} className="flex items-center px-3 py-1 text-orange-700 bg-orange-100 rounded-full">
+                    <div
+                      key={index}
+                      className="flex items-center px-3 py-1 text-orange-700 bg-orange-100 rounded-full"
+                    >
                       <span>{tag}</span>
                       <button
                         type="button"
@@ -205,7 +214,9 @@ export default function EditQuestionModal({
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                     className={`flex-1 p-3 border rounded-l-lg focus:outline-none focus:ring-2 ${
-                      errors.tags ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-orange-400"
+                      errors.tags
+                        ? "border-red-500 focus:ring-red-400"
+                        : "border-gray-300 focus:ring-orange-400"
                     }`}
                     placeholder="Add tags (press Enter)"
                     disabled={isLoading}
