@@ -55,11 +55,15 @@ const HomePage = () => {
 
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-10">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-extrabold text-red-500 text-center mb-6 drop-shadow-md animate-fade-in">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-red-500 text-center mb-6 drop-shadow-md animate-fade-in">
             Ready For Your Cooking Journey?
           </h1>
 
-          
+          <div className="w-full py-7 text-center bg-yellow-400 text-white rounded-xl shadow-lg mb-8 mt-9">
+            <h1 className="text-2xl font-extrabold tracking-wide text-white animate__animated animate__fadeInUp">
+              From Zero to Hero - Pick Your Level!
+            </h1>
+          </div>
 
           <LearningPlanCreator />
 
@@ -70,14 +74,8 @@ const HomePage = () => {
             </h1>
           </div> */}
 
-          <div className="w-full py-7 text-center bg-yellow-400 text-white rounded-xl shadow-lg mb-8 mt-9">
-            <h1 className="text-2xl font-extrabold tracking-wide text-white animate__animated animate__fadeInUp">
-              From Zero to Hero - Pick Your Level!
-            </h1>
-          </div>
-
           {/* Downward pointing arrow with bounce animation */}
-          <div className="flex justify-center mt-4 mb-6">
+          <div className="flex justify-center mt-10 mb-6">
             <div className="animate-bounce text-4xl text-red-700 drop-shadow-md">
               👩🏻‍🍳👨🏻‍🍳
             </div>
