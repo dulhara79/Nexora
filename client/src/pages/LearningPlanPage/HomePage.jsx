@@ -68,11 +68,11 @@ const HomePage = () => {
           <LearningPlanCreator />
 
           {/* Join Nexora Banner */}
-          <div className="w-full py-7 text-center bg-orange-600 text-white rounded-xl shadow-lg mb-8 mt-9">
+          {/* <div className="w-full py-7 text-center bg-orange-600 text-white rounded-xl shadow-lg mb-8 mt-9">
             <h1 className="text-2xl font-extrabold tracking-wide text-white animate__animated animate__fadeInUp">
               Join Nexora Today and Cook Like a Pro!
             </h1>
-          </div>
+          </div> */}
 
           {/* Downward pointing arrow with bounce animation */}
           <div className="flex justify-center mt-4 mb-6">
