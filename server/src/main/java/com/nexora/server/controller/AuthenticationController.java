@@ -19,9 +19,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+// Request payload for login endpoint
 record LoginRequest(String email, String password) {}
+// Request payload for OTP verification endpoint
 record VerifyOtpRequest(String email, String otp) {}
 
+/**
+ * Controller for handling authentication-related endpoints.
+ */
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
@@ -36,6 +41,9 @@ public class AuthenticationController {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Handles login requests by sending an OTP to the user's email.
+     */
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
         LOGGER.info("Received login request for email: " + loginRequest.email());
@@ -56,6 +64,9 @@ public class AuthenticationController {
         }
     }
 
+    /**
+     * Verifies the OTP sent to the user's email and returns a JWT token if successful.
+     */
     @PostMapping(value = "/login/verify", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> verifyLogin(@Valid @RequestBody VerifyOtpRequest verifyRequest) {
         LOGGER.info("Received OTP verification request for email: " + verifyRequest.email());
@@ -80,6 +91,9 @@ public class AuthenticationController {
         }
     }
 
+    /**
+     * Handles Google OAuth2 login redirect. Returns a script to post user info or error to the frontend.
+     */
     @GetMapping(value = "/google-redirect", produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<?> googleRedirect(@AuthenticationPrincipal OAuth2User principal) {
         LOGGER.info("Handling Google redirect for OAuth2 authentication");
@@ -101,6 +115,7 @@ public class AuthenticationController {
                         .header(HttpHeaders.CACHE_CONTROL, "no-store")
                         .body(errorScript);
             }
+            // Handle Google login and update user info
             User user = authenticationService.handleGoogleLogin(email, name);
             user.setProfilePhotoUrl(picture != null ? picture : user.getProfilePhotoUrl());
             user = userRepository.save(user);
@@ -110,6 +125,7 @@ public class AuthenticationController {
             links.put("logout", "/api/auth/logout");
             LOGGER.info("Google login successful for userId: " + user.getId());
 
+            // Return script to post user info to frontend and close popup
             String script = String.format(
                     "<script>" +
                     "window.opener.postMessage({" +
@@ -137,6 +153,9 @@ public class AuthenticationController {
         }
     }
 
+    /**
+     * Handles Google login failure and notifies the frontend.
+     */
     @GetMapping("/login/failure")
     public ResponseEntity<?> googleLoginFailure() {
         LOGGER.info("Handling login failure");
@@ -146,49 +165,46 @@ public class AuthenticationController {
                 .body(errorScript);
     }
 
+    /**
+     * Checks if the provided JWT token is valid and returns user info if so.
+     */
     @GetMapping("/check-session")
-public ResponseEntity<?> checkSession(@RequestHeader(value = "Authorization", required = false) String authHeader) {
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                .body(Map.of("error", "No valid token provided"));
+    public ResponseEntity<?> checkSession(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(Map.of("error", "No valid token provided"));
+        }
+
+        String token = authHeader.substring(7);
+
+        try {
+            User user = authenticationService.validateJwtToken(token);
+            Map<String, String> links = new HashMap<>();
+            links.put("self", "/api/auth/check-session");
+            links.put("logout", "/api/auth/logout");
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate") // Prevent caching
+                    .header(HttpHeaders.VARY, "Authorization") // Differentiate by token
+                    .header(HttpHeaders.ETAG, "\"" + user.getId() + "\"")
+                    .body(new UserResponse(user.getId(), user.getEmail(), user.getName(), user.getProfilePhotoUrl(), token, links));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(Map.of("error", "Invalid or expired token: " + e.getMessage()));
+        }
     }
 
-    String token = authHeader.substring(7);
-
-    try {
-        User user = authenticationService.validateJwtToken(token);
-        Map<String, String> links = new HashMap<>();
-        links.put("self", "/api/auth/check-session");
-        links.put("logout", "/api/auth/logout");
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate") // 🔥 Prevent caching
-                .header(HttpHeaders.VARY, "Authorization") // 🔥 Differentiate by token
-                .header(HttpHeaders.ETAG, "\"" + user.getId() + "\"")
-                .body(new UserResponse(user.getId(), user.getEmail(), user.getName(), user.getProfilePhotoUrl(), token, links));
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                .body(Map.of("error", "Invalid or expired token: " + e.getMessage()));
-    }
-}
-    // @PostMapping("/logout")
-    // public ResponseEntity<?> logout() {
-    //     LOGGER.info("Handling logout");
-    //     Map<String, String> links = new HashMap<>();
-    //     links.put("login", "/api/auth/login");
-    //     return ResponseEntity.ok()
-    //             .header(HttpHeaders.CACHE_CONTROL, "no-store")
-    //             .body(Map.of("message", "Logged out successfully. Please clear the token on client side.", "_links", links));
-    // }
-
+    /**
+     * Logs out the user by revoking the JWT token.
+     */
     @PostMapping("/logout")
-public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
-    String token = authHeader.substring(7); // Remove "Bearer " prefix
-    authenticationService.revokeToken(token);
-    return ResponseEntity.ok()
-            .header(HttpHeaders.CACHE_CONTROL, "no-store")
-            .body(Map.of("message", "Logged out successfully."));
-}
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7); // Remove "Bearer " prefix
+        authenticationService.revokeToken(token);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(Map.of("message", "Logged out successfully."));
+    }
 }
