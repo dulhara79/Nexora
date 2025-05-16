@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,11 +58,11 @@ public class ForumQuizController {
         }
     }
 
-    @PatchMapping(value = "/{id}/answer", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> submitAnswer(
+    @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateQuiz(
             @PathVariable String id,
             @RequestHeader("Authorization") String authHeader,
-            @RequestBody Map<String, String> answerRequest) {
+            @RequestBody ForumQuiz quizUpdate) {
         String userId = extractUserIdFromToken(authHeader);
         if (userId == null) {
             return ResponseEntity.status(401)
@@ -69,8 +70,62 @@ public class ForumQuizController {
                     .body(createErrorResponse("Unauthorized"));
         }
         try {
-            String answer = answerRequest.get("answer");
-            ForumQuiz updatedQuiz = quizService.submitAnswer(id, answer, userId);
+            ForumQuiz updatedQuiz = quizService.updateQuiz(id, quizUpdate, userId);
+            Map<String, String> links = new HashMap<>();
+            links.put("self", "/api/quizzes/" + id);
+            Map<String, Object> response = new HashMap<>();
+            response.put("quiz", updatedQuiz);
+            response.put("_links", links);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> deleteQuiz(
+            @PathVariable String id,
+            @RequestHeader("Authorization") String authHeader) {
+        String userId = extractUserIdFromToken(authHeader);
+        if (userId == null) {
+            return ResponseEntity.status(401)
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(createErrorResponse("Unauthorized"));
+        }
+        try {
+            quizService.deleteQuiz(id, userId);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Quiz deleted successfully");
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    @PatchMapping(value = "/{id}/answer", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> submitAnswer(
+            @PathVariable String id,
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody Map<Integer, String> answers) {
+        String userId = extractUserIdFromToken(authHeader);
+        System.out.println();
+        System.out.println("......Quiz controller submit answer... userId: " + userId);
+        System.out.println("......Quiz controller submit answer... answers: " + answers);
+        if (userId == null) {
+            return ResponseEntity.status(401)
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(createErrorResponse("Unauthorized"));
+        }
+        try {
+            ForumQuiz updatedQuiz = quizService.submitAnswer(id, answers, userId);
             Map<String, String> links = new HashMap<>();
             links.put("self", "/api/quizzes/" + id);
             Map<String, Object> response = new HashMap<>();
@@ -149,7 +204,7 @@ public class ForumQuizController {
             String etag = "\"" + Integer.toHexString(quizzes.hashCode()) + "\"";
             if (ifNoneMatch != null && ifNoneMatch.equals(etag)) {
                 return ResponseEntity.status(304)
-                        .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                        .header(HttpHeaders.CACHE_CONTROL, "no-store")
                         .header(HttpHeaders.ETAG, etag)
                         .build();
             }
@@ -159,7 +214,7 @@ public class ForumQuizController {
             response.put("quizzes", quizzes);
             response.put("_links", links);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
                     .header(HttpHeaders.ETAG, etag)
                     .body(response);
         } catch (Exception e) {
@@ -205,7 +260,7 @@ public class ForumQuizController {
             String etag = "\"" + Integer.toHexString(quizzes.hashCode()) + "\"";
             if (ifNoneMatch != null && ifNoneMatch.equals(etag)) {
                 return ResponseEntity.status(304)
-                        .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                        .header(HttpHeaders.CACHE_CONTROL, "no-store")
                         .header(HttpHeaders.ETAG, etag)
                         .build();
             }
@@ -215,7 +270,7 @@ public class ForumQuizController {
             response.put("quizzes", quizzes);
             response.put("_links", links);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
                     .header(HttpHeaders.ETAG, etag)
                     .body(response);
         } catch (Exception e) {
@@ -234,13 +289,17 @@ public class ForumQuizController {
             if (!quizOptional.isPresent()) {
                 return ResponseEntity.status(404)
                         .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                        .body(createErrorResponse("ForumQuiz not found"));
+                        .body(createErrorResponse("Quiz not found"));
             }
             ForumQuiz quiz = quizOptional.get();
+            if (quiz.getDeadline().isBefore(LocalDateTime.now())) {
+                quiz.setActive(false);
+                quizService.saveQuiz(quiz);
+            }
             String etag = "\"" + Integer.toHexString(quiz.hashCode()) + "\"";
             if (ifNoneMatch != null && ifNoneMatch.equals(etag)) {
                 return ResponseEntity.status(304)
-                        .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                        .header(HttpHeaders.CACHE_CONTROL, "no-store")
                         .header(HttpHeaders.ETAG, etag)
                         .build();
             }
@@ -250,7 +309,7 @@ public class ForumQuizController {
             response.put("quiz", quiz);
             response.put("_links", links);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
                     .header(HttpHeaders.ETAG, etag)
                     .body(response);
         } catch (Exception e) {
