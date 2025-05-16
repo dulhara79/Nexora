@@ -26,6 +26,7 @@ import RecipePage from "./pages/LearningPlanPage/RecipePage";
 import CuisinePage from "./pages/LearningPlanPage/CuisinePage";
 import UserPlanPage from "./pages/LearningPlanPage/UserPlanPage";
 import ProgressPage from "./pages/LearningPlanPage/ProgressPage";
+import ShoppingListPage from "./pages/LearningPlanPage/ShoppingListPage";
 
 // Forum Pages
 import ForumHomeLandingPage from "./pages/Forum/ForumHomeLandingPage";
@@ -93,6 +94,9 @@ function App() {
           <Route path="/userplan" element={<UserPlanPage />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/progress/:userId" element={<ProgressPage />} />
+          <Route path="/shoppinglist" element={<ShoppingListPage />} />
+          <Route path="/shoppinglist/:userId" element={<ShoppingListPage />} />
+
           {/* Forum Routes */}
           <Route path="/forum" element={<ForumHomeLandingPage />} />
           <Route path="/forum/home" element={<ForumDashBoard />} />
