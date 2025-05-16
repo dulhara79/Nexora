@@ -229,7 +229,7 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import NavbarLP from '../../components/LearningPlan/NavbarLP';
+// import NavbarLP from '../../components/LearningPlan/NavbarLP';
 import Confetti from 'react-confetti';
 import { AuthContext } from '../../context/AuthContext';
 
