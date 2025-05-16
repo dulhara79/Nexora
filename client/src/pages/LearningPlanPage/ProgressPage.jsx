@@ -183,6 +183,7 @@ const ProgressPage = () => {
   return (
     <>
       {/* <NavbarLP /> */}
+      <Navbar />
       <div className="min-h-screen bg-gradient-to-b from-blue-100 to-gray-50 p-10">
         <h1 className="text-5xl font-extrabold mb-12 text-center text-blue-800">
           🌟 My Culinary Journey 🌟
