@@ -403,10 +403,10 @@ const UserPlanPage = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 {plan.recipes.map(r => (
-                  <div key={r.name} className="border p-4 rounded-lg">
+                  <div key={r.name} className="border p-6 min-h-100 rounded-xl shadow-md">
                     <h3 className="font-semibold">{r.name}</h3>
                     <p className="text-xl text-gray-600">⏱️ {r.time}</p>
-                    <img src={r.image} alt={r.name} className="w-full h-32 object-cover rounded-md my-2" />
+                    <img src={r.image} alt={r.name} className="w-full h-80 object-cover rounded-md my-2" />
                     <button
                       onClick={() => handleRecipeDone(plan.id, r.name)}
                       className={`mt-2 px-4 py-1 rounded text-white ${r.isDone ? 'bg-yellow-300' : 'bg-yellow-600 hover:bg-yellow-700'}`}>
