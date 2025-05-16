@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../../context/AuthContext";
 import Header from "../../components/common/NewPageHeader";
 import axios from "axios";
 import { toast as toastify, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-// Add these icons to your imports
 import {
   Edit3Icon,
   SaveIcon,
@@ -22,11 +20,41 @@ const EditQuestionPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, token } = useContext(AuthContext);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [tags, setTags] = useState("");
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    tags: "",
+  });
+  const [formErrors, setFormErrors] = useState({
+    title: "",
+    description: "",
+    tags: "",
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [focusedField, setFocusedField] = useState(null);
+
+  // Validation rules
+  const VALIDATION_RULES = {
+    title: {
+      maxLength: 150,
+      minLength: 10,
+      required: true,
+      pattern: /^[A-Za-z0-9\s.,!?'-]*$/,
+    },
+    description: {
+      maxLength: 2000,
+      minLength: 30,
+      required: true,
+      pattern: /^[A-Za-z0-9\s.,!?'-]*$/,
+    },
+    tag: {
+      maxLength: 30,
+      minLength: 2,
+      pattern: /^[a-z0-9-]+$/,
+      maxCount: 5,
+    },
+  };
 
   useEffect(() => {
     const fetchQuestion = async () => {
@@ -42,9 +70,11 @@ const EditQuestionPage = () => {
         if (!question) {
           throw new Error("Question not found");
         }
-        setTitle(question.title);
-        setDescription(question.description);
-        setTags(question.tags?.join(", ") || "");
+        setFormData({
+          title: question.title,
+          description: question.description,
+          tags: question.tags?.join(", ") || "",
+        });
       } catch (err) {
         setError(
           err.response?.data?.error || err.message || "Failed to load question"
@@ -57,6 +87,64 @@ const EditQuestionPage = () => {
     fetchQuestion();
   }, [id, token]);
 
+  const validateField = (name, value) => {
+    const rules = VALIDATION_RULES[name];
+    if (!rules) return "";
+
+    if (rules.required && !value.trim()) {
+      return `${name.charAt(0).toUpperCase() + name.slice(1)} is required`;
+    }
+    if (value.length < rules.minLength) {
+      return `${name.charAt(0).toUpperCase() + name.slice(1)} must be at least ${rules.minLength} characters`;
+    }
+    if (value.length > rules.maxLength) {
+      return `${name.charAt(0).toUpperCase() + name.slice(1)} must be less than ${rules.maxLength} characters`;
+    }
+    if (rules.pattern && !rules.pattern.test(value)) {
+      return `${name.charAt(0).toUpperCase() + name.slice(1)} contains invalid characters`;
+    }
+    return "";
+  };
+
+  const validateTags = (tagsString) => {
+    const tagsArray = tagsString
+      .split(",")
+      .map((tag) => tag.trim().toLowerCase())
+      .filter((tag) => tag);
+    
+    if (tagsArray.length > VALIDATION_RULES.tag.maxCount) {
+      return `Maximum ${VALIDATION_RULES.tag.maxCount} tags allowed`;
+    }
+
+    for (const tag of tagsArray) {
+      if (tag.length < VALIDATION_RULES.tag.minLength) {
+        return `Each tag must be at least ${VALIDATION_RULES.tag.minLength} characters`;
+      }
+      if (tag.length > VALIDATION_RULES.tag.maxLength) {
+        return `Each tag must be less than ${VALIDATION_RULES.tag.maxLength} characters`;
+      }
+      if (!VALIDATION_RULES.tag.pattern.test(tag)) {
+        return "Tags can only contain lowercase letters, numbers, and hyphens";
+      }
+      if (tagsArray.filter((t) => t === tag).length > 1) {
+        return "Duplicate tags are not allowed";
+      }
+    }
+    return "";
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+    setFormErrors({
+      ...formErrors,
+      [name]: name === "tags" ? validateTags(value) : validateField(name, value),
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user) {
@@ -67,39 +155,32 @@ const EditQuestionPage = () => {
       return;
     }
 
-    // Client-side validation
-    if (!title.trim() || title.length < 5) {
-      toastify.warn("Title must be at least 5 characters long", {
-        position: "top-right",
-        autoClose: 3000,
+    // Validate all fields
+    const titleError = validateField("title", formData.title);
+    const descriptionError = validateField("description", formData.description);
+    const tagsError = validateTags(formData.tags);
+
+    if (titleError || descriptionError || tagsError) {
+      setFormErrors({
+        title: titleError,
+        description: descriptionError,
+        tags: tagsError,
       });
-      return;
-    }
-    if (!description.trim() || description.length < 10) {
-      toastify.warn("Description must be at least 10 characters long", {
+      toastify.error("Please fix the errors in the form", {
         position: "top-right",
         autoClose: 3000,
       });
       return;
     }
 
-    // Prepare tags array
-    const tagsArray = tags
+    const tagsArray = formData.tags
       .split(",")
-      .map((tag) => tag.trim())
-      .filter((tag) => tag)
-      .filter((tag) => tag.length >= 2); // Ensure tags are at least 2 chars
-    if (tagsArray.length > 10) {
-      toastify.warn("Maximum 10 tags allowed", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-      return;
-    }
+      .map((tag) => tag.trim().toLowerCase())
+      .filter((tag) => tag);
 
     const updatedQuestion = {
-      title: title.trim(),
-      description: description.trim(),
+      title: formData.title.trim(),
+      description: formData.description.trim(),
       tags: tagsArray,
     };
 
@@ -216,7 +297,7 @@ const EditQuestionPage = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             {/* Title Field */}
-            <div className="mb-6">
+            <motion.div className="mb-6" whileTap={{ scale: 0.995 }}>
               <label className="flex items-center mb-2 text-sm font-medium text-gray-700">
                 <FileTextIcon className="w-4 h-4 mr-2" />
                 Question Title
@@ -224,64 +305,114 @@ const EditQuestionPage = () => {
               <div className="relative">
                 <input
                   type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter a clear and concise title (min 5 characters)"
-                  className="w-full px-4 py-3 text-gray-800 transition-all duration-200 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedField("title")}
+                  onBlur={() => setFocusedField(null)}
+                  placeholder="Enter a clear and concise title"
+                  className={`w-full px-4 py-3 text-gray-800 transition-all duration-200 border-2 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
+                    formErrors.title
+                      ? "border-red-400"
+                      : focusedField === "title"
+                      ? "border-orange-400 shadow-md shadow-orange-100"
+                      : "border-gray-200"
+                  }`}
+                  maxLength={VALIDATION_RULES.title.maxLength}
                   required
                 />
                 <div className="absolute top-0 right-0 flex items-center h-full px-3 text-xs text-gray-400">
-                  {title.length}/150
+                  {formData.title.length}/{VALIDATION_RULES.title.maxLength}
                 </div>
               </div>
-            </div>
+              <p className={`mt-1 text-sm ${formErrors.title ? "text-red-500" : "text-gray-500"}`}>
+                {formErrors.title || "Be specific and concise"}
+              </p>
+            </motion.div>
 
             {/* Description Field */}
-            <div className="mb-6">
+            <motion.div className="mb-6" whileTap={{ scale: 0.995 }}>
               <label className="flex items-center mb-2 text-sm font-medium text-gray-700">
                 <Edit3Icon className="w-4 h-4 mr-2" />
                 Description
               </label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Provide detailed context for your question (min 10 characters)"
-                className="w-full px-4 py-3 text-gray-800 transition-all duration-200 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                rows="6"
-              />
-              <div className="flex justify-end mt-1 text-xs text-gray-400">
-                {description.length}/5000 characters
+              <div className="relative">
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedField("description")}
+                  onBlur={() => setFocusedField(null)}
+                  placeholder="Provide detailed context for your question"
+                  className={`w-full px-4 py-3 text-gray-800 transition-all duration-200 border-2 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
+                    formErrors.description
+                      ? "border-red-400"
+                      : focusedField === "description"
+                      ? "border-orange-400 shadow-md shadow-orange-100"
+                      : "border-gray-200"
+                  }`}
+                  rows="6"
+                  maxLength={VALIDATION_RULES.description.maxLength}
+                />
+                <div className="flex justify-end mt-1 text-xs text-gray-400">
+                  {formData.description.length}/{VALIDATION_RULES.description.maxLength} characters
+                </div>
               </div>
-            </div>
+              <p className={`mt-1 text-sm ${formErrors.description ? "text-red-500" : "text-gray-500"}`}>
+                {formErrors.description || "Include all relevant details"}
+              </p>
+            </motion.div>
 
             {/* Tags Field */}
-            <div className="mb-8">
+            <motion.div className="mb-8" whileTap={{ scale: 0.995 }}>
               <label className="flex items-center mb-2 text-sm font-medium text-gray-700">
                 <TagIcon className="w-4 h-4 mr-2" />
-                Tags (comma-separated, min 2 characters each)
+                Tags (comma-separated)
               </label>
-              <input
-                type="text"
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                placeholder="e.g., javascript, react, node (max 10 tags)"
-                className="w-full px-4 py-3 text-gray-800 transition-all duration-200 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-              />
-              <div className="flex flex-wrap gap-2 mt-2">
-                {tags.split(",").map((tag, index) => {
-                  const cleanTag = tag.trim();
-                  if (!cleanTag) return null;
-                  return (
-                    <span
-                      key={index}
-                      className="px-2 py-1 text-xs text-orange-800 bg-orange-100 rounded-full"
-                    >
-                      #{cleanTag}
-                    </span>
-                  );
-                })}
+              <div className="relative">
+                <input
+                  type="text"
+                  name="tags"
+                  value={formData.tags}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedField("tags")}
+                  onBlur={() => setFocusedField(null)}
+                  placeholder="e.g., javascript, react, node"
+                  className={`w-full px-4 py-3 text-gray-800 transition-all duration-200 border-2 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
+                    formErrors.tags
+                      ? "border-red-400"
+                      : focusedField === "tags"
+                      ? "border-orange-400 shadow-md shadow-orange-100"
+                      : "border-gray-200"
+                  }`}
+                />
+                <div className="flex justify-end mt-1 text-xs text-gray-400">
+                  {formData.tags.split(",").filter(tag => tag.trim()).length}/{VALIDATION_RULES.tag.maxCount} tags
+                </div>
               </div>
-            </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <AnimatePresence>
+                  {formData.tags.split(",").map((tag, index) => {
+                    const cleanTag = tag.trim();
+                    if (!cleanTag) return null;
+                    return (
+                      <motion.span
+                        key={index}
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.8, opacity: 0 }}
+                        className="px-2 py-1 text-xs text-orange-800 bg-orange-100 rounded-full"
+                      >
+                        #{cleanTag}
+                      </motion.span>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+              <p className={`mt-1 text-sm ${formErrors.tags ? "text-red-500" : "text-gray-500"}`}>
+                {formErrors.tags || `Add up to ${VALIDATION_RULES.tag.maxCount} tags (lowercase, numbers, hyphens)`}
+              </p>
+            </motion.div>
 
             {/* Action Buttons */}
             <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
@@ -299,7 +430,12 @@ const EditQuestionPage = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                className="flex items-center justify-center px-6 py-3 font-medium text-white transition-all rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 hover:shadow-lg"
+                disabled={Object.values(formErrors).some(err => err) || isLoading}
+                className={`flex items-center justify-center px-6 py-3 font-medium text-white transition-all rounded-lg ${
+                  Object.values(formErrors).some(err => err) || isLoading
+                    ? "bg-orange-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-orange-500 to-amber-500 hover:shadow-lg"
+                }`}
               >
                 <SaveIcon className="w-4 h-4 mr-2" />
                 Update Question
