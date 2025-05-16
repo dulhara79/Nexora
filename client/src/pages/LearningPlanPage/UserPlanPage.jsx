@@ -387,7 +387,7 @@ const UserPlanPage = () => {
       <div className="min-h-screen bg-gray-50 p-10">
         <h1 className="text-5xl font-bold mb-10 text-center">My Learning Plan</h1>
         {!plans.length && <p className="text-center">No cuisines added yet!</p>}
-        <div className="space-y-8">
+        <div className="space-y-12">
           {plans.map(plan => (
             <div key={plan.id} className="bg-white p-6 rounded-xl shadow-lg">
               <div className="flex justify-between items-center mb-4">
