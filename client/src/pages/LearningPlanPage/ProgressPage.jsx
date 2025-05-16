@@ -118,7 +118,9 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import NavbarLP from '../../components/LearningPlan/NavbarLP';
+// import NavbarLP from '../../components/LearningPlan/NavbarLP';
+import Navbar from "../../components/common/NewPageHeader";
+
 import { AuthContext } from '../../context/AuthContext';
 
 const API_BASE = 'http://localhost:5000';
@@ -180,15 +182,16 @@ const ProgressPage = () => {
 
   return (
     <>
-      <NavbarLP />
-      <div className="min-h-screen bg-gradient-to-b from-blue-100 to-gray-50 p-10">
-        <h1 className="text-5xl font-extrabold mb-12 text-center text-blue-800">
-          🌟 My Culinary Journey 🌟
+      {/* <NavbarLP /> */}
+      <Navbar />
+      <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-gray-50 p-10">
+        <h1 className="text-5xl font-extrabold mb-2 text-center text-red-700">
+          My Culinary Journey
         </h1>
 
         {/* Ongoing Section */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-6 text-blue-600">Ongoing Adventures</h2>
+        <section className="mb-1">
+          <h2 className="text-3xl font-bold mb-6 text-orange-600">Ongoing Adventures</h2>
           {ongoingPlans.length === 0 ? (
             <p className="text-center text-gray-600">No cuisines in progress yet!</p>
           ) : (
@@ -203,7 +206,7 @@ const ProgressPage = () => {
                     <p className="text-gray-600 mb-4">{doneCount}/{total} Recipes Mastered</p>
                     <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                       <div
-                        className="bg-blue-500 h-3 rounded-full transition-all duration-300"
+                        className="bg-orange-500 h-3 rounded-full transition-all duration-300"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
@@ -216,17 +219,17 @@ const ProgressPage = () => {
 
         {/* Completed Section */}
         <section>
-          <h2 className="text-3xl font-bold mb-6 text-green-600">Triumphs</h2>
+          <h2 className="text-3xl font-bold mb-6 text-yellow-600">Triumphs</h2>
           {completedPlans.length === 0 ? (
             <p className="text-center text-gray-600">No cuisines completed yet—keep cooking!</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {completedPlans.map(plan => (
-                <div key={plan.id} className="bg-green-100 p-6 rounded-xl shadow-md flex items-center space-x-4">
+                <div key={plan.id} className="bg-yellow-100 p-6 rounded-xl shadow-md flex items-center space-x-4">
                   <span className="text-3xl">🏆</span>
                   <div>
-                    <h3 className="text-xl font-medium text-green-800">{plan.cuisineName}</h3>
-                    <p className="text-green-600">Mastered!</p>
+                    <h3 className="text-xl font-medium text-yellow-800">{plan.cuisineName}</h3>
+                    <p className="text-yellow-600">Mastered!</p>
                   </div>
                 </div>
               ))}

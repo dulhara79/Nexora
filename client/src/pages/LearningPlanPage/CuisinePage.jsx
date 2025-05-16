@@ -111,7 +111,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import CuisineCard from '../../components/LearningPlan/CuisineCard';
-import NavbarLP from '../../components/LearningPlan/NavbarLP';
+// import NavbarLP from '../../components/LearningPlan/NavbarLP';
+import Navbar from "../../components/common/NewPageHeader";
+
 
 const API_BASE = 'http://localhost:5000';
 
@@ -192,19 +194,20 @@ const CuisinePage = () => {
 
   return (
     <>
-      <NavbarLP />
+      {/* <NavbarLP /> */}
+      <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-white p-10">
         <div className="max-w-7xl mx-auto -space-y-8 -mt-20">
           <section>
-            <h2 id="beginner" className="text-3xl font-extrabold text-blue-800 text-center mb-8 animate-glowIn">🥄 Beginner Level</h2>
-            {renderCuisineCards('beginner', 'blue')}
+            <h2 id="beginner" className="text-4xl font-extrabold text-yellow-400 text-center mb-8 animate-glowIn">🥄 Beginner Level</h2>
+            {renderCuisineCards('beginner', 'yellow')}
           </section>
           <section>
-            <h2 id="intermediate" className="text-3xl font-extrabold text-yellow-800 text-center mb-8 animate-glowIn">🍝 Intermediate Level</h2>
-            {renderCuisineCards('intermediate', 'yellow')}
+            <h2 id="intermediate" className="text-4xl font-extrabold text-orange-500 text-center mb-8 animate-glowIn">🍝 Intermediate Level</h2>
+            {renderCuisineCards('intermediate', 'orange')}
           </section>
           <section>
-            <h2 id="advanced" className="text-3xl font-extrabold text-red-800 text-center mb-8 animate-glowIn">🍽️ Advanced Level</h2>
+            <h2 id="advanced" className="text-4xl font-extrabold text-red-500 text-center mb-8 animate-glowIn">🍽️ Advanced Level</h2>
             {renderCuisineCards('advanced', 'red')}
           </section>
         </div>
