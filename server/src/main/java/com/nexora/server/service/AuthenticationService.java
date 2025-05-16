@@ -20,6 +20,9 @@ import java.util.Random;
 import java.util.Set;
 import java.util.logging.Logger;
 
+/**
+ * Service class for handling authentication logic such as login, OTP, JWT, and Google login.
+ */
 @Service
 public class AuthenticationService {
 
@@ -43,16 +46,30 @@ public class AuthenticationService {
     @Value("${jwt.expiration}")
     private long jwtExpiration;
 
+    // Set to store revoked JWT tokens
     private Set<String> revokedTokens = new HashSet<>();
 
+    /**
+     * Revoke a JWT token by adding it to the revokedTokens set.
+     */
     public void revokeToken(String token) {
         revokedTokens.add(token);
     }
 
+    /**
+     * Check if a JWT token has been revoked.
+     */
     public boolean isTokenRevoked(String token) {
         return revokedTokens.contains(token);
     }
 
+    /**
+     * Send a login OTP to the user's email after verifying credentials.
+     * @param email User's email
+     * @param password User's password
+     * @return Status message
+     * @throws Exception if user not found, email not verified, or password invalid
+     */
     public String sendLoginOtp(String email, String password) throws Exception {
         Optional<User> userOptional = userRepository.findByEmail(email);
         if (!userOptional.isPresent()) {
@@ -77,6 +94,13 @@ public class AuthenticationService {
         return "OTP sent to your email";
     }
 
+    /**
+     * Verify the OTP entered by the user for login.
+     * @param email User's email
+     * @param otp OTP entered by user
+     * @return User object if verification is successful
+     * @throws Exception if user not found, email not verified, or OTP invalid
+     */
     public User verifyLoginOtp(String email, String otp) throws Exception {
         LOGGER.info("Verifying login for email: " + email);
         Optional<User> userOptional = userRepository.findByEmail(email);
@@ -95,12 +119,19 @@ public class AuthenticationService {
             throw new Exception("Invalid OTP");
         }
 
-        user.setVerificationCode(null);
+        user.setVerificationCode(null); // Clear OTP after successful verification
         userRepository.save(user);
         LOGGER.info("Login successful for: " + email);
         return user;
     }
 
+    /**
+     * Handle login or registration via Google.
+     * @param email User's Google email
+     * @param name User's name
+     * @return User object
+     * @throws Exception if registration fails
+     */
     public User handleGoogleLogin(String email, String name) throws Exception {
         Optional<User> userOptional = userRepository.findByEmail(email);
         User user;
@@ -117,10 +148,20 @@ public class AuthenticationService {
         return user;
     }
 
+    /**
+     * Find a user by their ID.
+     * @param id User ID
+     * @return User object or null if not found
+     */
     public User findById(String id) {
         return userRepository.findById(id).orElse(null);
     }
 
+    /**
+     * Generate a JWT token for the given user.
+     * @param user User object
+     * @return JWT token string
+     */
     public String generateJwtToken(User user) {
         SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
         return Jwts.builder()
@@ -131,6 +172,12 @@ public class AuthenticationService {
                 .compact();
     }
 
+    /**
+     * Validate a JWT token and return the corresponding user.
+     * @param token JWT token string
+     * @return User object if token is valid
+     * @throws Exception if token is revoked, invalid, or expired
+     */
     public User validateJwtToken(String token) throws Exception {
         if (isTokenRevoked(token)) {
             throw new Exception("Token revoked");
@@ -152,10 +199,19 @@ public class AuthenticationService {
         }
     }
 
+    /**
+     * Generate a 6-digit verification code for OTP.
+     * @return 6-digit OTP as string
+     */
     private String generateVerificationCode() {
         return String.format("%06d", new Random().nextInt(999999));
     }
 
+    /**
+     * Send the login OTP to the user's email.
+     * @param email User's email
+     * @param otp OTP code
+     */
     private void sendLoginOtpEmail(String email, String otp) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
