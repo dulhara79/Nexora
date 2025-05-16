@@ -4,7 +4,6 @@ import LearningPlanCreator from "../../components/LearningPlan/LearningPlanCreat
 //import NavbarLP from "../../components/LearningPlan/NavbarLP.jsx";
 import Navbar from "../../components/common/NewPageHeader";
 
-
 const HomePage = () => {
   const navigate = useNavigate();
 
@@ -59,11 +58,9 @@ const HomePage = () => {
             Ready For Your Cooking Journey?
           </h1>
 
-                    {/* Downward pointing arrow with bounce animation */}
+          {/* Downward pointing arrow with bounce animation */}
           <div className="flex justify-center mt-10 mb-6">
-            <div className="text-7xl text-red-700 drop-shadow-md">
-              👩🏻‍🍳👨🏻‍🍳
-            </div>
+            <div className="text-7xl text-red-700 drop-shadow-md">👩🏻‍🍳👨🏻‍🍳</div>
           </div>
 
           <div className="w-full py-6 text-center bg-yellow-400 text-white rounded-xl shadow-lg mb-8 mt-9">
@@ -102,7 +99,6 @@ const HomePage = () => {
     />
   </svg>
 </div> */}
-
 
           <div className="flex flex-col space-y-8 mt-10">
             {levels.map((level, idx) => (
