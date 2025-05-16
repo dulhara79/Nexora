@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
@@ -16,6 +16,41 @@ const CommentSection = ({
   setComments,
 }) => {
   const [newComment, setNewComment] = useState("");
+  const [formErrors, setFormErrors] = useState("");
+  const [focusedField, setFocusedField] = useState(false);
+
+  // Validation rules
+  const VALIDATION_RULES = {
+    comment: {
+      maxLength: 1000,
+      minLength: 5,
+      required: true,
+      pattern: /^[A-Za-z0-9\s.,!?'-]*$/,
+    },
+  };
+
+  const validateComment = (value) => {
+    const rules = VALIDATION_RULES.comment;
+    if (rules.required && !value.trim()) {
+      return "Comment is required";
+    }
+    if (value.length < rules.minLength) {
+      return `Comment must be at least ${rules.minLength} characters`;
+    }
+    if (value.length > rules.maxLength) {
+      return `Comment must be less than ${rules.maxLength} characters`;
+    }
+    if (rules.pattern && !rules.pattern.test(value)) {
+      return "Comment contains invalid characters";
+    }
+    return "";
+  };
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setNewComment(value);
+    setFormErrors(validateComment(value));
+  };
 
   const submitComment = async (e) => {
     e.preventDefault();
@@ -27,8 +62,10 @@ const CommentSection = ({
       return;
     }
 
-    if (!newComment.trim()) {
-      toast.warn("Comment cannot be empty", {
+    const commentError = validateComment(newComment);
+    if (commentError) {
+      setFormErrors(commentError);
+      toast.warn(commentError, {
         position: "top-right",
         autoClose: 3000,
       });
@@ -40,7 +77,7 @@ const CommentSection = ({
         `http://localhost:5000/api/forum/comments`,
         {
           questionId,
-          content: newComment,
+          content: newComment.trim(),
           authorName: user.username,
         },
         {
@@ -57,6 +94,7 @@ const CommentSection = ({
         { ...newCommentData, replies: [] },
       ]);
       setNewComment("");
+      setFormErrors("");
       toast.success("Comment added", {
         position: "top-right",
         autoClose: 2000,
@@ -110,36 +148,65 @@ const CommentSection = ({
           onSubmit={submitComment}
         >
           <div className="flex items-center mb-4">
-            {/* <motion.div whileHover={{ scale: 1.1 }}>
-              <FallbackAvatar className="w-8 h-8 mr-3 rounded-full ring-2 ring-orange-400" />
-            </motion.div> */}
             <motion.img
               src={user.profilePhotoUrl || "/default-avatar.png"}
               alt="Author Avatar"
               className="w-10 h-10 mr-3 rounded-full ring-2 ring-offset-2 ring-orange-500"
-            ></motion.img>
+              whileHover={{ scale: 1.1 }}
+            />
             <span className="font-medium text-gray-800 dark:text-gray-200">
               Comment as{" "}
               <span className="font-semibold text-orange-500 dark:text-orange-400">
-                {user.name}{" "}
+                {user.name}
               </span>
             </span>
           </div>
-          <textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Share your thoughts..."
-            className="w-full px-4 py-3 mb-3 text-gray-800 transition-all duration-200 bg-white border border-gray-200 rounded-lg dark:text-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-            rows="4"
-            required
-          />
+          <motion.div className="relative" whileTap={{ scale: 0.995 }}>
+            <textarea
+              value={newComment}
+              onChange={handleChange}
+              onFocus={() => setFocusedField(true)}
+              onBlur={() => setFocusedField(false)}
+              placeholder="Share your thoughts..."
+              className={`w-full px-4 py-3 mb-3 text-gray-800 transition-all duration-200 bg-white border-2 rounded-lg dark:text-gray-200 dark:bg-gray-800 focus:ring-2 focus:ring-orange-400 focus:border-transparent ${
+                formErrors
+                  ? "border-red-400"
+                  : focusedField
+                  ? "border-orange-400 shadow-md shadow-orange-100"
+                  : "border-gray-200 dark:border-gray-700"
+              }`}
+              rows="4"
+              maxLength={VALIDATION_RULES.comment.maxLength}
+              required
+            />
+            <div className="flex justify-end mt-1 text-xs text-gray-400">
+              {newComment.length}/{VALIDATION_RULES.comment.maxLength} characters
+            </div>
+          </motion.div>
+          <AnimatePresence>
+            {formErrors && (
+              <motion.p
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="mb-3 text-sm text-red-500"
+              >
+                {formErrors}
+              </motion.p>
+            )}
+          </AnimatePresence>
           <div className="flex justify-end">
             <motion.button
               variants={containerVariants.buttonVariants}
               whileHover="hover"
               whileTap="tap"
               type="submit"
-              className="flex items-center px-5 py-2 font-medium text-white transition-all rounded-lg shadow-md bg-gradient-to-r from-orange-500 to-amber-500 hover:shadow-lg"
+              disabled={formErrors || !newComment.trim()}
+              className={`flex items-center px-5 py-2 font-medium text-white transition-all rounded-lg shadow-md bg-gradient-to-r ${
+                formErrors || !newComment.trim()
+                  ? "from-orange-400 to-amber-400 cursor-not-allowed"
+                  : "from-orange-500 to-amber-500 hover:shadow-lg"
+              }`}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

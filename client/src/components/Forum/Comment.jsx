@@ -15,9 +15,40 @@ const Comment = ({
 }) => {
   const [replyTo, setReplyTo] = useState(null);
   const [replyContent, setReplyContent] = useState("");
+  const [replyError, setReplyError] = useState("");
+  const [replyFocused, setReplyFocused] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editContent, setEditContent] = useState("");
+  const [editError, setEditError] = useState("");
+  const [editFocused, setEditFocused] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+
+  // Validation rules
+  const VALIDATION_RULES = {
+    comment: {
+      maxLength: 1000,
+      minLength: 5,
+      required: true,
+      pattern: /^[A-Za-z0-9\s.,!?'-]*$/,
+    },
+  };
+
+  const validateComment = (value, field = "Comment") => {
+    const rules = VALIDATION_RULES.comment;
+    if (rules.required && !value.trim()) {
+      return `${field} is required`;
+    }
+    if (value.length < rules.minLength) {
+      return `${field} must be at least ${rules.minLength} characters`;
+    }
+    if (value.length > rules.maxLength) {
+      return `${field} must be less than ${rules.maxLength} characters`;
+    }
+    if (rules.pattern && !rules.pattern.test(value)) {
+      return `${field} contains invalid characters`;
+    }
+    return "";
+  };
 
   const handleCommentVote = async (commentId, voteType) => {
     if (!isAuthenticated) {
@@ -90,10 +121,12 @@ const Comment = ({
       return;
     }
 
-    if (!replyContent.trim() || !replyTo) {
-      toast.warn("Reply cannot be empty", {
+    const replyValidationError = validateComment(replyContent, "Reply");
+    if (replyValidationError) {
+      setReplyError(replyValidationError);
+      toast.warn(replyValidationError, {
         position: "top-right",
-        autoClose: 300,
+        autoClose: 3000,
       });
       return;
     }
@@ -104,7 +137,7 @@ const Comment = ({
         {
           questionId: comment.questionId,
           parentCommentId: replyTo,
-          content: replyContent,
+          content: replyContent.trim(),
           authorName: user.username,
           authorAvatarUrl: user.profilePhotoUrl,
         },
@@ -140,6 +173,7 @@ const Comment = ({
       );
       setReplyTo(null);
       setReplyContent("");
+      setReplyError("");
       toast.success("Reply added", { position: "top-right", autoClose: 2000 });
     } catch (error) {
       toast.error(error.response?.data?.error || "Failed to add reply", {
@@ -159,8 +193,10 @@ const Comment = ({
       return;
     }
 
-    if (!editContent.trim()) {
-      toast.warn("Comment cannot be empty", {
+    const editValidationError = validateComment(editContent, "Comment");
+    if (editValidationError) {
+      setEditError(editValidationError);
+      toast.warn(editValidationError, {
         position: "top-right",
         autoClose: 3000,
       });
@@ -170,7 +206,7 @@ const Comment = ({
     try {
       const response = await axios.put(
         `http://localhost:5000/api/forum/comments/${commentId}`,
-        { content: editContent },
+        { content: editContent.trim() },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -208,6 +244,7 @@ const Comment = ({
       );
       setEditingCommentId(null);
       setEditContent("");
+      setEditError("");
       toast.success("Comment updated", {
         position: "top-right",
         autoClose: 2000,
@@ -395,14 +432,12 @@ const Comment = ({
         <div className="flex-1">
           <div className="flex flex-wrap items-center mb-3">
             <div className="flex items-center">
-              {/* <motion.div whileHover={{ scale: 1.1 }}>
-                <FallbackAvatar className="w-8 h-8 mr-2 rounded-full ring-2 ring-orange-400" />
-              </motion.div> */}
               <motion.img
                 src={comment.authorAvatarUrl || "/default-avatar.png"}
                 alt="Comment Author Avatar"
                 className="w-10 h-10 mr-3 rounded-full ring-2 ring-offset-2 ring-orange-500"
-              ></motion.img>
+                whileHover={{ scale: 1.1 }}
+              />
               <span className="font-semibold text-gray-800 dark:text-gray-100">
                 {comment.authorName || "Anonymous"}
               </span>
@@ -454,14 +489,43 @@ const Comment = ({
               onSubmit={(e) => handleEditComment(comment.id, e)}
               className="mt-4"
             >
-              <textarea
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                placeholder="Edit your comment..."
-                className="w-full px-4 py-3 text-sm text-gray-800 transition-all duration-200 bg-white border border-gray-200 rounded-lg dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                rows="3"
-                required
-              />
+              <motion.div className="relative" whileTap={{ scale: 0.995 }}>
+                <textarea
+                  value={editContent}
+                  onChange={(e) => {
+                    setEditContent(e.target.value);
+                    setEditError(validateComment(e.target.value, "Comment"));
+                  }}
+                  onFocus={() => setEditFocused(true)}
+                  onBlur={() => setEditFocused(false)}
+                  placeholder="Edit your comment..."
+                  className={`w-full px-4 py-3 text-sm text-gray-800 transition-all duration-200 bg-white border-2 rounded-lg dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-orange-400 focus:border-transparent ${
+                    editError
+                      ? "border-red-400"
+                      : editFocused
+                      ? "border-orange-400 shadow-md shadow-orange-100"
+                      : "border-gray-200"
+                  }`}
+                  rows="3"
+                  maxLength={VALIDATION_RULES.comment.maxLength}
+                  required
+                />
+                <div className="flex justify-end mt-1 text-xs text-gray-400">
+                  {editContent.length}/{VALIDATION_RULES.comment.maxLength} characters
+                </div>
+              </motion.div>
+              <AnimatePresence>
+                {editError && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="mt-1 text-sm text-red-500"
+                  >
+                    {editError}
+                  </motion.p>
+                )}
+              </AnimatePresence>
               <div className="flex justify-end gap-2 mt-3">
                 <motion.button
                   variants={buttonVariants}
@@ -471,6 +535,7 @@ const Comment = ({
                   onClick={() => {
                     setEditingCommentId(null);
                     setEditContent("");
+                    setEditError("");
                   }}
                   className="px-4 py-2 text-sm font-medium text-gray-600 transition-colors bg-gray-100 rounded-lg dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                 >
@@ -481,7 +546,12 @@ const Comment = ({
                   whileHover="hover"
                   whileTap="tap"
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white transition-all rounded-lg shadow-md bg-gradient-to-r from-orange-500 to-amber-500 hover:shadow-lg"
+                  disabled={editError || !editContent.trim()}
+                  className={`px-4 py-2 text-sm font-medium text-white transition-all rounded-lg shadow-md bg-gradient-to-r ${
+                    editError || !editContent.trim()
+                      ? "from-orange-400 to-amber-400 cursor-not-allowed"
+                      : "from-orange-500 to-amber-500 hover:shadow-lg"
+                  }`}
                 >
                   Update Comment
                 </motion.button>
@@ -502,6 +572,7 @@ const Comment = ({
                 onClick={() => {
                   setReplyTo(comment.id);
                   setReplyContent("");
+                  setReplyError("");
                 }}
                 className="flex items-center font-medium text-orange-600 transition-colors dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300"
               >
@@ -531,6 +602,7 @@ const Comment = ({
                   onClick={() => {
                     setEditingCommentId(comment.id);
                     setEditContent(comment.content);
+                    setEditError("");
                   }}
                   className="flex items-center font-medium text-blue-600 transition-colors dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                 >
@@ -587,21 +659,54 @@ const Comment = ({
                 onSubmit={submitReply}
                 className="mt-4"
               >
-                <textarea
-                  value={replyContent}
-                  onChange={(e) => setReplyContent(e.target.value)}
-                  placeholder="Write your reply..."
-                  className="w-full px-4 py-3 text-sm text-gray-800 transition-all duration-200 bg-white border border-gray-200 rounded-lg dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                  rows="3"
-                  required
-                />
+                <motion.div className="relative" whileTap={{ scale: 0.995 }}>
+                  <textarea
+                    value={replyContent}
+                    onChange={(e) => {
+                      setReplyContent(e.target.value);
+                      setReplyError(validateComment(e.target.value, "Reply"));
+                    }}
+                    onFocus={() => setReplyFocused(true)}
+                    onBlur={() => setReplyFocused(false)}
+                    placeholder="Write your reply..."
+                    className={`w-full px-4 py-3 text-sm text-gray-800 transition-all duration-200 bg-white border-2 rounded-lg dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-orange-400 focus:border-transparent ${
+                      replyError
+                        ? "border-red-400"
+                        : replyFocused
+                        ? "border-orange-400 shadow-md shadow-orange-100"
+                        : "border-gray-200"
+                    }`}
+                    rows="3"
+                    maxLength={VALIDATION_RULES.comment.maxLength}
+                    required
+                  />
+                  <div className="flex justify-end mt-1 text-xs text-gray-400">
+                    {replyContent.length}/{VALIDATION_RULES.comment.maxLength} characters
+                  </div>
+                </motion.div>
+                <AnimatePresence>
+                  {replyError && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="mt-1 text-sm text-red-500"
+                    >
+                      {replyError}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
                 <div className="flex justify-end gap-2 mt-3">
                   <motion.button
                     variants={buttonVariants}
                     whileHover="hover"
                     whileTap="tap"
                     type="button"
-                    onClick={() => setReplyTo(null)}
+                    onClick={() => {
+                      setReplyTo(null);
+                      setReplyContent("");
+                      setReplyError("");
+                    }}
                     className="px-4 py-2 text-sm font-medium text-gray-600 transition-colors bg-gray-100 rounded-lg dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     Cancel
@@ -611,7 +716,12 @@ const Comment = ({
                     whileHover="hover"
                     whileTap="tap"
                     type="submit"
-                    className="px-4 py-2 text-sm font-medium text-white transition-all rounded-lg shadow-md bg-gradient-to-r from-orange-500 to-amber-500 hover:shadow-lg"
+                    disabled={replyError || !replyContent.trim()}
+                    className={`px-4 py-2 text-sm font-medium text-white transition-all rounded-lg shadow-md bg-gradient-to-r ${
+                      replyError || !replyContent.trim()
+                        ? "from-orange-400 to-amber-400 cursor-not-allowed"
+                        : "from-orange-500 to-amber-500 hover:shadow-lg"
+                    }`}
                   >
                     Post Reply
                   </motion.button>

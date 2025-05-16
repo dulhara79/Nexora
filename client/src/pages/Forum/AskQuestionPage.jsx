@@ -6,7 +6,6 @@ import {
   Plus,
   X,
   Tag as TagIcon,
-  Users,
   Check,
   AlertCircle,
 } from "lucide-react";
@@ -19,8 +18,12 @@ export default function AskQuestionPage() {
     title: "",
     description: "",
     tags: [],
-    // communityId: "",
-  }); // Removed authorId
+  });
+  const [formErrors, setFormErrors] = useState({
+    title: "",
+    description: "",
+    tags: "",
+  });
   const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -29,40 +32,107 @@ export default function AskQuestionPage() {
   const [focusedField, setFocusedField] = useState(null);
   const navigate = useNavigate();
 
+  // Validation rules
+  const VALIDATION_RULES = {
+    title: {
+      maxLength: 150,
+      minLength: 10,
+      required: true,
+      pattern: /^[A-Za-z0-9\s.,!?'-]*$/,
+    },
+    description: {
+      maxLength: 2000,
+      minLength: 30,
+      required: true,
+      pattern: /^[A-Za-z0-9\s.,!?'-]*$/,
+    },
+    tag: {
+      maxLength: 30,
+      minLength: 2,
+      pattern: /^[a-z0-9-]+$/,
+      maxCount: 5,
+    },
+  };
+
   useEffect(() => {
     // fetchCommunities();
   }, []);
 
-  const fetchCommunities = async () => {
-    try {
-      const res = await axios.get(`${BASE_URL}/api/communities`);
-      setCommunities(res.data || []);
-    } catch (error) {
-      console.error("Error fetching communities:", error);
-      setError("Failed to load communities. Please try again later.");
+  const validateField = (name, value) => {
+    const rules = VALIDATION_RULES[name];
+    if (!rules) return "";
+
+    if (rules.required && !value.trim()) {
+      return `${name.charAt(0).toUpperCase() + name.slice(1)} is required`;
     }
+    if (value.length < rules.minLength) {
+      return `${name.charAt(0).toUpperCase() + name.slice(1)} must be at least ${rules.minLength} characters`;
+    }
+    if (value.length > rules.maxLength) {
+      return `${name.charAt(0).toUpperCase() + name.slice(1)} must be less than ${rules.maxLength} characters`;
+    }
+    if (rules.pattern && !rules.pattern.test(value)) {
+      return name === 'tag' 
+        ? 'Tags can only contain lowercase letters, numbers, and hyphens'
+        : `${name.charAt(0).toUpperCase() + name.slice(1)} contains invalid characters`;
+    }
+    return "";
+  };
+
+  const validateTag = (tag) => {
+    const rules = VALIDATION_RULES.tag;
+    if (tag.length < rules.minLength) {
+      return `Tag must be at least ${rules.minLength} characters`;
+    }
+    if (tag.length > rules.maxLength) {
+      return `Tag must be less than ${rules.maxLength} characters`;
+    }
+    if (!rules.pattern.test(tag)) {
+      return 'Tags can only contain lowercase letters, numbers, and hyphens';
+    }
+    if (formData.tags.includes(tag)) {
+      return 'Tag already added';
+    }
+    return "";
   };
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
+    });
+    setFormErrors({
+      ...formErrors,
+      [name]: validateField(name, value),
     });
     setError("");
   };
 
   const handleAddTag = () => {
-    if (formData.tags.length >= 5) {
-      setError("You can add up to 5 tags.");
+    const trimmedTag = tagInput.trim().toLowerCase();
+    if (!trimmedTag) {
+      setFormErrors({ ...formErrors, tags: "Tag cannot be empty" });
       return;
     }
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData({
-        ...formData,
-        tags: [...formData.tags, tagInput.trim()],
-      });
-      setTagInput("");
+    
+    if (formData.tags.length >= VALIDATION_RULES.tag.maxCount) {
+      setFormErrors({ ...formErrors, tags: `Maximum ${VALIDATION_RULES.tag.maxCount} tags allowed` });
+      return;
     }
+
+    const tagError = validateTag(trimmedTag);
+    if (tagError) {
+      setFormErrors({ ...formErrors, tags: tagError });
+      return;
+    }
+
+    setFormData({
+      ...formData,
+      tags: [...formData.tags, trimmedTag],
+    });
+    setTagInput("");
+    setFormErrors({ ...formErrors, tags: "" });
   };
 
   const handleRemoveTag = (tagToRemove) => {
@@ -70,6 +140,7 @@ export default function AskQuestionPage() {
       ...formData,
       tags: formData.tags.filter((tag) => tag !== tagToRemove),
     });
+    setFormErrors({ ...formErrors, tags: "" });
   };
 
   const handleTagInputKeyDown = (e) => {
@@ -82,24 +153,17 @@ export default function AskQuestionPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.title.trim()) {
-      setError("Please provide a title for your question");
-      return;
-    }
-
-    if (!formData.description.trim()) {
-      setError("Please provide a description for your question");
-      return;
-    }
-
-    // if (!formData.communityId) {
-    //   setError("Please select a community for your question");
-    //   return;
-    // }
-
-    if (formData.tags.length > 5) {
-      // Corrected validation
-      setError("You can add up to 5 tags.");
+    // Validate all fields before submission
+    const titleError = validateField("title", formData.title);
+    const descriptionError = validateField("description", formData.description);
+    
+    if (titleError || descriptionError) {
+      setFormErrors({
+        title: titleError,
+        description: descriptionError,
+        tags: formErrors.tags,
+      });
+      setError("Please fix the errors in the form");
       return;
     }
 
@@ -110,12 +174,10 @@ export default function AskQuestionPage() {
         throw new Error("No authentication token found. Please log in.");
       }
 
-      // Send properly structured data
       const postData = {
         title: formData.title,
         description: formData.description,
         tags: formData.tags,
-        // communityId: formData.communityId
       };
 
       const res = await axios.post(`${BASE_URL}/api/questions`, postData, {
@@ -132,7 +194,7 @@ export default function AskQuestionPage() {
     } catch (error) {
       console.error("Error submitting question:", error);
       setError(
-        error.response?.data?.error || // Match backend error key
+        error.response?.data?.error ||
           "Failed to post your question. Please try again."
       );
       setLoading(false);
@@ -189,6 +251,8 @@ export default function AskQuestionPage() {
                 className={`relative border-2 rounded-lg transition-all duration-300 ${
                   focusedField === "title"
                     ? "border-orange-400 shadow-md shadow-orange-100"
+                    : formErrors.title
+                    ? "border-red-400"
                     : "border-gray-200"
                 }`}
                 whileTap={{ scale: 0.995 }}
@@ -202,11 +266,15 @@ export default function AskQuestionPage() {
                   onBlur={() => setFocusedField(null)}
                   className="w-full px-4 py-3 bg-transparent rounded-lg focus:outline-none"
                   placeholder="What's your cooking question?"
+                  maxLength={VALIDATION_RULES.title.maxLength}
                 />
               </motion.div>
-              <p className="mt-1 text-sm text-gray-500">
-                Be specific and imagine you're asking another person
-              </p>
+              <div className="flex justify-between mt-1">
+                <p className={`text-sm ${formErrors.title ? 'text-red-500' : 'text-gray-500'}`}>
+                  {formErrors.title || 
+                    `Be specific and imagine you're asking another person (${formData.title.length}/${VALIDATION_RULES.title.maxLength})`}
+                </p>
+              </div>
             </motion.div>
 
             {/* Description Input */}
@@ -218,6 +286,8 @@ export default function AskQuestionPage() {
                 className={`relative border-2 rounded-lg transition-all duration-300 ${
                   focusedField === "description"
                     ? "border-orange-400 shadow-md shadow-orange-100"
+                    : formErrors.description
+                    ? "border-red-400"
                     : "border-gray-200"
                 }`}
                 whileTap={{ scale: 0.995 }}
@@ -231,12 +301,15 @@ export default function AskQuestionPage() {
                   rows={8}
                   className="w-full px-4 py-3 bg-transparent rounded-lg focus:outline-none"
                   placeholder="Describe your question in detail... Include any steps you've already tried, ingredients you're using, and specific techniques you're asking about."
+                  maxLength={VALIDATION_RULES.description.maxLength}
                 />
               </motion.div>
-              <p className="mt-1 text-sm text-gray-500">
-                Include all the information someone would need to answer your
-                question
-              </p>
+              <div className="flex justify-between mt-1">
+                <p className={`text-sm ${formErrors.description ? 'text-red-500' : 'text-gray-500'}`}>
+                  {formErrors.description ||
+                    `Include all the information someone would need to answer your question (${formData.description.length}/${VALIDATION_RULES.description.maxLength})`}
+                </p>
+              </div>
             </motion.div>
 
             {/* Tags Input */}
@@ -249,34 +322,41 @@ export default function AskQuestionPage() {
                   className={`flex items-center border-2 rounded-lg overflow-hidden transition-all duration-300 ${
                     focusedField === "tags"
                       ? "border-orange-400 shadow-md shadow-orange-100"
+                      : formErrors.tags
+                      ? "border-red-400"
                       : "border-gray-200"
                   }`}
                   whileTap={{ scale: 0.995 }}
                 >
                   <div className="flex flex-wrap items-center gap-2 px-2 py-1">
-                    {formData.tags.map((tag, index) => (
-                      <motion.span
-                        key={index}
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.8, opacity: 0 }}
-                        className="flex items-center gap-1 px-3 py-1 text-sm text-orange-700 bg-orange-100 rounded-full group"
-                      >
-                        <TagIcon size={14} />
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveTag(tag)}
-                          className="p-1 text-orange-500 rounded-full hover:bg-orange-200 hover:text-orange-800"
+                    <AnimatePresence>
+                      {formData.tags.map((tag, index) => (
+                        <motion.span
+                          key={index}
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.8, opacity: 0 }}
+                          className="flex items-center gap-1 px-3 py-1 text-sm text-orange-700 bg-orange-100 rounded-full group"
                         >
-                          <X size={12} />
-                        </button>
-                      </motion.span>
-                    ))}
+                          <TagIcon size={14} />
+                          {tag}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTag(tag)}
+                            className="p-1 text-orange-500 rounded-full hover:bg-orange-200 hover:text-orange-800"
+                          >
+                            <X size={12} />
+                          </button>
+                        </motion.span>
+                      ))}
+                    </AnimatePresence>
                     <input
                       type="text"
                       value={tagInput}
-                      onChange={(e) => setTagInput(e.target.value)}
+                      onChange={(e) => {
+                        setTagInput(e.target.value);
+                        setFormErrors({ ...formErrors, tags: "" });
+                      }}
                       onKeyDown={handleTagInputKeyDown}
                       onFocus={() => setFocusedField("tags")}
                       onBlur={() => {
@@ -285,6 +365,7 @@ export default function AskQuestionPage() {
                       }}
                       className="flex-1 min-w-[150px] px-2 py-2 bg-transparent focus:outline-none"
                       placeholder="Add tags (press Enter or comma)"
+                      maxLength={VALIDATION_RULES.tag.maxLength}
                     />
                   </div>
                   <motion.button
@@ -298,62 +379,13 @@ export default function AskQuestionPage() {
                   </motion.button>
                 </motion.div>
               </div>
-              <p className="text-sm text-gray-500">
-                Add up to 5 tags to describe what your question is about
-              </p>
-            </motion.div>
-
-            {/* Community Select */}
-            {/* <motion.div className="mb-8" variants={itemVariants}>
-            <label className="block mb-2 text-lg font-medium text-gray-700">
-              Community
-            </label>
-            <motion.div
-              className={`relative border-2 rounded-lg transition-all duration-300 ${
-                focusedField === "community"
-                  ? "border-orange-400 shadow-md shadow-orange-100"
-                  : "border-gray-200"
-              }`}
-              whileTap={{ scale: 0.995 }}
-            >
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <Users size={20} className="text-gray-400" />
-              </div>
-              <select
-                name="communityId"
-                value={formData.communityId}
-                onChange={handleChange}
-                onFocus={() => setFocusedField("community")}
-                onBlur={() => setFocusedField(null)}
-                className="w-full py-3 pl-10 pr-4 bg-transparent rounded-lg appearance-none focus:outline-none"
-              >
-                <option value="">Select a cooking community</option>
-                {communities.map(community => (
-                  <option key={community.id} value={community.id}>
-                    {community.name}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg
-                  className="w-5 h-5 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
+              <div className="flex justify-between mt-1">
+                <p className={`text-sm ${formErrors.tags ? 'text-red-500' : 'text-gray-500'}`}>
+                  {formErrors.tags ||
+                    `Add up to ${VALIDATION_RULES.tag.maxCount} tags to describe what your question is about (${formData.tags.length}/${VALIDATION_RULES.tag.maxCount})`}
+                </p>
               </div>
             </motion.div>
-            <p className="mt-1 text-sm text-gray-500">
-              Choose the most relevant community for your question
-            </p>
-          </motion.div> */}
 
             {/* Error Message */}
             <AnimatePresence>
@@ -376,12 +408,12 @@ export default function AskQuestionPage() {
             <motion.div variants={itemVariants}>
               <motion.button
                 type="submit"
-                disabled={loading || success}
+                disabled={loading || success || Object.values(formErrors).some(err => err)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className={`relative w-full px-6 py-4 text-lg font-medium text-white transition-all rounded-lg shadow-lg 
                 ${
-                  loading || success
+                  loading || success || Object.values(formErrors).some(err => err)
                     ? "bg-orange-400 cursor-not-allowed"
                     : "bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-orange-200 hover:shadow-orange-300"
                 }`}
