@@ -1,30 +1,3 @@
-// package com.nexora.server.config;
-
-// import org.springframework.context.annotation.Configuration;
-// import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-// import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
-// import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
-// import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
-
-// @Configuration
-// @EnableWebSocketMessageBroker
-// public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-
-//     @Override
-//     public void configureMessageBroker(MessageBrokerRegistry config) {
-//         config.enableSimpleBroker("/topic", "/queue");
-//         config.setApplicationDestinationPrefixes("/app");
-//         config.setUserDestinationPrefix("/user");
-//     }
-
-//     @Override
-//     public void registerStompEndpoints(StompEndpointRegistry registry) {
-//         registry.addEndpoint("/ws-notifications")
-//                 .setAllowedOrigins("http://localhost:5173")
-//                 .withSockJS();
-//     }
-// }
-
 package com.nexora.server.config;
 
 import com.nexora.server.service.AuthenticationService;
@@ -47,6 +20,10 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+/**
+ * WebSocket configuration class for enabling STOMP over WebSocket,
+ * setting up endpoints, message broker, and authentication.
+ */
 @Configuration
 @EnableWebSocketMessageBroker
 @Order(Ordered.HIGHEST_PRECEDENCE + 99)
@@ -55,6 +32,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Autowired
     private AuthenticationService authenticationService;
 
+    /**
+     * Configure the message broker with application and user destination prefixes,
+     * and enable a simple broker with a custom task scheduler.
+     */
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/topic", "/queue")
@@ -63,6 +44,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         config.setUserDestinationPrefix("/user");
     }
 
+    /**
+     * Register the STOMP endpoint for WebSocket connections and enable SockJS fallback.
+     */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-notifications")
@@ -70,6 +54,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .withSockJS();
     }
 
+    /**
+     * Configure the inbound channel to intercept and authenticate CONNECT frames using JWT.
+     */
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(new ChannelInterceptor() {
@@ -81,6 +68,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     if (authHeader != null && authHeader.startsWith("Bearer ")) {
                         String token = authHeader.substring(7);
                         try {
+                            // Validate JWT and set the authenticated user
                             String userId = authenticationService.validateJwtToken(token).getId();
                             accessor.setUser(new UserPrincipal(userId));
                         } catch (Exception e) {
@@ -95,6 +83,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         });
     }
 
+    /**
+     * Bean definition for the task scheduler used by the message broker for heartbeats.
+     */
     @Bean
     public TaskScheduler taskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
@@ -104,7 +95,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         return scheduler;
     }
 
-    // Simple UserPrincipal class for WebSocket authentication
+    /**
+     * Simple implementation of java.security.Principal for associating a user ID with a WebSocket session.
+     */
     private static class UserPrincipal implements java.security.Principal {
         private final String userId;
 
