@@ -154,7 +154,7 @@ const ShoppingListPage = () => {
         </button>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 space-y-8">
         {cuisines.map((cuisine, ci) => (
           <section key={ci} className="bg-white shadow-lg rounded-lg overflow-hidden">
             {/* Cuisine Header */}
