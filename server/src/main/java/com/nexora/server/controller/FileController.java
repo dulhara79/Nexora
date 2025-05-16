@@ -9,7 +9,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-
+/**
+ * Controller for handling file operations such as upload, retrieval, update, and deletion.
+ * Exposes REST endpoints for file management.
+ */
 @RestController
 @RequestMapping("/api/files")
 public class FileController {
