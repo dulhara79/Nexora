@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.logging.Logger;
 
+/**
+ * Service class for managing forum tags.
+ */
 @Service
 public class ForumTagService {
 
@@ -20,6 +23,12 @@ public class ForumTagService {
     @Autowired
     private ForumQuestionRepository questionRepository;
 
+    /**
+     * Saves a list of tag names to the repository.
+     * Ignores empty or null tag names and avoids duplicates.
+     *
+     * @param tagNames List of tag names to save.
+     */
     public void saveTags(List<String> tagNames) {
         for (String tagName : tagNames) {
             if (tagName != null && !tagName.trim().isEmpty()) {
@@ -35,6 +44,12 @@ public class ForumTagService {
         }
     }
 
+    /**
+     * Deletes a tag by name if it exists and is not used by any questions.
+     *
+     * @param tagName The name of the tag to delete.
+     * @throws Exception if the tag does not exist or is used by questions.
+     */
     public void deleteTag(String tagName) throws Exception {
         ForumTag tag = tagRepository.findByName(tagName.trim().toLowerCase());
         if (tag == null) {
@@ -49,6 +64,11 @@ public class ForumTagService {
         LOGGER.info("Deleted tag: " + tagName);
     }
 
+    /**
+     * Retrieves all tags from the repository.
+     *
+     * @return List of all ForumTag objects.
+     */
     public List<ForumTag> getAllTags() {
         return tagRepository.findAll();
     }
