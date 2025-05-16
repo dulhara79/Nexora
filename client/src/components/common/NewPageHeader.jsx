@@ -16,7 +16,10 @@ import {
   ChevronDown,
   ChevronUp,
   LogOut,
+  UserPlus,
+  UserCheck,
 } from "lucide-react";
+import axios from "axios";
 
 // Page-specific color schemes
 const PAGE_THEMES = {
@@ -94,6 +97,8 @@ export default function EnhancedHeader() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
   const [activeSection, setActiveSection] = useState("home");
   const [submenuOpen, setSubmenuOpen] = useState(false);
   const [headerState, setHeaderState] = useState({
@@ -226,7 +231,9 @@ export default function EnhancedHeader() {
   const handleScrollUpdate = (isScrolled) => {
     setHeaderState((prev) => ({
       ...prev,
-      bgColor: isScrolled ? "bg-white shadow-md" : PAGE_THEMES[activeSection].nav,
+      bgColor: isScrolled
+        ? "bg-white shadow-md"
+        : PAGE_THEMES[activeSection].nav,
       textColor: isScrolled ? "text-gray-800" : PAGE_THEMES[activeSection].text,
       border: isScrolled ? "border-b border-gray-200" : "",
       backdrop: isScrolled ? "backdrop-blur-md" : "",
@@ -245,6 +252,52 @@ export default function EnhancedHeader() {
     }
   };
 
+  // Handle search input
+  const handleSearch = async (query) => {
+    setSearchQuery(query);
+    if (query.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    try {
+      const response = await axios.get(`http://localhost:5000/api/users/search?query=${encodeURIComponent(query)}&limit=10`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        withCredentials: true,
+      });
+      setSearchResults(response.data.searchResults || []);
+    } catch (error) {
+      console.error("Error searching users:", error);
+      setSearchResults([]);
+    }
+  };
+
+  // Handle follow/unfollow from search results
+  const handleFollowToggle = async (targetUserId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const isFollowing = searchResults.find(u => u.id === targetUserId)?.isFollowing;
+      const endpoint = isFollowing
+        ? `/api/users/${user.id}/unfollow/${targetUserId}`
+        : `/api/users/${user.id}/follow/${targetUserId}`;
+      
+      await axios.post(`http://localhost:5000${endpoint}`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
+      
+      setSearchResults(prevResults =>
+        prevResults.map(u =>
+          u.id === targetUserId ? { ...u, isFollowing: !isFollowing } : u
+        )
+      );
+    } catch (error) {
+      console.error("Error toggling follow:", error);
+      if (error.response?.status === 401) {
+        navigate('/login');
+      }
+    }
+  };
+
   // Close submenu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -258,29 +311,27 @@ export default function EnhancedHeader() {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.addEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
-        {/* Background Gradient */}
         <div
           ref={headerRef}
           className={`fixed inset-x-0 top-0 h-16 transition-all duration-500 ${headerState.bgColor} ${headerState.border} ${headerState.backdrop}`}
         />
-
-        {/* Main Navigation */}
         <nav className="relative z-10">
           <div className="container px-4 mx-auto">
-            <div className="flex items-center justify-between h-16">
-              {/* Logo */}
+            <div className="flex justify-between h-16 items item-center">
               <div className="flex items-center space-x-2">
                 <motion.div
                   whileHover={{ rotate: 15, scale: 1.1 }}
                   transition={{ type: "spring", stiffness: 300, damping: 15 }}
                   className={`p-2 rounded-full ${
-                    headerState.bgColor.includes("bg-white") ? "bg-orange-100" : "bg-white/10"
+                    headerState.bgColor.includes("bg-white")
+                      ? "bg-orange-100"
+                      : "bg-white/10"
                   }`}
                 >
                   <ChefHat className={`w-6 h-6 ${headerState.textColor}`} />
@@ -289,8 +340,6 @@ export default function EnhancedHeader() {
                   Nexora
                 </span>
               </div>
-
-              {/* Desktop Navigation */}
               <nav className="items-center hidden space-x-1 md:flex">
                 {Object.entries(NAV_STRUCTURE).map(([key, item]) => {
                   const isActive = activeSection === key;
@@ -301,8 +350,12 @@ export default function EnhancedHeader() {
                       onClick={() => handleTabClick(key)}
                       className={`flex items-center px-4 py-2 rounded-lg transition-all duration-300 ${
                         isActive
-                          ? `${PAGE_THEMES[item.theme].active} ${PAGE_THEMES[item.theme].text}`
-                          : `${headerState.textColor} ${PAGE_THEMES[item.theme].hover}`
+                          ? `${PAGE_THEMES[item.theme].active} ${
+                              PAGE_THEMES[item.theme].text
+                            }`
+                          : `${headerState.textColor} ${
+                              PAGE_THEMES[item.theme]
+                            }`
                       }`}
                     >
                       <span className="mr-2">{item.icon}</span>
@@ -315,8 +368,6 @@ export default function EnhancedHeader() {
                     </button>
                   );
                 })}
-
-                {/* Search Button */}
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -325,8 +376,6 @@ export default function EnhancedHeader() {
                 >
                   <Search className="w-5 h-5" />
                 </motion.button>
-
-                {/* User Menu */}
                 {isAuthenticated ? (
                   <div className="relative group">
                     <motion.button
@@ -344,8 +393,6 @@ export default function EnhancedHeader() {
                         size={8}
                       />
                     </motion.button>
-
-                    {/* Dropdown */}
                     <motion.div
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -393,8 +440,6 @@ export default function EnhancedHeader() {
                   </div>
                 )}
               </nav>
-
-              {/* Mobile Menu Button */}
               <div className="flex items-center space-x-4 md:hidden">
                 <motion.button
                   whileTap={{ scale: 0.95 }}
@@ -425,14 +470,16 @@ export default function EnhancedHeader() {
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   className={`p-2 rounded-full transition-colors ${headerState.textColor} ${headerState.hoverClass}`}
                 >
-                  {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                  {mobileMenuOpen ? (
+                    <X className="w-6 h-6" />
+                  ) : (
+                    <Menu className="w-6 h-6" />
+                  )}
                 </motion.button>
               </div>
             </div>
           </div>
         </nav>
-
-        {/* Submenu */}
         <AnimatePresence>
           {submenuOpen && NAV_STRUCTURE[activeSection]?.submenu && (
             <motion.div
@@ -470,13 +517,11 @@ export default function EnhancedHeader() {
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Search Bar */}
         <AnimatePresence>
           {searchOpen && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 56, opacity: 1 }}
+              animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3 }}
               className="fixed inset-x-0 z-40 shadow-md top-16 bg-white/90 backdrop-blur-md"
@@ -485,18 +530,66 @@ export default function EnhancedHeader() {
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="Search recipes, users, or cuisines..."
+                    placeholder="Search users..."
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
                     className="w-full px-4 py-2 pl-10 pr-4 border rounded-full focus:outline-none focus:ring-2 focus:ring-orange-300"
                     autoFocus
                   />
                   <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
                 </div>
+                {searchResults.length > 0 && (
+                  <div className="mt-2 overflow-y-auto bg-white rounded-lg shadow-lg max-h-64">
+                    {searchResults.map((result) => (
+                      <div
+                        key={result.id}
+                        className="flex items-center justify-between p-3 hover:bg-gray-50"
+                      >
+                        <Link
+                          to={`/profile/${result.id}`}
+                          onClick={() => setSearchOpen(false)}
+                          className="flex items-center space-x-2"
+                        >
+                          <FallbackAvatar
+                            src={result.profilePhotoUrl}
+                            name={result.name || "User"}
+                            size={8}
+                          />
+                          <div>
+                            <p className="font-medium text-gray-800">{result.name}</p>
+                            <p className="text-sm text-gray-500">@{result.username}</p>
+                          </div>
+                        </Link>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleFollowToggle(result.id)}
+                          className={`px-4 py-1 font-medium rounded-full ${
+                            result.isFollowing
+                              ? "bg-indigo-100 text-indigo-700 border border-indigo-500"
+                              : "bg-indigo-600 text-white hover:bg-indigo-700"
+                          }`}
+                        >
+                          {result.isFollowing ? (
+                            <div className="flex items-center">
+                              <UserCheck className="w-4 h-4 mr-2" />
+                              Following
+                            </div>
+                          ) : (
+                            <div className="flex items-center">
+                              <UserPlus className="w-4 h-4 mr-2" />
+                              Follow
+                            </div>
+                          )}
+                        </motion.button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Mobile Menu */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
@@ -652,8 +745,6 @@ export default function EnhancedHeader() {
           )}
         </AnimatePresence>
       </header>
-
-      {/* Spacer to prevent content from hiding under the header + submenu */}
       <div
         className={`${
           submenuOpen ? "h-24" : "h-16"
