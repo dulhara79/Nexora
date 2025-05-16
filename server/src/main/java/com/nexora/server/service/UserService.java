@@ -20,9 +20,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -64,6 +66,15 @@ public class UserService {
         if (user == null || target == null) {
             throw new IllegalArgumentException("User or target user not found");
         }
+        if (userId.equals(targetUserId)) {
+            throw new IllegalArgumentException("Cannot follow yourself");
+        }
+        if (user.getFollowing() == null) {
+            user.setFollowing(new ArrayList<>());
+        }
+        if (target.getFollowers() == null) {
+            target.setFollowers(new ArrayList<>());
+        }
         if (user.getFollowing().contains(targetUserId)) {
             throw new IllegalStateException("Already following this user");
         }
@@ -74,22 +85,28 @@ public class UserService {
         return "Successfully followed user";
     }
 
-    public String unfollowUser(String userId, String targetUserId) {
-        User user = findById(userId);
-        User target = findById(targetUserId);
-        if (user == null || target == null) {
-            throw new IllegalArgumentException("User or target user not found");
-        }
-        if (!user.getFollowing().contains(targetUserId)) {
-            throw new IllegalStateException("Not following this user");
-        }
-        user.getFollowing().remove(targetUserId);
-        target.getFollowers().remove(userId);
-        userRepository.save(user);
-        userRepository.save(target);
-        return "Successfully unfollowed user";
+    // In UserService.java
+public String unfollowUser(String userId, String targetUserId) {
+    User user = getUserById(userId);
+    User target = getUserById(targetUserId);
+
+    if (!user.getFollowing().contains(targetUserId)) {
+        throw new RuntimeException("You are not following this user.");
     }
 
+    if (!target.getFollowers().contains(userId)) {
+        throw new RuntimeException("Target does not have you as a follower.");
+    }
+
+    // Remove from both sides
+    user.getFollowing().remove(targetUserId);
+    target.getFollowers().remove(userId);
+
+    userRepository.save(user);
+    userRepository.save(target);
+
+    return "Successfully unfollowed user";
+}
     public User getUserById(String userId) {
         User user = findById(userId);
         if (user == null) {
@@ -149,14 +166,24 @@ public class UserService {
     }
 
     public List<User> searchUsers(String query, String currentUserId, int limit) {
+        User currentUser = findById(currentUserId);
+        if (currentUser == null) {
+            throw new IllegalArgumentException("Current user not found");
+        }
         List<User> users = userRepository.findByNameOrUsername(query);
         users.removeIf(user -> user.getId().equals(currentUserId));
+        List<String> currentUserFollowing = currentUser.getFollowing() != null ? currentUser.getFollowing() : new ArrayList<>();
+        // Set isFollowing for each user
+        users.forEach(user -> user.setFollowing(currentUserFollowing.contains(user.getId()) ? List.of("true") : List.of("false")));
         return users.stream().limit(limit).toList();
     }
 
     public List<User> getRelatedUsers(String query, String currentUserId, int limit) {
         User currentUser = findById(currentUserId);
-        String likeSkill = currentUser != null ? currentUser.getLikeSkill() : null;
+        if (currentUser == null) {
+            throw new IllegalArgumentException("Current user not found");
+        }
+        String likeSkill = currentUser.getLikeSkill();
         Aggregation aggregation = Aggregation.newAggregation(
                 Aggregation.match(Criteria.where("_id").ne(currentUserId)
                         .and("following").nin(currentUserId)
@@ -185,7 +212,29 @@ public class UserService {
                         .and("likeSkill").as("likeSkill")
                         .and("createdAt").as("createdAt"));
         AggregationResults<User> results = mongoTemplate.aggregate(aggregation, "users", User.class);
-        return results.getMappedResults();
+        List<User> relatedUsers = results.getMappedResults();
+        List<String> currentUserFollowing = currentUser.getFollowing() != null ? currentUser.getFollowing() : new ArrayList<>();
+        // Set isFollowing for each user
+        relatedUsers.forEach(user -> user.setFollowing(currentUserFollowing.contains(user.getId()) ? List.of("true") : List.of("false")));
+        return relatedUsers;
+    }
+
+    public List<User> getFollowers(String userId) {
+        User user = findById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+        List<String> followerIds = user.getFollowers() != null ? user.getFollowers() : new ArrayList<>();
+        return userRepository.findAllById(followerIds);
+    }
+
+    public List<User> getFollowing(String userId) {
+        User user = findById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+        List<String> followingIds = user.getFollowing() != null ? user.getFollowing() : new ArrayList<>();
+        return userRepository.findAllById(followingIds);
     }
 
     public User validateJwtToken(String token) throws Exception {

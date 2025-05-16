@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -87,6 +88,8 @@ public class UserController {
                         .body(Map.of("error", "Unauthorized: Token does not match user"));
             }
 
+            System.out.println("Unfollowing: " + userId + " -> " + targetUserId);
+
             String result = userService.unfollowUser(userId, targetUserId);
             Map<String, String> links = new HashMap<>();
             links.put("self", "/api/users/" + userId);
@@ -117,8 +120,94 @@ public class UserController {
             response.put("user", user);
             response.put("_links", links);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
                     .header(HttpHeaders.ETAG, "\"" + user.getId() + "\"")
+                    .body(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+     @GetMapping("/{userId}/followers")
+    public ResponseEntity<?> getFollowers(
+            @PathVariable String userId,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                        .body(Map.of("error", "No valid token provided"));
+            }
+            String token = authHeader.substring(7);
+            User currentUser = userService.validateJwtToken(token);
+            
+            List<User> followers = userService.getFollowers(userId);
+            List<Map<String, Object>> followerResponses = followers.stream().map(user -> {
+                Map<String, Object> userMap = new HashMap<>();
+                userMap.put("id", user.getId());
+                userMap.put("name", user.getName());
+                userMap.put("username", user.getUsername());
+                userMap.put("profilePhotoUrl", user.getProfilePhotoUrl());
+                userMap.put("isFollowing", currentUser.getFollowing().contains(user.getId()));
+                Map<String, String> userLinks = new HashMap<>();
+                userLinks.put("self", "/api/users/" + user.getId());
+                userMap.put("_links", userLinks);
+                return userMap;
+            }).collect(Collectors.toList());
+            
+            Map<String, String> links = new HashMap<>();
+            links.put("self", "/api/users/" + userId + "/followers");
+            Map<String, Object> response = new HashMap<>();
+            response.put("followers", followerResponses);
+            response.put("_links", links);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .header(HttpHeaders.ETAG, "\"" + userId + "-followers\"")
+                    .body(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{userId}/following")
+    public ResponseEntity<?> getFollowing(
+            @PathVariable String userId,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                        .body(Map.of("error", "No valid token provided"));
+            }
+            String token = authHeader.substring(7);
+            User currentUser = userService.validateJwtToken(token);
+            
+            List<User> following = userService.getFollowing(userId);
+            List<Map<String, Object>> followingResponses = following.stream().map(user -> {
+                Map<String, Object> userMap = new HashMap<>();
+                userMap.put("id", user.getId());
+                userMap.put("name", user.getName());
+                userMap.put("username", user.getUsername());
+                userMap.put("profilePhotoUrl", user.getProfilePhotoUrl());
+                userMap.put("isFollowing", currentUser.getFollowing().contains(user.getId()));
+                Map<String, String> userLinks = new HashMap<>();
+                userLinks.put("self", "/api/users/" + user.getId());
+                userMap.put("_links", userLinks);
+                return userMap;
+            }).collect(Collectors.toList());
+            
+            Map<String, String> links = new HashMap<>();
+            links.put("self", "/api/users/" + userId + "/following");
+            Map<String, Object> response = new HashMap<>();
+            response.put("following", followingResponses);
+            response.put("_links", links);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .header(HttpHeaders.ETAG, "\"" + userId + "-following\"")
                     .body(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest()
@@ -151,7 +240,7 @@ public class UserController {
             response.put("suggestedUsers", userResponses);
             response.put("_links", links);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
                     .header(HttpHeaders.ETAG, "\"" + userId + "-suggested-" + limit + "\"")
                     .body(response);
         } catch (Exception e) {
@@ -213,7 +302,7 @@ public class UserController {
             links.put("self", "/api/users/search?query=" + query + "&limit=" + limit);
             response.put("_links", links);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
                     .header(HttpHeaders.ETAG, "\"" + query + "-search-" + limit + "\"")
                     .body(response);
         } catch (Exception e) {

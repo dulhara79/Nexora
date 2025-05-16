@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Link, Navigate } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Link, Navigate } from "react-router-dom";
 import {
   HiOutlineFire,
   HiOutlineStar,
@@ -11,14 +11,14 @@ import {
   HiOutlineEye,
   HiChevronRight,
   HiOutlineTag,
-} from 'react-icons/hi';
-import axios from 'axios';
+} from "react-icons/hi";
+import axios from "axios";
 // import Header from '../../components/Forum/Header';
 import Header from "../../components/common/NewPageHeader";
-import { AuthContext } from '../../context/AuthContext';
+import { AuthContext } from "../../context/AuthContext";
 
 // Configure Axios instance
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = "http://localhost:5000/api";
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
@@ -27,13 +27,13 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('jwtToken');
+    const token = localStorage.getItem("jwtToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     const etag = localStorage.getItem(`etag-${config.url}`);
     if (etag) {
-      config.headers['If-None-Match'] = etag;
+      config.headers["If-None-Match"] = etag;
     }
     return config;
   },
@@ -44,7 +44,10 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     if (response.headers.etag) {
-      localStorage.setItem(`etag-${response.config.url}`, response.headers.etag);
+      localStorage.setItem(
+        `etag-${response.config.url}`,
+        response.headers.etag
+      );
     }
     return response.data;
   },
@@ -53,10 +56,10 @@ api.interceptors.response.use(
       return Promise.resolve(null);
     }
     if (error.response?.status === 401) {
-      localStorage.removeItem('jwtToken');
-      window.location.href = '/login';
+      localStorage.removeItem("jwtToken");
+      window.location.href = "/login";
     }
-    return Promise.reject(error.response?.data?.error || 'An error occurred');
+    return Promise.reject(error.response?.data?.error || "An error occurred");
   }
 );
 
@@ -69,7 +72,7 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('ErrorBoundary caught:', error, errorInfo);
+    console.error("ErrorBoundary caught:", error, errorInfo);
   }
 
   render() {
@@ -86,7 +89,7 @@ class ErrorBoundary extends React.Component {
 
 const HomePage = () => {
   const { isAuthenticated, loading, userId } = useContext(AuthContext);
-  const [activeTab, setActiveTab] = useState('trending');
+  const [activeTab, setActiveTab] = useState("trending");
   const [isLoaded, setIsLoaded] = useState(false);
   const [showWelcomeCard, setShowWelcomeCard] = useState(true);
   const [posts, setPosts] = useState([]);
@@ -120,23 +123,23 @@ const HomePage = () => {
     try {
       setLoading(true);
       const [tagsResponse, communitiesResponse] = await Promise.all([
-        api.get('/tags'),
-        api.get('/communities'),
+        api.get("/tags"),
+        api.get("/communities"),
       ]);
       setTrendingTags(tagsResponse?.tags?.map((tag) => tag.name) || []);
       setCommunitySpotlight(
         communitiesResponse?.communities?.map((community) => ({
-          id: community.id || 'unknown',
-          name: community.name || 'Unnamed Community',
+          id: community.id || "unknown",
+          name: community.name || "Unnamed Community",
           members: community.members || 0,
-          description: community.description || 'No description available',
+          description: community.description || "No description available",
           color: getRandomGradient(),
-          icon: community.icon || '🌟',
+          icon: community.icon || "🌟",
         })) || []
       );
     } catch (err) {
-      console.error('Failed to fetch initial data:', err);
-      setError('Failed to load tags or communities.');
+      console.error("Failed to fetch initial data:", err);
+      setError("Failed to load tags or communities.");
     } finally {
       setLoading(false);
     }
@@ -145,41 +148,42 @@ const HomePage = () => {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      let sortBy = '';
-      if (activeTab === 'trending') sortBy = 'mostCommented';
-      if (activeTab === 'latest') sortBy = 'newest';
-      if (activeTab === 'popular') sortBy = 'mostCommented';
-      if (activeTab === 'following') {
+      let sortBy = "";
+      if (activeTab === "trending") sortBy = "mostCommented";
+      if (activeTab === "latest") sortBy = "newest";
+      if (activeTab === "popular") sortBy = "mostCommented";
+      if (activeTab === "following") {
         await fetchSavedPosts();
         return;
       }
 
-      const response = await api.get('/questions', {
+      const response = await api.get("/questions", {
         params: { sortBy },
       });
 
       if (!response) return; // Cached response
 
-      const transformedPosts = response.questions?.map((post) => ({
-        id: post.id || 'unknown',
-        title: post.title || 'Untitled',
-        author: post.authorUsername || 'Anonymous',
-        authorAvatar: post.authorUsername?.[0]?.toUpperCase() || 'A',
-        authorColor: getRandomGradient(),
-        content: post.description || '',
-        tags: Array.isArray(post.tags) ? post.tags : [],
-        likes: post.upvoteUserIds?.length || 0,
-        comments: post.commentIds?.length || 0,
-        views: post.views || 0,
-        timeAgo: calculateTimeAgo(post.createdAt || new Date()),
-        isPinned: post.isPinned || false,
-        isHot: (post.commentIds?.length || 0) > 10,
-      })) || [];
+      const transformedPosts =
+        response.questions?.map((post) => ({
+          id: post.id || "unknown",
+          title: post.title || "Untitled",
+          author: post.authorUsername || "Anonymous",
+          authorAvatar: post.authorUsername?.[0]?.toUpperCase() || "A",
+          authorColor: getRandomGradient(),
+          content: post.description || "",
+          tags: Array.isArray(post.tags) ? post.tags : [],
+          likes: post.upvoteUserIds?.length || 0,
+          comments: post.commentIds?.length || 0,
+          views: post.views || 0,
+          timeAgo: calculateTimeAgo(post.createdAt || new Date()),
+          isPinned: post.isPinned || false,
+          isHot: (post.commentIds?.length || 0) > 10,
+        })) || [];
 
       setPosts(transformedPosts);
     } catch (err) {
-      console.error('Fetch posts error:', err);
-      setError('Failed to load posts.');
+      console.error("Fetch posts error:", err);
+      setError("Failed to load posts.");
     } finally {
       setLoading(false);
     }
@@ -188,27 +192,28 @@ const HomePage = () => {
   const fetchSavedPosts = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/questions/saved-questions');
+      const response = await api.get("/questions/saved-questions");
       if (!response) return; // Cached response
-      const transformedPosts = response.questions?.map((post) => ({
-        id: post.id || 'unknown',
-        title: post.title || 'Untitled',
-        author: post.authorUsername || 'Anonymous',
-        authorAvatar: post.authorUsername?.[0]?.toUpperCase() || 'A',
-        authorColor: getRandomGradient(),
-        content: post.description || '',
-        tags: Array.isArray(post.tags) ? post.tags : [],
-        likes: post.upvoteUserIds?.length || 0,
-        comments: post.commentIds?.length || 0,
-        views: post.views || 0,
-        timeAgo: calculateTimeAgo(post.createdAt || new Date()),
-        isPinned: post.isPinned || false,
-        isHot: (post.commentIds?.length || 0) > 10,
-      })) || [];
+      const transformedPosts =
+        response.questions?.map((post) => ({
+          id: post.id || "unknown",
+          title: post.title || "Untitled",
+          author: post.authorUsername || "Anonymous",
+          authorAvatar: post.authorUsername?.[0]?.toUpperCase() || "A",
+          authorColor: getRandomGradient(),
+          content: post.description || "",
+          tags: Array.isArray(post.tags) ? post.tags : [],
+          likes: post.upvoteUserIds?.length || 0,
+          comments: post.commentIds?.length || 0,
+          views: post.views || 0,
+          timeAgo: calculateTimeAgo(post.createdAt || new Date()),
+          isPinned: post.isPinned || false,
+          isHot: (post.commentIds?.length || 0) > 10,
+        })) || [];
       setPosts(transformedPosts);
     } catch (err) {
-      console.error('Fetch saved posts error:', err);
-      setError('Failed to load saved posts.');
+      console.error("Fetch saved posts error:", err);
+      setError("Failed to load saved posts.");
     } finally {
       setLoading(false);
     }
@@ -216,18 +221,20 @@ const HomePage = () => {
 
   const fetchSavedStatus = async () => {
     try {
-      const response = await api.get('/questions/saved-questions');
+      const response = await api.get("/questions/saved-questions");
       if (response) {
-        setSavedPosts(new Set(response.questions?.map((post) => post.id) || []));
+        setSavedPosts(
+          new Set(response.questions?.map((post) => post.id) || [])
+        );
       }
     } catch (err) {
-      console.error('Failed to fetch saved status:', err);
+      console.error("Failed to fetch saved status:", err);
     }
   };
 
   const fetchLikedStatus = async () => {
     try {
-      const response = await api.get('/questions/saved-questions');
+      const response = await api.get("/questions/saved-questions");
       if (response) {
         setLikedPosts(
           new Set(
@@ -238,14 +245,14 @@ const HomePage = () => {
         );
       }
     } catch (err) {
-      console.error('Failed to fetch liked status:', err);
+      console.error("Failed to fetch liked status:", err);
     }
   };
 
   const handleUpvote = async (postId) => {
     try {
       const response = await api.patch(`/questions/${postId}/vote`, {
-        voteType: 'upvote',
+        voteType: "upvote",
       });
       if (response) {
         setPosts(
@@ -269,14 +276,14 @@ const HomePage = () => {
         });
       }
     } catch (err) {
-      console.error('Failed to upvote:', err);
-      setError('Failed to upvote post.');
+      console.error("Failed to upvote:", err);
+      setError("Failed to upvote post.");
     }
   };
 
   const handleSave = async (postId) => {
     try {
-      await api.post('/questions/saved-questions', { questionId: postId });
+      await api.post("/questions/saved-questions", { questionId: postId });
       setSavedPosts((prev) => {
         const newSet = new Set(prev);
         if (newSet.has(postId)) {
@@ -287,17 +294,17 @@ const HomePage = () => {
         return newSet;
       });
     } catch (err) {
-      console.error('Failed to save:', err);
-      setError('Failed to save post.');
+      console.error("Failed to save:", err);
+      setError("Failed to save post.");
     }
   };
 
   const getRandomGradient = () => {
     const gradients = [
-      'from-blue-500 to-indigo-600',
-      'from-emerald-500 to-teal-600',
-      'from-purple-500 to-pink-600',
-      'from-amber-500 to-orange-600',
+      "from-blue-500 to-indigo-600",
+      "from-emerald-500 to-teal-600",
+      "from-purple-500 to-pink-600",
+      "from-amber-500 to-orange-600",
     ];
     return gradients[Math.floor(Math.random() * gradients.length)];
   };
@@ -321,7 +328,7 @@ const HomePage = () => {
       transition: {
         staggerChildren: 0.1,
         delayChildren: 0.2,
-        type: 'spring',
+        type: "spring",
         stiffness: 100,
       },
     },
@@ -329,7 +336,7 @@ const HomePage = () => {
 
   const tabItemVariants = {
     hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0, transition: { type: 'spring', damping: 15 } },
+    visible: { opacity: 1, y: 0, transition: { type: "spring", damping: 15 } },
   };
 
   const cardContainerVariants = {
@@ -348,7 +355,7 @@ const HomePage = () => {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { type: 'spring', damping: 20, stiffness: 100 },
+      transition: { type: "spring", damping: 20, stiffness: 100 },
     },
   };
 
@@ -357,7 +364,7 @@ const HomePage = () => {
     visible: {
       opacity: 1,
       x: 0,
-      transition: { type: 'spring', damping: 20, stiffness: 100 },
+      transition: { type: "spring", damping: 20, stiffness: 100 },
     },
   };
 
@@ -377,7 +384,7 @@ const HomePage = () => {
                 initial={{ opacity: 0, y: -30, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -30, scale: 0.95 }}
-                transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
+                transition={{ duration: 0.6, type: "spring", bounce: 0.3 }}
               >
                 <div className="relative z-10 flex flex-col items-start justify-between p-8 md:flex-row md:items-center">
                   <div className="mb-6 md:mb-0">
@@ -393,7 +400,7 @@ const HomePage = () => {
                       className="px-6 py-3 font-semibold text-indigo-700 transition-colors bg-white shadow-lg rounded-xl hover:bg-blue-50"
                       whileHover={{
                         scale: 1.05,
-                        boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
+                        boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
                       }}
                       whileTap={{ scale: 0.95 }}
                     >
@@ -403,7 +410,7 @@ const HomePage = () => {
                       className="px-6 py-3 font-semibold text-white transition-colors bg-transparent border-2 border-white rounded-xl hover:bg-white/10"
                       whileHover={{
                         scale: 1.05,
-                        boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
+                        boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
                       }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setShowWelcomeCard(false)}
@@ -432,31 +439,31 @@ const HomePage = () => {
                 className="sticky z-10 flex p-2 mb-8 space-x-2 shadow-lg bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-xl top-4"
                 variants={tabContainerVariants}
                 initial="hidden"
-                animate={isLoaded ? 'visible' : 'hidden'}
+                animate={isLoaded ? "visible" : "hidden"}
               >
-                {['trending', 'latest', 'popular', 'following'].map((tab) => (
+                {["trending", "latest", "popular", "following"].map((tab) => (
                   <motion.button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
                     className={`flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold capitalize transition-all duration-300 ${
                       activeTab === tab
-                        ? 'bg-indigo-600 text-white shadow-md'
-                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50'
+                        ? "bg-indigo-600 text-white shadow-md"
+                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"
                     }`}
                     variants={tabItemVariants}
                     whileHover={{ scale: 1.05, y: -2 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    {tab === 'trending' && (
+                    {tab === "trending" && (
                       <HiOutlineFire className="w-5 h-5 mr-2" />
                     )}
-                    {tab === 'latest' && (
+                    {tab === "latest" && (
                       <HiOutlineClock className="w-5 h-5 mr-2" />
                     )}
-                    {tab === 'popular' && (
+                    {tab === "popular" && (
                       <HiOutlineStar className="w-5 h-5 mr-2" />
                     )}
-                    {tab === 'following' && (
+                    {tab === "following" && (
                       <HiOutlineBookmark className="w-5 h-5 mr-2" />
                     )}
                     {tab}
@@ -472,7 +479,7 @@ const HomePage = () => {
                     transition={{
                       duration: 1,
                       repeat: Infinity,
-                      ease: 'linear',
+                      ease: "linear",
                     }}
                   />
                 </div>
@@ -489,7 +496,7 @@ const HomePage = () => {
                   className="space-y-6"
                   variants={cardContainerVariants}
                   initial="hidden"
-                  animate={isLoaded ? 'visible' : 'hidden'}
+                  animate={isLoaded ? "visible" : "hidden"}
                 >
                   {posts.map((post) => (
                     <motion.div
@@ -498,7 +505,7 @@ const HomePage = () => {
                       variants={cardItemVariants}
                       whileHover={{
                         y: -5,
-                        boxShadow: '0 12px 40px rgba(0,0,0,0.1)',
+                        boxShadow: "0 12px 40px rgba(0,0,0,0.1)",
                       }}
                     >
                       <div className="relative p-6">
@@ -507,7 +514,7 @@ const HomePage = () => {
                             <motion.div
                               className={`flex items-center justify-center w-10 h-10 text-base font-bold text-white rounded-full bg-gradient-to-br ${post.authorColor}`}
                               whileHover={{ scale: 1.1, rotate: 10 }}
-                              transition={{ type: 'spring', stiffness: 200 }}
+                              transition={{ type: "spring", stiffness: 200 }}
                             >
                               {post.authorAvatar}
                             </motion.div>
@@ -590,8 +597,8 @@ const HomePage = () => {
                             <motion.button
                               className={`flex items-center text-sm font-medium ${
                                 likedPosts.has(post.id)
-                                  ? 'text-indigo-600 dark:text-indigo-400'
-                                  : 'text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+                                  ? "text-indigo-600 dark:text-indigo-400"
+                                  : "text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"
                               }`}
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
@@ -615,8 +622,8 @@ const HomePage = () => {
                           <motion.button
                             className={`text-sm font-medium ${
                               savedPosts.has(post.id)
-                                ? 'text-green-600 dark:text-green-400'
-                                : 'text-slate-500 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400'
+                                ? "text-green-600 dark:text-green-400"
+                                : "text-slate-500 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400"
                             }`}
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
@@ -636,7 +643,7 @@ const HomePage = () => {
                   className="px-8 py-4 font-semibold text-white transition-all shadow-lg bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl hover:from-indigo-500 hover:to-blue-500"
                   whileHover={{
                     scale: 1.05,
-                    boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
+                    boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
                   }}
                   whileTap={{ scale: 0.95 }}
                   initial={{ opacity: 0 }}
@@ -666,7 +673,7 @@ const HomePage = () => {
                     className="w-full px-6 py-3 font-semibold text-white transition-all shadow-md bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl hover:from-indigo-500 hover:to-blue-500"
                     whileHover={{
                       scale: 1.03,
-                      boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
+                      boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
                     }}
                     whileTap={{ scale: 0.97 }}
                   >
@@ -705,7 +712,7 @@ const HomePage = () => {
                         className="p-4 transition-all bg-white border dark:bg-slate-900 rounded-xl border-slate-100 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-900"
                         whileHover={{
                           y: -3,
-                          boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
+                          boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
                         }}
                       >
                         <div className="flex items-center space-x-4">
@@ -792,7 +799,7 @@ const HomePage = () => {
                     className="p-5 rounded-xl bg-gradient-to-r from-indigo-100 to-blue-100 dark:from-indigo-900/40 dark:to-blue-900/40"
                     whileHover={{
                       y: -3,
-                      boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
+                      boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
                     }}
                   >
                     <div className="flex items-center justify-between mb-3">
@@ -827,7 +834,7 @@ const HomePage = () => {
                     className="p-5 rounded-xl bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40"
                     whileHover={{
                       y: -3,
-                      boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
+                      boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
                     }}
                   >
                     <div className="flex items-center justify-between mb-3">
@@ -867,7 +874,7 @@ const HomePage = () => {
           className="fixed z-30 right-6 bottom-6 md:hidden"
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 1.2, type: 'spring', stiffness: 200 }}
+          transition={{ delay: 1.2, type: "spring", stiffness: 200 }}
         >
           <Link to="/forum/ask">
             <motion.button

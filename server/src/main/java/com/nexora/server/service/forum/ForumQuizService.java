@@ -334,7 +334,9 @@ public class ForumQuizService {
 
         int totalParticipants = quiz.getParticipantAnswers().size();
         int totalCorrectAnswers = quiz.getParticipantScores().values().stream().mapToInt(Integer::intValue).sum();
-        double percentageCorrect = totalParticipants > 0 ? ((double) totalCorrectAnswers / (totalParticipants * quiz.getQuestions().size())) * 100 : 0;
+        double percentageCorrect = totalParticipants > 0
+                ? ((double) totalCorrectAnswers / (totalParticipants * quiz.getQuestions().size())) * 100
+                : 0;
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalParticipants", totalParticipants);
@@ -368,7 +370,8 @@ public class ForumQuizService {
                     ForumNotification notification = new ForumNotification();
                     notification.setUserId(userId);
                     notification.setUserName(userService.getUserById(userId).getName());
-                    notification.setMessage("Results are in for quiz: " + quiz.getTitle() + ". Your score: " + score + "/" + quiz.getQuestions().size());
+                    notification.setMessage("Results are in for quiz: " + quiz.getTitle() + ". Your score: " + score
+                            + "/" + quiz.getQuestions().size());
                     notification.setType("QUIZ_RESULT");
                     notification.setRelatedQuizId(quiz.getId());
                     notificationService.createNotification(notification);

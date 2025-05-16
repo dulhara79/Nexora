@@ -60,7 +60,12 @@ class ErrorBoundary extends React.Component {
 }
 
 const SavedQuestions = () => {
-  const { user, isAuthenticated, loading: authLoading, token } = useContext(AuthContext);
+  const {
+    user,
+    isAuthenticated,
+    loading: authLoading,
+    token,
+  } = useContext(AuthContext);
   const [savedQuestions, setSavedQuestions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -77,19 +82,19 @@ const SavedQuestions = () => {
     let isMounted = true;
 
     // const fetchSavedQuestions = async () => {
-     
-    //   console.log("Auth Loading:", authLoading);  
+
+    //   console.log("Auth Loading:", authLoading);
     //   console.log("Is Authenticated:", isAuthenticated);
     //   console.log("User:", user);
     //   console.log("User Token:", user?.token);
     //   console.log("Is Loading:", isLoading);
     //   console.log("Error:", error);
-    //   console.log("Display Mode:", displayMode); 
+    //   console.log("Display Mode:", displayMode);
     //   console.log("Search Term:", searchTerm);
     //   console.log("Toast:", toast);
     //   console.log("Saved Questions:", savedQuestions);
     //   console.log("Display token:", token);
-      
+
     //     if (!token) {
     //       setError("Please log in to view saved questions");
     //     }
@@ -133,7 +138,7 @@ const SavedQuestions = () => {
         const response = await axios.get(
           `http://localhost:5000/api/questions/saved-questions?_=${timestamp}`,
           {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
         setSavedQuestions(response.data.questions || []);
@@ -152,7 +157,7 @@ const SavedQuestions = () => {
         }
       }
     };
-    
+
     fetchSavedQuestions();
 
     return () => {
@@ -175,7 +180,6 @@ const SavedQuestions = () => {
     };
   };
 
-  
   const removeSavedQuestion = async (questionId) => {
     console.log("Saved questionId:", questionId);
     try {

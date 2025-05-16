@@ -41,8 +41,8 @@ export default function CreateQuestionModal({ onClose, onSubmit }) {
       onClose();
     } catch (err) {
       // Error handling
-      const errorMessage = 
-        err.response?.data?.error || 
+      const errorMessage =
+        err.response?.data?.error ||
         "Failed to create question. Please try again.";
       setError(errorMessage);
     } finally {
@@ -65,7 +65,7 @@ export default function CreateQuestionModal({ onClose, onSubmit }) {
         className="w-full max-w-2xl p-8 mx-4 bg-white shadow-2xl rounded-xl"
       >
         <h2 className="mb-4 text-2xl font-bold">Ask a Question</h2>
-        
+
         {error && (
           <div className="p-3 mb-4 text-red-700 bg-red-100 rounded">
             {error}

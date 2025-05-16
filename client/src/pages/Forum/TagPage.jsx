@@ -10,7 +10,6 @@ import {
 } from "react-icons/hi";
 // import Header from "../../components/Forum/Header";import Header from "../../components/common/NewPageHeader";
 
-
 const TagPage = () => {
   const { tag } = useParams();
   const [posts, setPosts] = useState([]);
@@ -22,9 +21,12 @@ const TagPage = () => {
     const fetchPostsByTag = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_BASE_URL}/questions/tag/${tag}`, {
-          withCredentials: true,
-        });
+        const response = await axios.get(
+          `${API_BASE_URL}/questions/tag/${tag}`,
+          {
+            withCredentials: true,
+          }
+        );
 
         const transformedPosts = response.data.map((post) => ({
           id: post.id || "unknown",
@@ -117,9 +119,7 @@ const TagPage = () => {
             {error}
           </div>
         ) : posts.length === 0 ? (
-          <div className="p-4 text-gray-600">
-            No posts found for this tag.
-          </div>
+          <div className="p-4 text-gray-600">No posts found for this tag.</div>
         ) : (
           <motion.div
             className="space-y-4"

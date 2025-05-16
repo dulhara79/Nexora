@@ -6,10 +6,20 @@ import { Link } from "react-router-dom";
 import { buttonVariants } from "./Variants";
 import FallbackAvatar from "../common/FallbackAvatar";
 
-const QuestionDetailCard = ({ question, user, token, isAuthenticated, setQuestion, navigate }) => {
+const QuestionDetailCard = ({
+  question,
+  user,
+  token,
+  isAuthenticated,
+  setQuestion,
+  navigate,
+}) => {
   const handleVote = async (voteType) => {
     if (!isAuthenticated) {
-      toast.info("Please log in to vote", { position: "top-right", autoClose: 3000 });
+      toast.info("Please log in to vote", {
+        position: "top-right",
+        autoClose: 3000,
+      });
       return;
     }
 
@@ -26,7 +36,10 @@ const QuestionDetailCard = ({ question, user, token, isAuthenticated, setQuestio
       );
 
       setQuestion(response.data.question);
-      toast.success(`Question ${voteType}d`, { position: "top-right", autoClose: 2000 });
+      toast.success(`Question ${voteType}d`, {
+        position: "top-right",
+        autoClose: 2000,
+      });
     } catch (error) {
       toast.error(error.response?.data?.error || "Failed to register vote", {
         position: "top-right",
@@ -71,10 +84,13 @@ const QuestionDetailCard = ({ question, user, token, isAuthenticated, setQuestio
         autoClose: 2000,
       });
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to save/unsave question", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.error(
+        error.response?.data?.error || "Failed to save/unsave question",
+        {
+          position: "top-right",
+          autoClose: 3000,
+        }
+      );
     }
   };
 
@@ -87,21 +103,31 @@ const QuestionDetailCard = ({ question, user, token, isAuthenticated, setQuestio
       return;
     }
 
-    if (window.confirm("Are you sure you want to delete this question? This action cannot be undone.")) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this question? This action cannot be undone."
+      )
+    ) {
       try {
-        await axios.delete(`http://localhost:5000/api/questions/${question.id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await axios.delete(
+          `http://localhost:5000/api/questions/${question.id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         toast.success("Question deleted successfully", {
           position: "top-right",
           autoClose: 2000,
         });
         navigate("/forum");
       } catch (error) {
-        toast.error(error.response?.data?.error || "Failed to delete question", {
-          position: "top-right",
-          autoClose: 3000,
-        });
+        toast.error(
+          error.response?.data?.error || "Failed to delete question",
+          {
+            position: "top-right",
+            autoClose: 3000,
+          }
+        );
       }
     }
   };
@@ -119,12 +145,11 @@ const QuestionDetailCard = ({ question, user, token, isAuthenticated, setQuestio
 
   const isSaved = user && question.savedQuestionIds?.includes(user.id);
   const voteCount =
-    (question.upvoteUserIds?.length || 0) - (question.downvoteUserIds?.length || 0);
+    (question.upvoteUserIds?.length || 0) -
+    (question.downvoteUserIds?.length || 0);
 
   return (
-    <motion.div
-      className="w-full mb-8 overflow-hidden bg-white border border-gray-100 shadow-lg dark:bg-gray-800 rounded-xl dark:border-gray-700"
-    >
+    <motion.div className="w-full mb-8 overflow-hidden bg-white border border-gray-100 shadow-lg dark:bg-gray-800 rounded-xl dark:border-gray-700">
       <div className="p-6 md:p-8">
         <div className="flex items-start">
           <div className="flex flex-col items-center mr-6">
@@ -237,8 +262,8 @@ const QuestionDetailCard = ({ question, user, token, isAuthenticated, setQuestio
                 <motion.img
                   src={question.authorAvatarUrl || "/default-avatar.png"}
                   alt="Author Avatar"
-                  className="w-10 h-10 mr-3 rounded-full ring-2 ring-offset-2 ring-orange-500">
-                  </motion.img>
+                  className="w-10 h-10 mr-3 rounded-full ring-2 ring-offset-2 ring-orange-500"
+                ></motion.img>
                 <div>
                   <p className="pr-8 font-medium text-gray-800 dark:text-gray-200">
                     {question.authorUsername || "Anonymous"}

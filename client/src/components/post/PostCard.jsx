@@ -42,11 +42,13 @@ const PostCard = memo(({ post, user, onUpdatePost, onDeletePost, onNewNotificati
     try {
       const response = await axios.post(`http://localhost:5000/api/posts/${post.id}/like`, {}, { withCredentials: true });
       onUpdatePost(response.data.post);
-      if (onNewNotification) onNewNotification();
+      if (onNewNotification && !(post.likes || []).includes(user)) {
+        onNewNotification();
+      }
     } catch (error) {
-      console.error("Error liking post:", error);
+      console.error("Error toggling like:", error);
       onUpdatePost(post);
-      toast.error("Failed to like the post.", { position: "top-right" });
+      toast.error("Failed to toggle like.", { position: "top-right" });
     } finally {
       setLoading(prev => ({ ...prev, like: false }));
     }

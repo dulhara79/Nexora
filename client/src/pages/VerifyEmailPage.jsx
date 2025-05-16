@@ -24,29 +24,24 @@ const VerifyEmailPage = () => {
     setLoading(true);
 
     try {
-      const formData = new URLSearchParams();
-      formData.append("email", email);
-      formData.append("code", otp);
-
       const response = await axios.post(
-        "http://localhost:5000/api/users/verify",
-        formData,
+        `http://localhost:5000/api/users/${encodeURIComponent(email)}/verification`,
+        { code: otp },
         {
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type": "application/json",
           },
         }
       );
 
       console.log("Verification response:", response.data);
-      setSuccess("Email verified successfully!");
+      setSuccess(response.data.message || "Email verified successfully!");
       setTimeout(() => navigate("/feed"), 2000);
     } catch (err) {
-      console.error("OTP verification error:", err.response);
+      console.error("OTP verification error:", err.response?.data, err.message);
       setError(
-        typeof err.response?.data === "string"
-          ? err.response?.data
-          : err.response?.data?.error || "Invalid OTP. Please try again."
+        err.response?.data?.error ||
+          "Invalid OTP. Please try again."
       );
     } finally {
       setLoading(false);
@@ -59,17 +54,22 @@ const VerifyEmailPage = () => {
     setLoading(true);
 
     try {
-      const formData = new URLSearchParams();
-      formData.append("email", email);
-
-      await axios.post("http://localhost:5000/api/users/register/resend", formData, {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      });
-      setSuccess("Verification code resent successfully!");
+      const response = await axios.post(
+        `http://localhost:5000/api/users/${encodeURIComponent(email)}/resend`,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      setSuccess(response.data.message || "Verification code resent successfully!");
     } catch (err) {
-      setError("Failed to resend verification code. Please try again.");
+      console.error("Resend code error:", err.response?.data, err.message);
+      setError(
+        err.response?.data?.error ||
+          "Failed to resend verification code. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -80,13 +80,22 @@ const VerifyEmailPage = () => {
     visible: {
       opacity: 1,
       scale: 1,
-      transition: { delayChildren: 0.2, staggerChildren: 0.1, duration: 0.3, ease: "easeOut" },
+      transition: {
+        delayChildren: 0.2,
+        staggerChildren: 0.1,
+        duration: 0.3,
+        ease: "easeOut",
+      },
     },
   };
 
   const itemVariants = {
     hidden: { y: 10, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.4, ease: "backOut" } },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.4, ease: "backOut" },
+    },
   };
 
   return (
