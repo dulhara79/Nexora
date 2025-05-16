@@ -350,8 +350,8 @@ const RecipePage = () => {
   };
 
   const theme = {
-    beginner: { color: 'blue', ring: 'ring-blue-300', text: 'text-blue-800', border: 'border-blue-500', progressBar: 'bg-blue-500' },
-    intermediate: { color: 'yellow', ring: 'ring-yellow-300', text: 'text-yellow-800', border: 'border-yellow-500', progressBar: 'bg-yellow-500' },
+    beginner: { color: 'yellow', ring: 'ring-yellow-300', text: 'text-yellow-800', border: 'border-yellow-500', progressBar: 'bg-yellow-500' },
+    intermediate: { color: 'orange', ring: 'ring-orange-300', text: 'text-orange-800', border: 'border-orange-500', progressBar: 'bg-orange-500' },
     advanced: { color: 'red', ring: 'ring-red-300', text: 'text-red-800', border: 'border-red-500', progressBar: 'bg-red-500' }
   }[level] || {};
 
