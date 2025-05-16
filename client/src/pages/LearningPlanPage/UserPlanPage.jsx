@@ -409,7 +409,7 @@ const UserPlanPage = () => {
                     <img src={r.image} alt={r.name} className="w-full h-80 object-cover rounded-md my-2" />
                     <button
                       onClick={() => handleRecipeDone(plan.id, r.name)}
-                      className={`mt-2 px-4 py-1 rounded text-white ${r.isDone ? 'bg-gray-300' : 'bg-black hover:bg-green-700'}`}>
+                      className={`mt-2 px-4 py-1 rounded text-white ${r.isDone ? 'bg-gray-300' : 'bg-black hover:bg-red-700'}`}>
                       {r.isDone ? '🎯 Done' : 'Mark as Done'}
                     </button>
                   </div>
