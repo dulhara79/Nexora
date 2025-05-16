@@ -263,7 +263,7 @@ const ChallengeList = () => {
                                 `/edit-challenge/${challenge.challengeId}`
                               )
                             }
-                            className="px-4 py-2 font-semibold text-white transition-all duration-300 rounded-full shadow-md bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500"
+                            className="px-4 py-2 font-semibold text-white transition-all duration-300 rounded-full shadow-md bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-500 hover:to-orange-500"
                             whileHover={{
                               scale: 1.05,
                               boxShadow: "0 0 10px rgba(255, 165, 0, 0.2)",

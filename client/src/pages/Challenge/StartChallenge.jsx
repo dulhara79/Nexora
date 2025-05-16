@@ -71,7 +71,7 @@ const StartChallenge = () => {
 
       <motion.button
         onClick={() => navigate('/challenges')}
-        className="relative z-10 flex items-center mb-6 font-semibold text-blue-500 transition-colors duration-300 hover:text-blue-600"
+        className="relative z-10 flex items-center mb-6 font-semibold text-red-500 transition-colors duration-300 hover:text-red-600"
         variants={itemVariants}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -103,7 +103,7 @@ const StartChallenge = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <svg className="w-8 h-8 mr-3 text-blue-500 animate-spin" viewBox="0 0 24 24">
+          <svg className="w-8 h-8 mr-3 text-yellow-500 animate-spin" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
           </svg>
@@ -177,7 +177,7 @@ const StartChallenge = () => {
             <motion.div className="flex gap-4" variants={itemVariants}>
               <motion.button
                 onClick={() => navigate(`/submit/${challenge.challengeId}`)}
-                className="flex-1 px-6 py-3 font-semibold text-white transition-all duration-300 rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500"
+                className="flex-1 px-6 py-3 font-semibold text-white transition-all duration-300 rounded-lg shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-red-600 hover:to-orange-600"
                 whileHover={{ scale: 1.05, boxShadow: '0 0 10px rgba(0, 255, 0, 0.2)' }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -185,7 +185,7 @@ const StartChallenge = () => {
               </motion.button>
               <motion.button
                 onClick={() => navigate(`/challenge/${challenge.challengeId}/submissions`)}
-                className="flex-1 px-6 py-3 font-semibold text-white transition-all duration-300 rounded-lg shadow-lg bg-gradient-to-r from-green-400 to-teal-400 hover:from-green-500 hover:to-teal-500"
+                className="flex-1 px-6 py-3 font-semibold text-white transition-all duration-300 rounded-lg shadow-lg bg-gradient-to-r from-red-500 to-orange-500 hover:from-orange-600 hover:to-red-600"
                 whileHover={{ scale: 1.05, boxShadow: '0 0 10px rgba(0, 255, 0, 0.2)' }}
                 whileTap={{ scale: 0.95 }}
               >

@@ -157,8 +157,8 @@ const CreateChallenge = () => {
 
       <div className="relative z-10 w-full max-w-2xl p-8 bg-white border border-gray-200 shadow-2xl bg-opacity-90 backdrop-filter backdrop-blur-xl rounded-3xl">
         <motion.h1
-          className="mb-8 text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400"
-          style={{ textShadow: '0 0 10px rgba(0, 0, 255, 0.2)' }}
+          className="mb-8 text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500"
+          style={{ textShadow: '0 0 10px rgba(255, 0, 0, 0.2)' }}
           variants={itemVariants}
         >
           {isEditMode ? 'Edit Challenge' : 'Create Challenge'}
@@ -185,7 +185,7 @@ const CreateChallenge = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <svg className="w-8 h-8 mr-3 text-blue-500 animate-spin" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 mr-3 text-red-500 animate-spin" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
             </svg>
@@ -200,7 +200,7 @@ const CreateChallenge = () => {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                className="w-full p-3 text-gray-800 placeholder-gray-400 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white hover:border-blue-400"
+                className="w-full p-3 text-gray-800 placeholder-gray-400 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 focus:bg-white hover:border-yellow-400"
                 required
                 placeholder="Enter challenge title"
               />
@@ -217,7 +217,7 @@ const CreateChallenge = () => {
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                className="w-full p-3 text-gray-800 placeholder-gray-400 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white hover:border-blue-400"
+                className="w-full p-3 text-gray-800 placeholder-gray-400 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 focus:bg-white hover:border-yellow-400"
                 required
                 rows="4"
                 placeholder="Describe your challenge"
@@ -236,7 +236,7 @@ const CreateChallenge = () => {
                 name="theme"
                 value={formData.theme}
                 onChange={handleChange}
-                className="w-full p-3 text-gray-800 placeholder-gray-400 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white hover:border-blue-400"
+                className="w-full p-3 text-gray-800 placeholder-gray-400 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 focus:bg-white hover:border-yellow-400"
                 required
                 placeholder="E.g., Italian Cuisine"
               />
@@ -254,7 +254,7 @@ const CreateChallenge = () => {
                 name="startDate"
                 value={formData.startDate}
                 onChange={handleChange}
-                className="w-full p-3 text-gray-800 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white hover:border-blue-400"
+                className="w-full p-3 text-gray-800 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 focus:bg-white hover:border-yellow-400"
                 required
               />
               {formErrors.startDate && (
@@ -271,7 +271,7 @@ const CreateChallenge = () => {
                 name="endDate"
                 value={formData.endDate}
                 onChange={handleChange}
-                className="w-full p-3 text-gray-800 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white hover:border-blue-400"
+                className="w-full p-3 text-gray-800 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 focus:bg-white hover:border-yellow-400"
                 required
               />
               {formErrors.endDate && (
@@ -289,7 +289,7 @@ const CreateChallenge = () => {
                   <img
                     src={currentPhotoUrl}
                     alt="Current challenge"
-                    className="object-cover w-40 h-40 mt-2 transition-all duration-300 border border-gray-300 rounded-lg shadow-lg hover:border-blue-500"
+                    className="object-cover w-40 h-40 mt-2 transition-all duration-300 border border-gray-300 rounded-lg shadow-lg hover:border-red-500"
                   />
                 </div>
               )}
@@ -299,7 +299,7 @@ const CreateChallenge = () => {
                   <img
                     src={previewUrl}
                     alt="Image preview"
-                    className="object-cover w-40 h-40 mt-2 transition-all duration-300 border border-gray-300 rounded-lg shadow-lg hover:border-blue-500"
+                    className="object-cover w-40 h-40 mt-2 transition-all duration-300 border border-gray-300 rounded-lg shadow-lg hover:border-red-500"
                   />
                 </div>
               )}
@@ -307,7 +307,7 @@ const CreateChallenge = () => {
                 type="file"
                 name="photo"
                 onChange={handleChange}
-                className="w-full mt-1 text-gray-800 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-blue-500 file:to-cyan-400 file:text-white hover:file:from-blue-600 hover:file:to-cyan-500"
+                className="w-full mt-1 text-gray-800 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-amber-500 file:to-yellow-500 file:text-white hover:file:from-amber-600 hover:file:to-red-600"
                 accept="image/*"
               />
             </motion.div>
@@ -315,7 +315,7 @@ const CreateChallenge = () => {
             <motion.div variants={itemVariants}>
               <motion.button
                 type="submit"
-                className="w-full px-6 py-3 font-bold text-white transition-all duration-300 rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-6 py-3 font-bold text-white transition-all duration-300 rounded-lg shadow-lg bg-gradient-to-r from-red-500 to-orange-400 hover:from-red-600 hover:to-orange-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isSubmitting}
                 whileHover={{ scale: 1.05, boxShadow: '0 0 10px rgba(0, 0, 255, 0.2)' }}
                 whileTap={{ scale: 0.95 }}
