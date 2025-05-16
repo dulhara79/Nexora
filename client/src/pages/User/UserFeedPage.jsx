@@ -244,7 +244,6 @@ function ChallengeCard({ challenge, delay }) {
 function AllContent({ posts, cuisines, challenges, questions }) {
   return (
     <div className="space-y-16">
-    
       <section>
         <h2 className="mb-6 text-3xl font-bold">Recent Culinary Creations</h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
