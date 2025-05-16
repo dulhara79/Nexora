@@ -294,10 +294,23 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Confetti from 'react-confetti';
 import { AuthContext } from '../../context/AuthContext';
+import jsPDF from "jspdf";
+
 
 const API_BASE = 'http://localhost:5000';
 
 const RecipePage = () => {
+// Function to generate PDF
+  const generatePDF = () => {
+    const doc = new jsPDF();
+
+  
+    // Save the PDF
+  }
+
+
+
+
   const { user, token, loading } = useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
@@ -364,8 +377,14 @@ const RecipePage = () => {
             onClick={handleAddPlan}
             className={`px-4 py-2 rounded-full bg-${theme.color}-500 text-white hover:bg-${theme.color}-600`}
           >
-            ➕ Add This Cuisine to My Plan
+            🪄 Add This Cuisine to My Plan
           </button>
+          <button
+                  onClick={generatePDF}
+                  className={`mt-4 px-4 py-2 rounded-full bg-${theme.color}-500 text-white hover:bg-${theme.color}-600`}
+                >
+                  📄 Generate PDF
+                </button>
         </div>
         <div className={`min-h-screen bg-gradient-to-br from-${theme.color}-50 to-white p-10`}>
           {showConfetti && <Confetti width={windowSize.width} height={windowSize.height} />}
@@ -406,8 +425,10 @@ const RecipePage = () => {
                     {recipe.method || 'Method details will be available soon.'}
                   </p>
                 </div>
+                
               </div>
             ))}
+            
           </div>
         </div>
       </div>
