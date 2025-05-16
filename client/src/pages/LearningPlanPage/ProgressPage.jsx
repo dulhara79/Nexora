@@ -219,17 +219,17 @@ const ProgressPage = () => {
 
         {/* Completed Section */}
         <section>
-          <h2 className="text-3xl font-bold mb-6 text-green-600">Triumphs</h2>
+          <h2 className="text-3xl font-bold mb-6 text-red-600">Triumphs</h2>
           {completedPlans.length === 0 ? (
             <p className="text-center text-gray-600">No cuisines completed yet—keep cooking!</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {completedPlans.map(plan => (
-                <div key={plan.id} className="bg-green-100 p-6 rounded-xl shadow-md flex items-center space-x-4">
+                <div key={plan.id} className="bg-red-100 p-6 rounded-xl shadow-md flex items-center space-x-4">
                   <span className="text-3xl">🏆</span>
                   <div>
-                    <h3 className="text-xl font-medium text-green-800">{plan.cuisineName}</h3>
-                    <p className="text-green-600">Mastered!</p>
+                    <h3 className="text-xl font-medium text-red-800">{plan.cuisineName}</h3>
+                    <p className="text-red-600">Mastered!</p>
                   </div>
                 </div>
               ))}
