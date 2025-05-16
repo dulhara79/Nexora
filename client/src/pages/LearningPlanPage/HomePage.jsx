@@ -60,7 +60,7 @@ const HomePage = () => {
           </h1>
 
           <div className="w-full py-7 text-center bg-yellow-400 text-white rounded-xl shadow-lg mb-8 mt-9">
-            <h1 className="text-2xl font-extrabold tracking-wide text-white animate__animated animate__fadeInUp">
+            <h1 className="text-3xl font-extrabold tracking-wide text-white animate__animated animate__fadeInUp">
               From Zero to Hero - Pick Your Level!
             </h1>
           </div>
@@ -76,8 +76,8 @@ const HomePage = () => {
 
           {/* Downward pointing arrow with bounce animation */}
           <div className="flex justify-center mt-10 mb-6">
-            <div className="animate-bounce text-2xl text-red-700 drop-shadow-md">
-              🔴🔴🔴
+            <div className="text-6xl text-red-700 drop-shadow-md">
+              👩🏻‍🍳👨🏻‍🍳
             </div>
           </div>
 
