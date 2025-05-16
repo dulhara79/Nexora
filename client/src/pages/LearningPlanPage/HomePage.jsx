@@ -15,7 +15,7 @@ const HomePage = () => {
       description:
         "Start with simple recipes to build your kitchen confidence. Enjoy easy-to-follow recipes and begin your culinary journey!",
       borderClass: "border-yellow-600",
-      textClass: "text-yellow-800",
+      textClass: "text-yellow-600",
       buttonClass: "bg-yellow-500 hover:bg-yellow-600",
       image:
         "https://www.baltana.com/files/wallpapers-28/Cupcake-Unicorn-Desktop-Wallpaper-85046.jpg",
@@ -26,7 +26,7 @@ const HomePage = () => {
       description:
         "Take your skills up a notch with diverse and challenging dishes. Perfect for those who have mastered the basics and are ready for more adventure!",
       borderClass: "border-orange-600",
-      textClass: "text-orange-800",
+      textClass: "text-orange-600",
       buttonClass: "bg-orange-500 hover:bg-orange-600",
       image:
         "https://www.baltana.com/files/wallpapers-25/Spaghetti-Wallpaper-1332x850-68239.jpg",
@@ -37,7 +37,7 @@ const HomePage = () => {
       description:
         "Master your craft with complex recipes and advanced techniques. For the seasoned cook looking to refine every detail.",
       borderClass: "border-red-600",
-      textClass: "text-red-800",
+      textClass: "text-red-600",
       buttonClass: "bg-red-500 hover:bg-red-600",
       image:
         "https://www.baltana.com/files/wallpapers-27/Fried-Hamburger-Background-HD-Wallpapers-84170.jpg",
