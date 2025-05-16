@@ -59,11 +59,7 @@ const HomePage = () => {
             Ready For Your Cooking Journey?
           </h1>
 
-          <div className="w-full py-7 text-center bg-yellow-400 text-white rounded-xl shadow-lg mb-8 mt-9">
-            <h1 className="text-2xl font-extrabold tracking-wide text-white animate__animated animate__fadeInUp">
-              From Zero to Hero - Pick Your Level!
-            </h1>
-          </div>
+          
 
           <LearningPlanCreator />
 
@@ -73,6 +69,12 @@ const HomePage = () => {
               Join Nexora Today and Cook Like a Pro!
             </h1>
           </div> */}
+
+          <div className="w-full py-7 text-center bg-yellow-400 text-white rounded-xl shadow-lg mb-8 mt-9">
+            <h1 className="text-2xl font-extrabold tracking-wide text-white animate__animated animate__fadeInUp">
+              From Zero to Hero - Pick Your Level!
+            </h1>
+          </div>
 
           {/* Downward pointing arrow with bounce animation */}
           <div className="flex justify-center mt-4 mb-6">
