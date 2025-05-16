@@ -17,6 +17,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+/**
+ * Service class for managing forum quizzes, including creation, update, deletion,
+ * answer submission, upvoting, statistics, and notifications.
+ */
 @Service
 public class ForumQuizService {
     private static final Logger LOGGER = Logger.getLogger(ForumQuizService.class.getName());
@@ -33,6 +37,9 @@ public class ForumQuizService {
     @Autowired
     private ForumNotificationService notificationService;
 
+    /**
+     * Creates a new quiz and notifies users.
+     */
     public ForumQuiz createQuiz(ForumQuiz quiz, String userId) throws Exception {
         Optional<User> userOptional = userRepository.findById(userId);
         if (!userOptional.isPresent()) {
@@ -73,11 +80,13 @@ public class ForumQuizService {
             }
         }
 
+        // Set author info
         quiz.setAuthorId(userId);
         quiz.setAuthorUsername(user.getName());
         ForumQuiz savedQuiz = forumQuizRepository.save(quiz);
         LOGGER.info("Quiz created with ID: " + savedQuiz.getId());
 
+        // Notify about quiz creation
         ForumNotification notification = new ForumNotification();
         notification.setUserId(userId);
         notification.setUserName(user.getName());
@@ -89,6 +98,9 @@ public class ForumQuizService {
         return savedQuiz;
     }
 
+    /**
+     * Updates an existing quiz. Only the creator can update.
+     */
     public ForumQuiz updateQuiz(String quizId, ForumQuiz quizUpdate, String userId) throws Exception {
         Optional<ForumQuiz> quizOptional = forumQuizRepository.findById(quizId);
         if (!quizOptional.isPresent()) {
@@ -142,7 +154,7 @@ public class ForumQuizService {
         quiz.setDeadline(quizUpdate.getDeadline());
         quiz.setQuestions(quizUpdate.getQuestions());
 
-        // If the quiz has participant answers, clear them to maintain consistency
+        // Clear participant answers if any exist, to maintain consistency
         if (!quiz.getParticipantAnswers().isEmpty()) {
             quiz.getParticipantAnswers().clear();
             quiz.getParticipantScores().clear();
@@ -153,7 +165,7 @@ public class ForumQuizService {
         ForumQuiz updatedQuiz = forumQuizRepository.save(quiz);
         LOGGER.info("Quiz updated with ID: " + quizId);
 
-        // Notify participants if the quiz was updated
+        // Notify about quiz update
         ForumNotification notification = new ForumNotification();
         notification.setUserId(userId);
         notification.setUserName(userService.getUserById(userId).getName());
@@ -165,6 +177,9 @@ public class ForumQuizService {
         return updatedQuiz;
     }
 
+    /**
+     * Deletes a quiz. Only the creator can delete.
+     */
     public void deleteQuiz(String quizId, String userId) throws Exception {
         Optional<ForumQuiz> quizOptional = forumQuizRepository.findById(quizId);
         if (!quizOptional.isPresent()) {
@@ -180,7 +195,7 @@ public class ForumQuizService {
         forumQuizRepository.delete(quiz);
         LOGGER.info("Quiz deleted with ID: " + quizId);
 
-        // Notify participants of deletion
+        // Notify about quiz deletion
         ForumNotification notification = new ForumNotification();
         notification.setUserId(userId);
         notification.setUserName(userService.getUserById(userId).getName());
@@ -190,10 +205,16 @@ public class ForumQuizService {
         notificationService.createNotification(notification);
     }
 
+    /**
+     * Saves a quiz (generic save).
+     */
     public ForumQuiz saveQuiz(ForumQuiz quiz) {
         return forumQuizRepository.save(quiz);
     }
 
+    /**
+     * Submits answers for a quiz. Validates answers and calculates score.
+     */
     public ForumQuiz submitAnswer(String quizId, Map<Integer, String> answers, String userId) throws Exception {
         Optional<ForumQuiz> quizOptional = forumQuizRepository.findById(quizId);
         if (!quizOptional.isPresent()) {
@@ -247,6 +268,7 @@ public class ForumQuizService {
         forumQuizRepository.save(quiz);
         LOGGER.info("User " + userId + " submitted answers to quiz " + quizId);
 
+        // Notify quiz author if someone else answered
         if (!quiz.getAuthorId().equals(userId)) {
             ForumNotification notification = new ForumNotification();
             notification.setUserId(quiz.getAuthorId());
@@ -261,6 +283,9 @@ public class ForumQuizService {
         return quiz;
     }
 
+    /**
+     * Clears a user's attempt for a quiz, allowing them to retake it.
+     */
     public ForumQuiz clearAttempt(String quizId, String userId) throws Exception {
         Optional<ForumQuiz> quizOptional = forumQuizRepository.findById(quizId);
         if (!quizOptional.isPresent()) {
@@ -282,6 +307,9 @@ public class ForumQuizService {
         return quiz;
     }
 
+    /**
+     * Upvotes or removes upvote for a quiz. Notifies the author if upvoted.
+     */
     public ForumQuiz upvoteQuiz(String quizId, String userId) throws Exception {
         Optional<ForumQuiz> quizOptional = forumQuizRepository.findById(quizId);
         if (!quizOptional.isPresent()) {
@@ -289,8 +317,10 @@ public class ForumQuizService {
         }
         ForumQuiz quiz = quizOptional.get();
         if (quiz.getUpvoteUserIds().contains(userId)) {
+            // Remove upvote
             quiz.getUpvoteUserIds().remove(userId);
         } else {
+            // Add upvote and notify author
             quiz.getUpvoteUserIds().add(userId);
             if (!quiz.getAuthorId().equals(userId)) {
                 Optional<User> voter = userRepository.findById(userId);
@@ -307,6 +337,9 @@ public class ForumQuizService {
         return forumQuizRepository.save(quiz);
     }
 
+    /**
+     * Returns statistics for a quiz (only for the creator).
+     */
     public Map<String, Object> getQuizStats(String quizId, String userId) throws Exception {
         Optional<ForumQuiz> quizOptional = forumQuizRepository.findById(quizId);
         if (!quizOptional.isPresent()) {
@@ -317,6 +350,7 @@ public class ForumQuizService {
             throw new Exception("Only the quiz creator can view statistics");
         }
 
+        // Calculate answer distributions for each question
         List<Map<String, Integer>> answerDistributions = new ArrayList<>();
         for (ForumQuiz.Question question : quiz.getQuestions()) {
             Map<String, Integer> distribution = new HashMap<>();
@@ -346,18 +380,30 @@ public class ForumQuizService {
         return stats;
     }
 
+    /**
+     * Retrieves a quiz by its ID.
+     */
     public Optional<ForumQuiz> getQuizById(String quizId) {
         return forumQuizRepository.findById(quizId);
     }
 
+    /**
+     * Returns all active quizzes.
+     */
     public List<ForumQuiz> getActiveQuizzes() {
         return forumQuizRepository.findByIsActiveTrue();
     }
 
+    /**
+     * Returns all quizzes created by a specific author.
+     */
     public List<ForumQuiz> getQuizzesByAuthor(String authorId) {
         return forumQuizRepository.findByAuthorId(authorId);
     }
 
+    /**
+     * Closes all expired quizzes and notifies participants of their results.
+     */
     public void closeExpiredQuizzes() {
         List<ForumQuiz> expiredQuizzes = forumQuizRepository.findByDeadlineBeforeAndIsActiveTrue(LocalDateTime.now());
         for (ForumQuiz quiz : expiredQuizzes) {
@@ -365,6 +411,7 @@ public class ForumQuizService {
             forumQuizRepository.save(quiz);
             LOGGER.info("Closed expired quiz: " + quiz.getId());
 
+            // Notify each participant of their result
             quiz.getParticipantScores().forEach((userId, score) -> {
                 try {
                     ForumNotification notification = new ForumNotification();
