@@ -92,8 +92,8 @@ const ChallengeList = () => {
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/light-wool.png')] opacity-10 animate-pulse"></div>
         <div className="relative z-10 flex items-center justify-between mb-8">
           <motion.h1
-            className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400"
-            style={{ textShadow: "0 0 10px rgba(0, 0, 255, 0.2)" }}
+            className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-orange-500"
+            style={{ textShadow: "0 0 10px rgba(255, 69, 0, 0.2)" }}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
@@ -103,8 +103,8 @@ const ChallengeList = () => {
           {isAuthenticated && (
             <motion.button
               onClick={() => navigate("/create-challenge")}
-              className="flex items-center px-6 py-3 space-x-2 font-semibold text-white transition-all duration-300 rounded-full shadow-lg bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500"
-              style={{ boxShadow: "0 0 10px rgba(0, 0, 255, 0.2)" }}
+              className="flex items-center px-6 py-3 space-x-2 font-semibold text-white transition-all duration-300 rounded-full shadow-lg bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-600 hover:to-orange-500"
+              style={{ boxShadow: "0 0 10px rgba(255, 69, 0, 0.2)" }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -148,7 +148,7 @@ const ChallengeList = () => {
             transition={{ duration: 0.5 }}
           >
             <svg
-              className="w-8 h-8 mr-3 text-blue-500 animate-spin"
+              className="w-8 h-8 mr-3 text-orange-500 animate-spin"
               viewBox="0 0 24 24"
             >
               <circle
@@ -179,18 +179,18 @@ const ChallengeList = () => {
           </motion.div>
         ) : (
           <motion.div
-            className="relative z-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"
+            className="relative z-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
             variants={containerVariants}
           >
             <AnimatePresence>
               {challenges.map((challenge) => (
                 <motion.div
                   key={challenge.challengeId}
-                  className="overflow-hidden transition-all duration-300 bg-white border-2 border-blue-300 rounded-xl hover:border-blue-500"
+                  className="overflow-hidden transition-all duration-300 bg-white border-2 border-pink-300 rounded-xl hover:border-pink-500 hover:shadow-lg"
                   variants={cardVariants}
                   whileHover={{
                     y: -5,
-                    boxShadow: "0 0 15px rgba(0,0,255,0.2)",
+                    boxShadow: "0 0 15px rgba(255, 105, 180, 0.2)",
                   }}
                   layout
                 >
@@ -205,7 +205,7 @@ const ChallengeList = () => {
                             "https://via.placeholder.com/150?text=No+Image";
                         }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-blue-500/20 to-transparent"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-pink-500/20 to-transparent"></div>
                       <p className="absolute px-2 py-1 text-sm font-medium text-white rounded bottom-2 left-3 bg-black/50">
                         {challenge.theme}
                       </p>
@@ -217,14 +217,14 @@ const ChallengeList = () => {
                         alt="No image available"
                         className="object-cover w-full h-56"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-blue-500/20 to-transparent"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-pink-500/20 to-transparent"></div>
                       <p className="absolute px-2 py-1 text-sm font-medium text-white rounded bottom-2 left-3 bg-black/50">
                         {challenge.theme}
                       </p>
                     </div>
                   )}
                   <div className="p-6">
-                    <h2 className="mb-2 text-2xl font-bold text-gray-800">
+                    <h2 className="mb-2 text-xl font-bold text-gray-800">
                       {challenge.title}
                     </h2>
                     <p className="mb-3 text-sm text-gray-600 line-clamp-2">
@@ -247,15 +247,14 @@ const ChallengeList = () => {
                         onClick={() =>
                           navigate(`/start-challenge/${challenge.challengeId}`)
                         }
-                        className="flex-1 px-4 py-2 font-semibold text-white transition-all duration-300 rounded-full shadow-md bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500"
+                        className="flex-1 px-4 py-2 font-semibold text-white transition-all duration-300 rounded-full shadow-md bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600"
                         whileHover={{
                           scale: 1.05,
-                          boxShadow: "0 0 10px rgba(0, 0, 255, 0.2)",
+                          boxShadow: "0 0 10px rgba(255, 105, 180, 0.2)",
                         }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        
-                        View Challenge
+                        Start Challenge
                       </motion.button>
                       {isAuthenticated && challenge.createdBy === user?.id && (
                         <div className="flex gap-3">
