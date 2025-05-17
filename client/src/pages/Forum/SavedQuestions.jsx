@@ -60,7 +60,12 @@ class ErrorBoundary extends React.Component {
 }
 
 const SavedQuestions = () => {
-  const { user, isAuthenticated, loading: authLoading, token } = useContext(AuthContext);
+  const {
+    user,
+    isAuthenticated,
+    loading: authLoading,
+    token,
+  } = useContext(AuthContext);
   const [savedQuestions, setSavedQuestions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -73,43 +78,70 @@ const SavedQuestions = () => {
   });
 
   useEffect(() => {
+    setIsLoading(false);
     let isMounted = true;
 
-    const fetchSavedQuestions = async () => {
-     
-      console.log("Auth Loading:", authLoading);  
-      console.log("Is Authenticated:", isAuthenticated);
-      console.log("User:", user);
-      console.log("User Token:", user?.token);
-      console.log("Is Loading:", isLoading);
-      console.log("Error:", error);
-      console.log("Display Mode:", displayMode); 
-      console.log("Search Term:", searchTerm);
-      console.log("Toast:", toast);
-      console.log("Saved Questions:", savedQuestions);
-      console.log("Display token:", token);
-      
-        if (!token) {
-          setError("Please log in to view saved questions");
-        }
-        if (isMounted) {
-          setIsLoading(false);
-        }
+    // const fetchSavedQuestions = async () => {
 
+    //   console.log("Auth Loading:", authLoading);
+    //   console.log("Is Authenticated:", isAuthenticated);
+    //   console.log("User:", user);
+    //   console.log("User Token:", user?.token);
+    //   console.log("Is Loading:", isLoading);
+    //   console.log("Error:", error);
+    //   console.log("Display Mode:", displayMode);
+    //   console.log("Search Term:", searchTerm);
+    //   console.log("Toast:", toast);
+    //   console.log("Saved Questions:", savedQuestions);
+    //   console.log("Display token:", token);
+
+    //     if (!token) {
+    //       setError("Please log in to view saved questions");
+    //     }
+    //     if (isMounted) {
+    //       setIsLoading(false);
+    //     }
+
+    //   try {
+    //     const response = await axios.get(
+    //       "http://localhost:5000/api/questions/saved-questions",
+    //       {
+    //         withCredentials: true,
+    //         headers: {
+    //           Authorization: `Bearer ${token}`,
+    //         },
+    //       }
+    //     );
+    //     if (isMounted) {
+    //       setSavedQuestions(response.data.questions || []);
+    //       setIsLoading(false);
+    //     }
+    //   } catch (err) {
+    //     console.error("Error fetching saved questions:", err);
+    //     if (isMounted) {
+    //       if (err.response?.status === 401) {
+    //         setError("Session expired. Please log in again.");
+    //       } else {
+    //         setError(
+    //           err.response?.data?.message ||
+    //             "Failed to load saved questions. Please try again later."
+    //         );
+    //       }
+    //       setIsLoading(false);
+    //     }
+    //   }
+    // };
+
+    const fetchSavedQuestions = async () => {
       try {
+        const timestamp = Date.now(); // Cache-busting
         const response = await axios.get(
-          "http://localhost:5000/api/questions/saved-questions",
+          `http://localhost:5000/api/questions/saved-questions?_=${timestamp}`,
           {
-            withCredentials: true,
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
-        if (isMounted) {
-          setSavedQuestions(response.data.questions || []);
-          setIsLoading(false);
-        }
+        setSavedQuestions(response.data.questions || []);
       } catch (err) {
         console.error("Error fetching saved questions:", err);
         if (isMounted) {
@@ -148,7 +180,6 @@ const SavedQuestions = () => {
     };
   };
 
-  
   const removeSavedQuestion = async (questionId) => {
     console.log("Saved questionId:", questionId);
     try {
@@ -224,7 +255,7 @@ const SavedQuestions = () => {
         message={toast.message}
         type={toast.type}
       />
-      <div className="min-h-screen mt-16 bg-gradient-to-br from-amber-50 via-white to-slate-100 dark:from-amber-950 dark:via-slate-900 dark:to-slate-950">
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-slate-100 dark:from-amber-950 dark:via-slate-900 dark:to-slate-950">
         <AnimatePresence>
           {authLoading || isLoading ? (
             <motion.div

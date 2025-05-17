@@ -402,6 +402,8 @@ export const AuthProvider = ({ children }) => {
         })
       );
 
+      console.log("Session check response:", response.data);
+
       if (response.data && response.data.id) {
         setUser({
           id: response.data.id || 0,

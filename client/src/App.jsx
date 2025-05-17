@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Authentication
@@ -17,6 +17,8 @@ import "./index.css";
 // User Pages
 import Profile from "./pages/User/UserProfilePage";
 import EditProfile from "./pages/User/EditProfilePage";
+import FollowersList from "./pages/User/FollowersList";
+import FollowingList from "./pages/User/FollowingList";
 
 // Learning Plan Pages
 import HomePage from "./pages/LearningPlanPage/HomePage";
@@ -24,6 +26,7 @@ import RecipePage from "./pages/LearningPlanPage/RecipePage";
 import CuisinePage from "./pages/LearningPlanPage/CuisinePage";
 import UserPlanPage from "./pages/LearningPlanPage/UserPlanPage";
 import ProgressPage from "./pages/LearningPlanPage/ProgressPage";
+import KitchenWisdomPage from "./pages/LearningPlanPage/KitchenWisdomPage";
 
 // Forum Pages
 import ForumHomeLandingPage from "./pages/Forum/ForumHomeLandingPage";
@@ -33,20 +36,20 @@ import QuestionDetailPage from "./pages/Forum/QuestionDetailPage";
 import AskQuestionPage from "./pages/Forum/AskQuestionPage";
 import SavedQuestions from "./pages/Forum/SavedQuestions";
 import TagPage from "./pages/Forum/TagPage";
-import ForumNotification from "./pages/Forum/ForumNotification";
+import ForumNotification from "./pages/Forum/ForumNotificationPage";
 import ForumCommunityPage from "./pages/Forum/ForumCommunityPage";
-
-// import AskQuestionPage from "./pages/forumNew/AskQuestionPage";
-// import CommunitiesPage from "./pages/forumNew/CommunitiesPage";
-// import CommunityDetailPage from "./pages/forumNew/CommunityDetailPage";
-// import ForumHomePage from "./pages/Forum/ForumHomeLandingPage";
-// import NotificationsPage from "./pages/forumNew/NotificationsPage";
-// import QuestionDetailPage from "./pages/forumNew/QuestionDetailPage";
+import UserQuestionsPage from "./pages/Forum/UserQuestionsPage";
+import QuizList from "./components/Forum/Quiz/QuizList";
+import QuizCreate from "./components/Forum/Quiz/QuizCreate";
+import QuizDetail from "./components/Forum/Quiz/QuizDetail";
+import QuizStats from "./components/Forum/Quiz/QuizStats";
+import QuizTake from "./components/Forum/Quiz/QuizTake";
 
 // Post Pages
 import Home from "./pages/post/Home";
 import CreatePost from "./pages/post/CreatePost";
 import Notifications from "./pages/post/Notifications";
+import SavedPosts from "./pages/post/SavedPosts";
 
 // Challanges Pages
 import ChallengeDetail from "./pages/Challenge/ChallengeDetail";
@@ -56,8 +59,10 @@ import StartChallenge from "./pages/Challenge/StartChallenge";
 import CompletedChallenges from "./pages/Challenge/Complt Challenge";
 
 // Test Page
-import TestPage from "./pages/TestPage";
+// import TestPage from "./pages/TestPage";
 import EditQuestionPage from "./pages/Forum/EditQuestionPage";
+import SearchResultsPage from "./pages/User/SearchResultsPage";
+import QuizEdit from "./components/Forum/Quiz/QuizEdit";
 
 function App() {
   return (
@@ -70,11 +75,12 @@ function App() {
           <Route path="/auth/google-callback" element={<GoogleCallback />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/otp-verify" element={<OTPVerify />} />
-
           <Route path="/profile/:userId" element={<Profile />} />
           <Route path="/edit/:userId" element={<EditProfile />} />
           <Route path="/feed" element={<UserFeedPage />} />
-          {/* <Route path="/register" element={<Register />} /> */}
+          <Route path="/search" element={<SearchResultsPage />} />
+          <Route path="/profile/:userId/followers" element={<FollowersList />} />
+          <Route path="/profile/:userId/following" element={<FollowingList />} />
 
           {/* Learning Plan Routes */}
           <Route path="/learninghome" element={<HomePage />} />
@@ -85,6 +91,7 @@ function App() {
           <Route path="/userplan" element={<UserPlanPage />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/progress/:userId" element={<ProgressPage />} />
+          <Route path="/kitchenwisdom" element={<KitchenWisdomPage />} />
 
           {/* Forum Routes */}
           <Route path="/forum" element={<ForumHomeLandingPage />} />
@@ -97,40 +104,29 @@ function App() {
           <Route path="/forum/tags/:tag" element={<TagPage />} />
           <Route path="/forum/community" element={<ForumCommunityPage />} />
           <Route path="/forum/notifications" element={<ForumNotification />} />
-          <Route
-            path="/forum/community/:communityId"
-            element={<ForumCommunityPage />}
-          />
-
-          {/* Forum Routes - NEWLY ADDED */}
-          {/* <Route path="/forum" element={<ForumDashBoard />} /> */}
-          {/* <Route path="/forum/questions" element={<ForumHomePage />} />
-          <Route path="/forum/question/:id" element={<QuestionDetailPage />} />
-          <Route path="/forum/ask" element={<AskQuestionPage />} />
-          <Route path="/forum/edit/:id" element={<EditQuestionPage />} />
-          {/* <Route path="/forum/saved" element={<SavedQuestions />} /> */}
-          {/* <Route path="/forum/tags/:tag" element={<TagPage />} /> */}
-          {/* <Route path="/forum/communities" element={<CommunitiesPage />} />
-          <Route path="/forum/communities/:communityId" element={<CommunityDetailPage />} />
-          <Route path="/forum/notifications" element={<NotificationsPage />} /> */}
+          <Route path="/forum/community/:communityId" element={<ForumCommunityPage />} />
+          <Route path="/forum/my-questions" element={<UserQuestionsPage />} />
+          <Route path="/forum/quizzes" element={<QuizList />} />
+          <Route path="/forum/quizzes/create" element={<QuizCreate />} />
+          <Route path="/forum/quizzes/:id" element={<QuizDetail />} />
+          <Route path="/forum/quizzes/:id/stats" element={<QuizStats />} />
+          <Route path="/forum/quizzes/:id/edit" element={<QuizEdit />} />
 
           {/* Post Routes */}
           <Route path="/post" element={<Home />} />
           <Route path="/create-post" element={<CreatePost />} />
           <Route path="/post-notifications" element={<Notifications />} />
+          <Route path="/saved-posts" element={<SavedPosts />} />
 
           {/* Challenges Routes */}
           <Route path="/challenges" element={<ChallengeList />} />
           <Route path="/challenge/:challengeId" element={<ChallengeDetail />} />
           <Route path="/create-challenge" element={<CreateChallenge />} />
-          <Route
-            path="/edit-challenge/:challengeId"
-            element={<CreateChallenge />}
-          />
-
+          <Route path="/edit-challenge/:challengeId" element={<CreateChallenge />} />
+          
           {/* Test Page */}
-          <Route path="/test" element={<TestPage />} />
-
+          {/* <Route path="/test" element={<TestPage />} /> */}
+          
           {/* Challenges Routes */}
           <Route path="/challenges" element={<ChallengeList />} />
           <Route path="/challenge/:challengeId" element={<ChallengeDetail />} />
@@ -139,10 +135,9 @@ function App() {
           <Route path="/start-challenge/:challengeId" element={<StartChallenge />} />
           <Route path="/completed-challenges" element={<CompletedChallenges />} />
 
-
-
           {/* 404 Page */}
           <Route path="/*" element={<PageNotFound />} />
+          
         </Routes>
       </AuthProvider>
     </Router>

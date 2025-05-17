@@ -8,23 +8,31 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a comment in the forum, which can be a top-level comment or a reply to another comment.
+ */
 @Data
 @Document(collection = "forum_comments")
 public class ForumComment {
     @Id
-    private String id;
+    private String id; // Unique identifier for the comment
 
-    private String questionId; // References Question.id
-    private String authorId; // References User.id
-    private String authorName; // Optional: can be fetched from User service
-    private String content;
-    private String parentCommentId; // For threaded replies (null for top-level comments)
-    private List<String> upvoteUserIds = new ArrayList<>();
-    private List<String> downvoteUserIds = new ArrayList<>();
-    private LocalDateTime createdAt = LocalDateTime.now();
-    private LocalDateTime updatedAt;
-    private boolean isFlagged = false;
+    private String questionId; // References the associated Question's id
+    private String authorId; // References the User's id who wrote the comment
+    private String authorName; // Optional: Name of the author (can be fetched from User service)
+    private String authorAvatarUrl; // Optional: Avatar URL of the author (can be fetched from User service)
+    private String content; // The actual text content of the comment
+    private String parentCommentId; // For threaded replies; null if this is a top-level comment
 
+    private List<String> upvoteUserIds = new ArrayList<>(); // List of user IDs who upvoted this comment
+    private List<String> downvoteUserIds = new ArrayList<>(); // List of user IDs who downvoted this comment
+
+    private LocalDateTime createdAt = LocalDateTime.now(); // Timestamp when the comment was created
+    private LocalDateTime updatedAt; // Timestamp when the comment was last updated
+
+    private boolean isFlagged = false; // Indicates if the comment has been flagged for moderation
+
+    // Getter and setter for isFlagged
     public boolean isFlagged() {
         return isFlagged;
     }
@@ -33,6 +41,7 @@ public class ForumComment {
         isFlagged = flagged;
     }
 
+    // Getter and setter for id
     public String getId() {
         return id;
     }
@@ -41,6 +50,7 @@ public class ForumComment {
         this.id = id;
     }
 
+    // Getter and setter for questionId
     public String getQuestionId() {
         return questionId;
     }
@@ -49,6 +59,7 @@ public class ForumComment {
         this.questionId = questionId;
     }
 
+    // Getter and setter for authorId
     public String getAuthorId() {
         return authorId;
     }
@@ -57,6 +68,7 @@ public class ForumComment {
         this.authorId = authorId;
     }
 
+    // Getter and setter for authorName
     public String getAuthorName() {
         return authorName;
     }
@@ -65,6 +77,16 @@ public class ForumComment {
         this.authorName = authorName;
     }
 
+    // Getter and setter for authorAvatarUrl
+    public String getAuthorAvatarUrl() {
+        return authorAvatarUrl;
+    }
+
+    public void setAuthorAvatarUrl(String authorAvatarUrl) {
+        this.authorAvatarUrl = authorAvatarUrl;
+    }
+
+    // Getter and setter for content
     public String getContent() {
         return content;
     }
@@ -73,6 +95,7 @@ public class ForumComment {
         this.content = content;
     }
 
+    // Getter and setter for parentCommentId
     public String getParentCommentId() {
         return parentCommentId;
     }
@@ -81,6 +104,7 @@ public class ForumComment {
         this.parentCommentId = parentCommentId;
     }
 
+    // Getter and setter for upvoteUserIds
     public List<String> getUpvoteUserIds() {
         return upvoteUserIds;
     }
@@ -89,6 +113,7 @@ public class ForumComment {
         this.upvoteUserIds = upvoteUserIds;
     }
 
+    // Getter and setter for downvoteUserIds
     public List<String> getDownvoteUserIds() {
         return downvoteUserIds;
     }
@@ -97,6 +122,7 @@ public class ForumComment {
         this.downvoteUserIds = downvoteUserIds;
     }
 
+    // Getter and setter for createdAt
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -105,6 +131,7 @@ public class ForumComment {
         this.createdAt = createdAt;
     }
 
+    // Getter and setter for updatedAt
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }

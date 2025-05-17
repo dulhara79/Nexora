@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * REST controller for managing forum questions.
+ */
 @RestController
 @RequestMapping("/api/questions")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
@@ -30,6 +33,10 @@ public class ForumQuestionController {
 
     @Autowired
     private AuthenticationService authenticationService;
+
+    /**
+     * Create a new forum question.
+     */
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createQuestion(
             @RequestHeader("Authorization") String authHeader,
@@ -61,6 +68,9 @@ public class ForumQuestionController {
         }
     }
 
+    /**
+     * Update an existing forum question.
+     */
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateQuestion(
             @PathVariable String id,
@@ -90,6 +100,9 @@ public class ForumQuestionController {
         }
     }
 
+    /**
+     * Delete a forum question.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteQuestion(
             @PathVariable String id,
@@ -112,17 +125,21 @@ public class ForumQuestionController {
         }
     }
 
+    /**
+     * Get a list of forum questions, with optional filtering and sorting.
+     */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getQuestions(
             @RequestParam(required = false) String tag,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String authorId,
             @RequestParam(required = false, defaultValue = "newest") String sortBy,
             @RequestHeader(value = "If-None-Match", required = false) String ifNoneMatch) {
-        List<ForumQuestion> questions = questionService.getQuestions(tag, search, sortBy);
+        List<ForumQuestion> questions = questionService.getQuestions(tag, search, sortBy, authorId);
         String etag = "\"" + Integer.toHexString(questions.hashCode()) + "\"";
         if (ifNoneMatch != null && ifNoneMatch.equals(etag)) {
             return ResponseEntity.status(304)
-                    .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                    .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
                     .header(HttpHeaders.ETAG, etag)
                     .build();
         }
@@ -137,6 +154,9 @@ public class ForumQuestionController {
                 .body(response);
     }
 
+    /**
+     * Get a single forum question by ID.
+     */
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getQuestion(
             @PathVariable String id,
@@ -172,6 +192,9 @@ public class ForumQuestionController {
         }
     }
 
+    /**
+     * Upvote or downvote a forum question.
+     */
     @PatchMapping(value = "/{id}/vote", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> voteQuestion(
             @PathVariable String id,
@@ -211,6 +234,9 @@ public class ForumQuestionController {
         }
     }
 
+    /**
+     * Flag a forum question as inappropriate.
+     */
     @PatchMapping(value = "/{id}/flag", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> flagQuestion(
             @PathVariable String id,
@@ -238,6 +264,9 @@ public class ForumQuestionController {
         }
     }
 
+    /**
+     * Save a question to the user's saved questions list.
+     */
     @PostMapping(value = "/saved-questions", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> saveQuestion(
             @RequestHeader("Authorization") String authHeader,
@@ -268,6 +297,9 @@ public class ForumQuestionController {
         }
     }
 
+    /**
+     * Get the list of questions saved by the user.
+     */
     @GetMapping(value = "/saved-questions", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getSavedQuestions(
             @RequestHeader("Authorization") String authHeader,
@@ -303,6 +335,9 @@ public class ForumQuestionController {
         }
     }
 
+    /**
+     * Remove a question from the user's saved questions list.
+     */
     @DeleteMapping(value = "/saved-questions/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> unsaveQuestion(
             @PathVariable String id,
@@ -330,6 +365,9 @@ public class ForumQuestionController {
         }
     }
 
+    /**
+     * Pin or unpin a forum question.
+     */
     @PatchMapping(value = "/{id}/pin", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> togglePinQuestion(
             @PathVariable String id,
@@ -358,6 +396,9 @@ public class ForumQuestionController {
         }
     }
 
+    /**
+     * Extract user ID from JWT token in the Authorization header.
+     */
     private String extractUserIdFromToken(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return null;
@@ -370,6 +411,9 @@ public class ForumQuestionController {
         }
     }
 
+    /**
+     * Helper method to create an error response map.
+     */
     private Map<String, String> createErrorResponse(String message) {
         Map<String, String> error = new HashMap<>();
         error.put("error", message);

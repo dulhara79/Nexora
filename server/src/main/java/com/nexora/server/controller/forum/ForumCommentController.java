@@ -15,6 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * REST controller for managing forum comments.
+ */
 @RestController
 @RequestMapping("/api/forum/comments")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
@@ -26,6 +29,14 @@ public class ForumCommentController {
     @Autowired
     private AuthenticationService authenticationService;
 
+    /**
+     * Creates a new comment for a forum question.
+     *
+     * @param authHeader Authorization header containing JWT token
+     * @param comment    Comment data from request body
+     * @param ucb        UriComponentsBuilder for building resource URI
+     * @return ResponseEntity with created comment or error
+     */
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createComment(
             @RequestHeader("Authorization") String authHeader,
@@ -57,6 +68,14 @@ public class ForumCommentController {
         }
     }
 
+    /**
+     * Updates an existing comment.
+     *
+     * @param id         Comment ID
+     * @param authHeader Authorization header containing JWT token
+     * @param comment    Updated comment data
+     * @return ResponseEntity with updated comment or error
+     */
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateComment(
             @PathVariable String id,
@@ -86,6 +105,13 @@ public class ForumCommentController {
         }
     }
 
+    /**
+     * Deletes a comment by ID.
+     *
+     * @param id         Comment ID
+     * @param authHeader Authorization header containing JWT token
+     * @return ResponseEntity with success message or error
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteComment(
             @PathVariable String id,
@@ -108,6 +134,13 @@ public class ForumCommentController {
         }
     }
 
+    /**
+     * Retrieves all comments for a specific question.
+     *
+     * @param questionId Question ID
+     * @param ifNoneMatch Optional ETag for caching
+     * @return ResponseEntity with list of comments or 304 if not modified
+     */
     @GetMapping(value = "/question/{questionId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getCommentsByQuestionId(
             @PathVariable String questionId,
@@ -116,7 +149,7 @@ public class ForumCommentController {
         String etag = "\"" + Integer.toHexString(comments.hashCode()) + "\"";
         if (ifNoneMatch != null && ifNoneMatch.equals(etag)) {
             return ResponseEntity.status(304)
-                    .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                    .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
                     .header(HttpHeaders.ETAG, etag)
                     .build();
         }
@@ -127,11 +160,19 @@ public class ForumCommentController {
         response.put("comments", comments);
         response.put("_links", links);
         return ResponseEntity.ok()
-                .header(HttpHeaders.CACHE_CONTROL, "max-age=300, must-revalidate")
+                .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
                 .header(HttpHeaders.ETAG, etag)
                 .body(response);
     }
 
+    /**
+     * Upvotes or downvotes a comment.
+     *
+     * @param id         Comment ID
+     * @param authHeader Authorization header containing JWT token
+     * @param voteRequest Map containing "voteType" ("upvote" or "downvote")
+     * @return ResponseEntity with updated comment or error
+     */
     @PatchMapping(value = "/{id}/vote", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> voteComment(
             @PathVariable String id,
@@ -171,6 +212,13 @@ public class ForumCommentController {
         }
     }
 
+    /**
+     * Flags a comment as inappropriate.
+     *
+     * @param id         Comment ID
+     * @param authHeader Authorization header containing JWT token
+     * @return ResponseEntity with success message or error
+     */
     @PatchMapping(value = "/{id}/flag", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> flagComment(
             @PathVariable String id,
@@ -198,6 +246,12 @@ public class ForumCommentController {
         }
     }
 
+    /**
+     * Extracts the user ID from the JWT token in the Authorization header.
+     *
+     * @param authHeader Authorization header
+     * @return User ID if valid, null otherwise
+     */
     private String extractUserIdFromToken(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return null;
@@ -210,6 +264,12 @@ public class ForumCommentController {
         }
     }
 
+    /**
+     * Creates a simple error response map.
+     *
+     * @param message Error message
+     * @return Map containing the error message
+     */
     private Map<String, String> createErrorResponse(String message) {
         Map<String, String> error = new HashMap<>();
         error.put("error", message);

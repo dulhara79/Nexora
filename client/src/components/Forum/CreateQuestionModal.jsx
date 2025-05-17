@@ -1,20 +1,53 @@
-// src/components/newForum/CreateQuestionModal.jsx
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 export default function CreateQuestionModal({ onClose, onSubmit }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tags, setTags] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { token } = useContext(AuthContext);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit({
-      title,
-      content,
-      tags: tags.split(",").map((t) => t.trim()),
-    });
-    onClose();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/questions",
+        {
+          title,
+          description: content,
+          tags: tags
+            .split(",")
+            .map((tag) => tag.trim())
+            .filter(Boolean),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // Success - call parent onSubmit and close modal
+      onSubmit(response.data.question);
+      onClose();
+    } catch (err) {
+      // Error handling
+      const errorMessage =
+        err.response?.data?.error ||
+        "Failed to create question. Please try again.";
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -32,6 +65,13 @@ export default function CreateQuestionModal({ onClose, onSubmit }) {
         className="w-full max-w-2xl p-8 mx-4 bg-white shadow-2xl rounded-xl"
       >
         <h2 className="mb-4 text-2xl font-bold">Ask a Question</h2>
+
+        {error && (
+          <div className="p-3 mb-4 text-red-700 bg-red-100 rounded">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <input
             value={title}
@@ -60,14 +100,16 @@ export default function CreateQuestionModal({ onClose, onSubmit }) {
               type="button"
               onClick={onClose}
               className="px-4 py-2 text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
+              disabled={isLoading}
             >
               Cancel
             </button>
             <button
               type="submit"
               className="px-4 py-2 text-white bg-orange-500 rounded hover:bg-orange-600"
+              disabled={isLoading}
             >
-              Post Question
+              {isLoading ? "Posting..." : "Post Question"}
             </button>
           </div>
         </form>

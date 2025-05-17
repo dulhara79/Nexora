@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { AuthContext } from "../../context/AuthContext";
 import { toast } from "react-toastify";
 //import Navbar from "../../components/post/Navbar";
+import Navbar from "../../components/common/NewPageHeader";
 
 const CreatePost = ({ onPostCreated }) => {
   const [description, setDescription] = useState("");
@@ -91,8 +92,8 @@ const CreatePost = ({ onPostCreated }) => {
   };
 
   return (
-    // <div className="min-h-screen text-gray-900 bg-amber-50">
-    //   <Navbar />
+    <div className="min-h-screen text-gray-900 bg-amber-50">
+      <Navbar />
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -128,6 +129,7 @@ const CreatePost = ({ onPostCreated }) => {
         </motion.button>
       </form>
     </motion.div>
+    </div>
     
   );
 };

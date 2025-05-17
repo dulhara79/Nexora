@@ -229,7 +229,9 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import NavbarLP from '../../components/LearningPlan/NavbarLP';
+// import NavbarLP from '../../components/LearningPlan/NavbarLP';
+import Navbar from "../../components/common/NewPageHeader";
+
 import Confetti from 'react-confetti';
 import { AuthContext } from '../../context/AuthContext';
 
@@ -374,23 +376,24 @@ const UserPlanPage = () => {
         <>
           <Confetti width={windowSize.width} height={windowSize.height} />
           <div className="fixed inset-0 flex items-center justify-center pointer-events-none">
-            <h2 className="text-4xl font-bold text-green-600 bg-white bg-opacity-80 p-4 rounded-lg">
+            <h2 className="text-4xl font-bold text-green-600 bg-white bg-opacity-80 p-6 rounded-lg">
               🎉 Cuisine Completed! 🎉
             </h2>
           </div>
         </>
       )}
-      <NavbarLP />
+      {/* <NavbarLP /> */}
+      <Navbar />
       <div className="min-h-screen bg-gray-50 p-10">
-        <h1 className="text-4xl font-bold mb-8 text-center">My Learning Plan</h1>
+        <h1 className="text-5xl font-bold mb-10 text-center text-orange-500">My Learning Plan</h1>
         {!plans.length && <p className="text-center">No cuisines added yet!</p>}
-        <div className="space-y-8">
+        <div className="space-y-12">
           {plans.map(plan => (
             <div key={plan.id} className="bg-white p-6 rounded-xl shadow-lg">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-semibold">{plan.cuisineName}</h2>
                 <div className="space-x-4">
-                  <button onClick={() => startEditing(plan)} className="text-blue-500 hover:underline">
+                  <button onClick={() => startEditing(plan)} className="text-yellow-500 hover:underline">
                     Update Cuisine
                   </button>
                   <button onClick={() => handleDeletePlan(plan.id)} className="text-red-500 hover:underline">
@@ -400,14 +403,14 @@ const UserPlanPage = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 {plan.recipes.map(r => (
-                  <div key={r.name} className="border p-4 rounded-lg">
+                  <div key={r.name} className="border p-6 min-h-100 rounded-xl shadow-md">
                     <h3 className="font-semibold">{r.name}</h3>
-                    <p className="text-sm text-gray-600">⏱️ {r.time}</p>
-                    <img src={r.image} alt={r.name} className="w-full h-32 object-cover rounded-md my-2" />
+                    <p className="text-xl text-gray-600">⏱️ {r.time}</p>
+                    <img src={r.image} alt={r.name} className="w-full h-80 object-cover rounded-md my-2" />
                     <button
                       onClick={() => handleRecipeDone(plan.id, r.name)}
-                      className={`mt-2 px-4 py-1 rounded text-white ${r.isDone ? 'bg-green-300' : 'bg-green-600 hover:bg-green-700'}`}>
-                      {r.isDone ? '✅ Done' : 'Mark as Done'}
+                      className={`mt-2 px-4 py-1 rounded text-white ${r.isDone ? 'bg-gray-300' : 'bg-black hover:bg-yellow-700'}`}>
+                      {r.isDone ? '🎯 Done' : 'Mark as Done'}
                     </button>
                   </div>
                 ))}
@@ -416,7 +419,7 @@ const UserPlanPage = () => {
           ))}
         </div>
         <div className="text-center mt-10">
-          <button onClick={() => navigate('/cuisine')} className="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600">
+          <button onClick={() => navigate('/cuisine')} className="px-6 py-2 bg-yellow-500 text-white rounded-full hover:bg-red-600">
             ← Back to Cuisines
           </button>
         </div>
