@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AuthContext } from '../../context/AuthContext';
-import Header from '../../components/common/NewPageHeader'
+import Header from '../../components/common/NewPageHeader';
 
 const CreateChallenge = () => {
   const { isAuthenticated, token } = useContext(AuthContext);
@@ -145,188 +145,199 @@ const CreateChallenge = () => {
   return (
     <>
       <Header />
-    <motion.div
-      className="relative flex items-center justify-center min-h-screen p-6 overflow-hidden bg-gradient-to-br from-white to-gray-100"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="w-full h-full bg-[url('https://www.transparenttextures.com/patterns/light-wool.png')] opacity-10 animate-pulse"></div>
-      </div>
-
-      <div className="relative z-10 w-full max-w-2xl p-8 bg-white border border-gray-200 shadow-2xl bg-opacity-90 backdrop-filter backdrop-blur-xl rounded-3xl">
-        <motion.h1
-          className="mb-8 text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500"
-          style={{ textShadow: '0 0 10px rgba(255, 0, 0, 0.2)' }}
-          variants={itemVariants}
-        >
-          {isEditMode ? 'Edit Challenge' : 'Create Challenge'}
-        </motion.h1>
-
-        <AnimatePresence>
-          {error && (
-            <motion.p
-              className="p-3 mb-6 text-center text-red-500 border border-red-300 rounded-lg shadow-md bg-red-100/50"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-            >
-              {error}
-            </motion.p>
-          )}
-        </AnimatePresence>
-
-        {isLoading ? (
-          <motion.div
-            className="flex items-center justify-center text-center text-gray-600"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
+      <motion.div
+        className="relative flex items-center justify-center min-h-screen p-6 overflow-hidden bg-gradient-to-br from-white to-gray-100"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="w-full h-full bg-[url('https://www.transparenttextures.com/patterns/light-wool.png')] opacity-10 animate-pulse"></div>
+        </div>
+        <div className="relative z-10 w-full max-w-2xl p-8 bg-white border border-gray-200 shadow-2xl bg-opacity-90 backdrop-filter backdrop-blur-xl rounded-3xl">
+          <motion.h1
+            className="mb-8 text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400"
+            style={{ textShadow: '0 0 10px rgba(0, 0, 255, 0.2)' }}
+            variants={itemVariants}
           >
-            <svg className="w-8 h-8 mr-3 text-red-500 animate-spin" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+            {isEditMode ? 'Edit Challenge' : 'Create Challenge'}
+          </motion.h1>
+          <motion.button
+            onClick={() => navigate('/challenges')}
+            className="relative z-10 flex items-center mb-6 font-semibold text-blue-500 transition-colors duration-300 hover:text-blue-600"
+            variants={itemVariants}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
             </svg>
-            Loading challenge data...
-          </motion.div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <motion.div variants={itemVariants} className="relative">
-              <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">Title</label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                className="w-full p-3 text-gray-800 placeholder-gray-400 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 focus:bg-white hover:border-yellow-400"
-                required
-                placeholder="Enter challenge title"
-              />
-              {formErrors.title && (
-                <motion.p className="absolute mt-1 text-sm text-red-500" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-                  {formErrors.title}
-                </motion.p>
-              )}
-            </motion.div>
+            Back to Challenges
+          </motion.button>
 
-            <motion.div variants={itemVariants} className="relative">
-              <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">Description</label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                className="w-full p-3 text-gray-800 placeholder-gray-400 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 focus:bg-white hover:border-yellow-400"
-                required
-                rows="4"
-                placeholder="Describe your challenge"
-              />
-              {formErrors.description && (
-                <motion.p className="absolute mt-1 text-sm text-red-500" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-                  {formErrors.description}
-                </motion.p>
-              )}
-            </motion.div>
-
-            <motion.div variants={itemVariants} className="relative">
-              <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">Theme</label>
-              <input
-                type="text"
-                name="theme"
-                value={formData.theme}
-                onChange={handleChange}
-                className="w-full p-3 text-gray-800 placeholder-gray-400 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 focus:bg-white hover:border-yellow-400"
-                required
-                placeholder="E.g., Italian Cuisine"
-              />
-              {formErrors.theme && (
-                <motion.p className="absolute mt-1 text-sm text-red-500" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-                  {formErrors.theme}
-                </motion.p>
-              )}
-            </motion.div>
-
-            <motion.div variants={itemVariants} className="relative">
-              <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">Start Date</label>
-              <input
-                type="date"
-                name="startDate"
-                value={formData.startDate}
-                onChange={handleChange}
-                className="w-full p-3 text-gray-800 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 focus:bg-white hover:border-yellow-400"
-                required
-              />
-              {formErrors.startDate && (
-                <motion.p className="absolute mt-1 text-sm text-red-500" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-                  {formErrors.startDate}
-                </motion.p>
-              )}
-            </motion.div>
-
-            <motion.div variants={itemVariants} className="relative">
-              <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">End Date</label>
-              <input
-                type="date"
-                name="endDate"
-                value={formData.endDate}
-                onChange={handleChange}
-                className="w-full p-3 text-gray-800 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 focus:bg-white hover:border-yellow-400"
-                required
-              />
-              {formErrors.endDate && (
-                <motion.p className="absolute mt-1 text-sm text-red-500" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-                  {formErrors.endDate}
-                </motion.p>
-              )}
-            </motion.div>
-
-            <motion.div variants={itemVariants} className="relative">
-              <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">Photo</label>
-              {isEditMode && currentPhotoUrl && !previewUrl && (
-                <div className="mb-4">
-                  <p className="text-sm text-gray-600">Current Image:</p>
-                  <img
-                    src={currentPhotoUrl}
-                    alt="Current challenge"
-                    className="object-cover w-40 h-40 mt-2 transition-all duration-300 border border-gray-300 rounded-lg shadow-lg hover:border-red-500"
-                  />
-                </div>
-              )}
-              {previewUrl && (
-                <div className="mb-4">
-                  <p className="text-sm text-gray-600">Preview:</p>
-                  <img
-                    src={previewUrl}
-                    alt="Image preview"
-                    className="object-cover w-40 h-40 mt-2 transition-all duration-300 border border-gray-300 rounded-lg shadow-lg hover:border-red-500"
-                  />
-                </div>
-              )}
-              <input
-                type="file"
-                name="photo"
-                onChange={handleChange}
-                className="w-full mt-1 text-gray-800 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-amber-500 file:to-yellow-500 file:text-white hover:file:from-amber-600 hover:file:to-red-600"
-                accept="image/*"
-              />
-            </motion.div>
-
-            <motion.div variants={itemVariants}>
-              <motion.button
-                type="submit"
-                className="w-full px-6 py-3 font-bold text-white transition-all duration-300 rounded-lg shadow-lg bg-gradient-to-r from-red-500 to-orange-400 hover:from-red-600 hover:to-orange-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isSubmitting}
-                whileHover={{ scale: 1.05, boxShadow: '0 0 10px rgba(0, 0, 255, 0.2)' }}
-                whileTap={{ scale: 0.95 }}
+          <AnimatePresence>
+            {error && (
+              <motion.p
+                className="p-3 mb-6 text-center text-red-500 border border-red-300 rounded-lg shadow-md bg-red-100/50"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
               >
-                {isSubmitting ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Challenge' : 'Create Challenge')}
-              </motion.button>
+                {error}
+              </motion.p>
+            )}
+          </AnimatePresence>
+
+          {isLoading ? (
+            <motion.div
+              className="flex items-center justify-center text-center text-gray-600"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <svg className="w-8 h-8 mr-3 text-blue-500 animate-spin" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+              </svg>
+              Loading challenge data...
             </motion.div>
-          </form>
-        )}
-      </div>
-    </motion.div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <motion.div variants={itemVariants} className="relative">
+                <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">Title</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  className="w-full p-3 text-gray-800 placeholder-gray-400 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white hover:border-blue-400"
+                  required
+                  placeholder="Enter challenge title"
+                />
+                {formErrors.title && (
+                  <motion.p className="absolute mt-1 text-sm text-red-500" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+                    {formErrors.title}
+                  </motion.p>
+                )}
+              </motion.div>
+
+              <motion.div variants={itemVariants} className="relative">
+                <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">Description</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  className="w-full p-3 text-gray-800 placeholder-gray-400 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white hover:border-blue-400"
+                  required
+                  rows="4"
+                  placeholder="Describe your challenge"
+                />
+                {formErrors.description && (
+                  <motion.p className="absolute mt-1 text-sm text-red-500" initial={{ opacity: 0 }} animate={{ opacity: 1}} transition={{ duration: 0.2 }}>
+                    {formErrors.description}
+                  </motion.p>
+                )}
+              </motion.div>
+
+              <motion.div variants={itemVariants} className="relative">
+                <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">Theme</label>
+                <input
+                  type="text"
+                  name="theme"
+                  value={formData.theme}
+                  onChange={handleChange}
+                  className="w-full p-3 text-gray-800 placeholder-gray-400 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white hover:border-blue-400"
+                  required
+                  placeholder="E.g., Italian Cuisine"
+                />
+                {formErrors.theme && (
+                  <motion.p className="absolute mt-1 text-sm text-red-500" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+                    {formErrors.theme}
+                  </motion.p>
+                )}
+              </motion.div>
+
+              <motion.div variants={itemVariants} className="relative">
+                <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">Start Date</label>
+                <input
+                  type="date"
+                  name="startDate"
+                  value={formData.startDate}
+                  onChange={handleChange}
+                  className="w-full p-3 text-gray-800 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white hover:border-blue-400"
+                  required
+                />
+                {formErrors.startDate && (
+                  <motion.p className="absolute mt-1 text-sm text-red-500" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+                    {formErrors.startDate}
+                  </motion.p>
+                )}
+              </motion.div>
+
+              <motion.div variants={itemVariants} className="relative">
+                <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">End Date</label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={formData.endDate}
+                  onChange={handleChange}
+                  className="w-full p-3 text-gray-800 transition-all duration-300 border border-gray-300 rounded-lg bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:bg-white hover:border-blue-400"
+                  required
+                />
+                {formErrors.endDate && (
+                  <motion.p className="absolute mt-1 text-sm text-red-500" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+                    {formErrors.endDate}
+                  </motion.p>
+                )}
+              </motion.div>
+
+              <motion.div variants={itemVariants} className="relative">
+                <label className="block mb-1 text-sm font-medium text-gray-700 transition-all duration-300">Photo</label>
+                {isEditMode && currentPhotoUrl && !previewUrl && (
+                  <div className="mb-4">
+                    <p className="text-sm text-gray-600">Current Image:</p>
+                    <img
+                      src={currentPhotoUrl}
+                      alt="Current challenge"
+                      className="object-cover w-40 h-40 mt-2 transition-all duration-300 border border-gray-300 rounded-lg shadow-lg hover:border-blue-500"
+                    />
+                  </div>
+                )}
+                {previewUrl && (
+                  <div className="mb-4">
+                    <p className="text-sm text-gray-600">Preview:</p>
+                    <img
+                      src={previewUrl}
+                      alt="Image preview"
+                      className="object-cover w-40 h-40 mt-2 transition-all duration-300 border border-gray-300 rounded-lg shadow-lg hover:border-blue-500"
+                    />
+                  </div>
+                )}
+                <input
+                  type="file"
+                  name="photo"
+                  onChange={handleChange}
+                  className="w-full mt-1 text-gray-800 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-blue-500 file:to-cyan-400 file:text-white hover:file:from-blue-600 hover:file:to-cyan-500"
+                  accept="image/*"
+                />
+              </motion.div>
+
+              <motion.div variants={itemVariants}>
+                <motion.button
+                  type="submit"
+                  className="w-full px-6 py-3 font-bold text-white transition-all duration-300 rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isSubmitting}
+                  whileHover={{ scale: 1.05, boxShadow: '0 0 10px rgba(0, 0, 255, 0.2)' }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {isSubmitting ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Challenge' : 'Create Challenge')}
+                </motion.button>
+              </motion.div>
+            </form>
+          )}
+        </div>
+      </motion.div>
     </>
   );
 };

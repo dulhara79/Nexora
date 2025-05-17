@@ -4,6 +4,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../../context/AuthContext";
 import Header from "../../components/common/NewPageHeader";
+import Chatbot from './Chatbot';
 
 const ChallengeList = () => {
   const { user, isAuthenticated, token } = useContext(AuthContext);
@@ -91,7 +92,7 @@ const ChallengeList = () => {
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/light-wool.png')] opacity-10 animate-pulse"></div>
         <div className="relative z-10 flex items-center justify-between mb-8">
           <motion.h1
-            className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600"
+            className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400"
             style={{ textShadow: "0 0 10px rgba(0, 0, 255, 0.2)" }}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -102,7 +103,7 @@ const ChallengeList = () => {
           {isAuthenticated && (
             <motion.button
               onClick={() => navigate("/create-challenge")}
-              className="flex items-center px-6 py-3 space-x-2 font-semibold text-white transition-all duration-300 rounded-full shadow-lg bg-gradient-to-r from-orange-500 to-amber-400 hover:from-orange-600 hover:to-amber-500"
+              className="flex items-center px-6 py-3 space-x-2 font-semibold text-white transition-all duration-300 rounded-full shadow-lg bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500"
               style={{ boxShadow: "0 0 10px rgba(0, 0, 255, 0.2)" }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -147,7 +148,7 @@ const ChallengeList = () => {
             transition={{ duration: 0.5 }}
           >
             <svg
-              className="w-8 h-8 mr-3 text-red-500 animate-spin"
+              className="w-8 h-8 mr-3 text-blue-500 animate-spin"
               viewBox="0 0 24 24"
             >
               <circle
@@ -185,11 +186,11 @@ const ChallengeList = () => {
               {challenges.map((challenge) => (
                 <motion.div
                   key={challenge.challengeId}
-                  className="overflow-hidden transition-all duration-300 bg-white border-2 border-red-300 rounded-xl hover:border-red-500"
+                  className="overflow-hidden transition-all duration-300 bg-white border-2 border-blue-300 rounded-xl hover:border-blue-500"
                   variants={cardVariants}
                   whileHover={{
                     y: -5,
-                    boxShadow: "0 0 15px rgba(255,0,0,0.2)",
+                    boxShadow: "0 0 15px rgba(0,0,255,0.2)",
                   }}
                   layout
                 >
@@ -246,14 +247,15 @@ const ChallengeList = () => {
                         onClick={() =>
                           navigate(`/start-challenge/${challenge.challengeId}`)
                         }
-                        className="flex-1 px-4 py-2 font-semibold text-white transition-all duration-300 rounded-full shadow-md bg-gradient-to-r from-pink-600 to-red-500 hover:from-pink-700 hover:to-red-500"
+                        className="flex-1 px-4 py-2 font-semibold text-white transition-all duration-300 rounded-full shadow-md bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500"
                         whileHover={{
                           scale: 1.05,
                           boxShadow: "0 0 10px rgba(0, 0, 255, 0.2)",
                         }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        Start Challenge
+                        
+                        View Challenge
                       </motion.button>
                       {isAuthenticated && challenge.createdBy === user?.id && (
                         <div className="flex gap-3">
@@ -263,7 +265,7 @@ const ChallengeList = () => {
                                 `/edit-challenge/${challenge.challengeId}`
                               )
                             }
-                            className="px-4 py-2 font-semibold text-white transition-all duration-300 rounded-full shadow-md bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-500 hover:to-orange-500"
+                            className="px-4 py-2 font-semibold text-white transition-all duration-300 rounded-full shadow-md bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500"
                             whileHover={{
                               scale: 1.05,
                               boxShadow: "0 0 10px rgba(255, 165, 0, 0.2)",
@@ -292,6 +294,7 @@ const ChallengeList = () => {
             </AnimatePresence>
           </motion.div>
         )}
+        <Chatbot />
       </motion.div>
     </>
   );

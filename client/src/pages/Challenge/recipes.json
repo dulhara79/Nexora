@@ -1,0 +1,126 @@
+{
+    "recipes": [
+      {
+        "name": "Pasta Perfection",
+        "ingredients": [
+          "Flour",
+          "Egg",
+          "Tomato Sauce"
+        ],
+        "instructions": [
+          "Make pasta dough and cut into strips.",
+          "Boil pasta until al dente.",
+          "Toss with tomato sauce."
+        ]
+      },
+
+      {
+        "name": "Vegan Dessert Delight",
+        "ingredients": [
+          "Avocado",
+          "Cocoa Powder",
+          "Maple Syrup"
+        ],
+        "instructions": [
+          "Blend ingredients until smooth.",
+          "Chill mousse for 1 hour."
+        ]
+      },
+
+      {
+        "name": "Midnight Breakfast Showdown",
+        "ingredients": [
+          "Pancake Mix",
+          "Eggs",
+          "Cream Cheese"
+        ],
+        "instructions": [
+          "Cook spiced pancakes.",
+          "Scramble eggs with cream.",
+          "Spread cream cheese on toast."
+        ]
+      },
+
+      {
+        "name": "Homemade Pizza Party",
+        "ingredients": [
+          "Flour",
+          "Tomato Sauce",
+          "Mozzarella"
+        ],
+        "instructions": [
+          "Knead dough and roll out.",
+          "Add sauce and cheese.",
+          "Bake until crispy."
+        ]
+      },
+
+      {
+        "name": "Bake Your Own Bread",
+        "ingredients": [
+          "Flour",
+          "Yeast",
+          "Water"
+        ],
+        "instructions": [
+          "Mix and knead dough.",
+          "Let rise and shape.",
+          "Bake until golden."
+        ]
+      },
+
+      {
+        "name": "Salad Reinvention",
+        "ingredients": [
+          "Quinoa",
+          "Lettuce",
+          "Chickpeas"
+        ],
+        "instructions": [
+          "Toss ingredients together.",
+          "Add lemon vinaigrette.",
+          "Serve fresh."
+        ]
+      },
+      
+      {
+        "name": "Sweet Treat Without Oven",
+        "ingredients": [
+          "Yogurt",
+          "Granola",
+          "Berries"
+        ],
+        "instructions": [
+          "Layer yogurt and granola.",
+          "Top with berries.",
+          "Chill and serve."
+        ]
+      },
+      {
+        "name": "Submarine Sandwich Showdown",
+        "ingredients": [
+          "Hoagie Roll",
+          "Turkey",
+          "Cheese"
+        ],
+        "instructions": [
+          "Toast roll lightly.",
+          "Layer turkey and cheese.",
+          "Add condiments."
+        ]
+      },
+      {
+        "name": "Koththu Remix",
+        "ingredients": [
+          "Paratha",
+          "Chicken",
+          "Cabbage"
+        ],
+        "instructions": [
+          "Chop and stir-fry paratha.",
+          "Add chicken and cabbage.",
+          "Season and serve."
+        ]
+      }
+    ]
+  }

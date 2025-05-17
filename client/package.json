@@ -23,7 +23,7 @@
     "canvas-confetti": "^1.9.3",
     "chart.js": "^4.4.9",
     "date-fns": "^4.1.0",
-    "framer-motion": "^12.7.3",
+    "framer-motion": "^12.11.4",
     "jspdf": "^3.0.1",
     "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",

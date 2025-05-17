@@ -56,10 +56,7 @@ import ChallengeDetail from "./pages/Challenge/ChallengeDetail";
 import ChallengeList from "./pages/Challenge/ChallengeList";
 import CreateChallenge from "./pages/Challenge/CreateChallenge";
 import StartChallenge from "./pages/Challenge/StartChallenge";
-import CollaborationHub from "./pages/Challenge/CollabHub";
-import Leaderboard from "./pages/Challenge/Leaderboard";
-import RemixGallery from "./pages/Challenge/ChallenfeRemix";
-import RecipeGenerator from "./pages/Challenge/RecipeGenerator";
+import CompletedChallenges from "./pages/Challenge/Complt Challenge";
 
 // Test Page
 // import TestPage from "./pages/TestPage";
@@ -134,19 +131,10 @@ function App() {
           <Route path="/challenges" element={<ChallengeList />} />
           <Route path="/challenge/:challengeId" element={<ChallengeDetail />} />
           <Route path="/create-challenge" element={<CreateChallenge />} />
-          <Route
-            path="/edit-challenge/:challengeId"
-            element={<CreateChallenge />}
-          />
-          <Route
-            path="/start-challenge/:challengeId"
-            element={<StartChallenge />}
-          />
-          <Route path="/collaboration-hub" element={<CollaborationHub />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/remix-gallery" element={<RemixGallery />} />
-          <Route path="/recipe-generator" element={<RecipeGenerator />} />
-          
+          <Route path="/edit-challenge/:challengeId" element={<CreateChallenge />} />
+          <Route path="/start-challenge/:challengeId" element={<StartChallenge />} />
+          <Route path="/completed-challenges" element={<CompletedChallenges />} />
+
           {/* 404 Page */}
           <Route path="/*" element={<PageNotFound />} />
           
